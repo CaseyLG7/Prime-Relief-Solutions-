@@ -1,0 +1,1 @@
+A case management system designed to streamline the LDP 1st Appeal Eviction process, providing structured workflows, document tracking, deadline monitoring, and decision recording for housing authorities or administrative bodies.
