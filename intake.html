@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Eviction Appeal Intake</title>
+<style>
+body {font-family: Georgia; background:#0e1624; color:white; padding:50px;}
+form {max-width:700px; margin:auto;}
+input, textarea {
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border-radius:4px;
+  border:none;
+}
+button {
+  padding:15px;
+  background:gold;
+  border:none;
+  font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<h1>Confidential Appeal Intake Questionnaire</h1>
+
+<form action="/submit-intake" method="POST">
+
+<input type="text" name="fullName" placeholder="Full Name" required>
+<input type="email" name="email" placeholder="Email Address" required>
+<input type="tel" name="phone" placeholder="Phone Number" required>
+
+<input type="text" name="court" placeholder="Justice Court (Precinct/County)" required>
+<input type="date" name="judgmentDate" required>
+
+<textarea name="caseDetails" placeholder="Brief Description of Case"></textarea>
+
+<button type="submit">Submit Intake</button>
+
+</form>
+
+</body>
+</html>
