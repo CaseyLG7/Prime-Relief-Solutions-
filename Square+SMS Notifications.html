@@ -1,0 +1,58 @@
+Install:
+
+npm install express body-parser twilio square
+server.js
+const express = require('express');
+const bodyParser = require('body-parser');
+const { Client, Environment } = require('square');
+const twilio = require('twilio');
+
+const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Square Setup
+const squareClient = new Client({
+  accessToken: 'YOUR_SQUARE_ACCESS_TOKEN',
+  environment: Environment.Sandbox
+});
+
+// Twilio Setup
+const twilioClient = twilio('YOUR_TWILIO_SID', 'YOUR_TWILIO_AUTH');
+
+// Process Payment
+app.post('/process-payment', async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const response = await squareClient.paymentsApi.createPayment({
+      sourceId: token,
+      amountMoney: {
+        amount: 19900,
+        currency: 'USD'
+      },
+      idempotencyKey: new Date().getTime().toString()
+    });
+
+    res.json({ success: true });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Intake Submission + SMS Notification
+app.post('/submit-intake', async (req, res) => {
+
+  const { fullName, phone } = req.body;
+
+  await twilioClient.messages.create({
+    body: `New Eviction Appeal Intake from ${fullName}`,
+    from: '+1234567890',
+    to: 'YOUR_PHONE_NUMBER'
+  });
+
+  res.send("Intake Submitted Successfully");
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
