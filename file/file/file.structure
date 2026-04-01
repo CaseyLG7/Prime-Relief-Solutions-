@@ -1,0 +1,22 @@
+ldp-eviction-appeal-system/
+│
+├── app/
+│   ├── layout.js
+│   ├── page.js
+│   ├── api/
+│   │   ├── cases/route.js
+│   │   └── cron/route.js
+│
+├── components/
+│   ├── Table.js
+│   ├── Filters.js
+│   └── Stats.js
+│
+├── lib/
+│   └── score.js
+│
+├── data/
+│   └── cases.json   ← IMPORTANT (JSON, not CSV)
+│
+├── vercel.json
+├── package.json
