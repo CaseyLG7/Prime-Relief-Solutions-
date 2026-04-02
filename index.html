@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LDP Eviction CRM System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body { font-family: Arial; background:#f4f6f8; padding:20px; }
+    h1 { margin-bottom:10px; }
+
+    .box {
+      background:white; padding:12px; margin-bottom:15px;
+      border-radius:10px; display:flex; gap:10px; flex-wrap:wrap;
+    }
+
+    input, select, button {
+      padding:8px; border-radius:6px; border:1px solid #ccc;
+    }
+
+    button { background:black; color:white; cursor:pointer; }
+
+    table {
+      width:100%; border-collapse:collapse; background:white;
+    }
+
+    th, td {
+      border:1px solid #ddd; padding:6px; font-size:12px;
+    }
+
+    th { background:#eee; }
+
+    .green { color:#16a34a; font-weight:bold; }
+    .orange { color:#f59e0b; font-weight:bold; }
+    .red { color:#dc2626; font-weight:bold; }
+  </style>
+</head>
+
+<body>
+
+<h1>LDP Eviction CRM Dashboard</h1>
+
+<div class="box">
+  <input type="file" id="file" />
+  <input type="text" id="search" placeholder="Search..." />
+  <input type="number" id="minAmount" value="500" />
+  <button onclick="exportCSV()">Export</button>
+</div>
+
+<div class="box">
+  <input type="text" id="urlInput" placeholder="Paste court file URL" />
+  <button onclick="loadFromURL()">Load from URL</button>
+</div>
+
+<div class="box" id="stats"></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Score</th>
+      <th>Case</th>
+      <th>Name</th>
+      <th>Amount</th>
+      <th>Days</th>
+      <th>Status</th>
+      <th>Save</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<h2>Saved Leads (CRM)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Case</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Remove</th>
+    </tr>
+  </thead>
+  <tbody id="crm"></tbody>
+</table>
+
+<script>
+let data = [];
+let filtered = [];
+let crm = JSON.parse(localStorage.getItem("crm") || "[]");
+
+document.getElementById("file").addEventListener("change", handleFile);
+document.getElementById("search").addEventListener("input", filter);
+document.getElementById("minAmount").addEventListener("input", filter);
+
+// FILE LOAD (TAB SUPPORT)
+function handleFile(e){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = e => parseData(e.target.result);
+  reader.readAsText(file);
+}
+
+// URL LOAD
+async function loadFromURL(){
+  let url = document.getElementById("urlInput").value;
+  if(!url) return alert("Enter URL");
+
+  let res = await fetch(url);
+  let text = await res.text();
+  parseData(text);
+}
+
+// PARSER
+function parseData(text){
+  const lines = text.trim().split("\\n");
+  const headers = lines[0].split("\\t").map(h => h.replace(/"/g,"").trim());
+
+  data = lines.slice(1).map(line=>{
+    const values = line.split("\\t");
+    let obj = {};
+    headers.forEach((h,i)=>{
+      obj[h] = values[i]?.replace(/"/g,"").trim();
+    });
+    return obj;
+  });
+
+  filter();
+}
+
+// AI SCORING
+function score(r){
+  let amount = Number(r["Claim Amount"] || 0);
+  let status = (r["Case Status "] || "").toLowerCase();
+  let cause = (r["Cause of Action"] || "").toLowerCase();
+  let hearing = new Date(r["Next Hearing Date"]);
+
+  let days = Math.floor((hearing - new Date())/(1000*60*60*24));
+
+  let score = 0;
+
+  if(status.includes("active")) score += 30;
+  if(amount > 1000) score += 25;
+  if(amount > 2000) score += 20;
+  if(days <= 7) score += 15;
+  if(days <= 3) score += 20;
+  if(cause.includes("nonpayment")) score += 10;
+
+  return { ...r, amount, days, score };
+}
+
+// FILTER
+function filter(){
+  let search = document.getElementById("search").value.toLowerCase();
+  let min = Number(document.getElementById("minAmount").value);
+
+  filtered = data.map(score)
+    .filter(r => r.score >= 50 && r.amount >= min)
+    .filter(r =>
+      Object.values(r).some(v =>
+        String(v).toLowerCase().includes(search)
+      )
+    )
+    .sort((a,b)=> b.score - a.score);
+
+  render();
+}
+
+// RENDER
+function render(){
+  let tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  filtered.forEach(r=>{
+    let tr = document.createElement("tr");
+
+    let color = r.score >= 80 ? "green" :
+                r.score >= 60 ? "orange" : "red";
+
+    tr.innerHTML = `
+      <td class="${color}">${r.score}</td>
+      <td>${r["Case Number"]}</td>
+      <td>${r["Defendant Name"]}</td>
+      <td>$${r.amount}</td>
+      <td>${r.days}</td>
+      <td>
+        <select onchange="updateStatus('${r["Case Number"]}', this.value)">
+          <option>New</option>
+          <option>Contacted</option>
+          <option>Closed</option>
+        </select>
+      </td>
+      <td><button onclick='saveLead(${JSON.stringify(r)})'>Save</button></td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  renderCRM();
+  stats();
+}
+
+// CRM SAVE
+function saveLead(r){
+  crm.push({ case:r["Case Number"], name:r["Defendant Name"], status:"New" });
+  localStorage.setItem("crm", JSON.stringify(crm));
+  renderCRM();
+}
+
+// CRM UPDATE
+function updateStatus(caseNum, status){
+  crm = crm.map(c => c.case === caseNum ? { ...c, status } : c);
+  localStorage.setItem("crm", JSON.stringify(crm));
+  renderCRM();
+}
+
+// CRM RENDER
+function renderCRM(){
+  let table = document.getElementById("crm");
+  table.innerHTML = "";
+
+  crm.forEach(c=>{
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${c.case}</td>
+      <td>${c.name}</td>
+      <td>${c.status}</td>
+      <td><button onclick="removeLead('${c.case}')">X</button></td>
+    `;
+
+    table.appendChild(tr);
+  });
+}
+
+// REMOVE
+function removeLead(caseNum){
+  crm = crm.filter(c => c.case !== caseNum);
+  localStorage.setItem("crm", JSON.stringify(crm));
+  renderCRM();
+}
+
+// STATS
+function stats(){
+  let total = filtered.length;
+  let avg = filtered.reduce((s,d)=> s + d.amount,0) / (total || 1);
+
+  document.getElementById("stats").innerHTML =
+    `Leads: ${total} | Avg: $${avg.toFixed(0)}`;
+}
+
+// EXPORT
+function exportCSV(){
+  let rows = filtered.map(r =>
+    `${r["Case Number"]},${r["Defendant Name"]},${r.amount}`
+  );
+
+  let csv = "Case,Name,Amount\\n" + rows.join("\\n");
+
+  let blob = new Blob([csv]);
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "leads.csv";
+  a.click();
+}
+</script>
+
+</body>
+</html>
