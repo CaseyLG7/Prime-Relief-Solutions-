@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LDP Eviction Appeal System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body { font-family: Arial; background:#f4f6f8; padding:20px; }
+    h1 { margin-bottom:10px; }
+
+    .controls, .stats {
+      background:white;
+      padding:12px;
+      margin-bottom:15px;
+      border-radius:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    input, button {
+      padding:8px;
+      border-radius:6px;
+      border:1px solid #ccc;
+    }
+
+    button {
+      background:black;
+      color:white;
+      cursor:pointer;
+    }
+
+    .card {
+      background:white;
+      padding:10px;
+      border-radius:8px;
+      min-width:120px;
+      text-align:center;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+    }
+
+    th, td {
+      border:1px solid #ddd;
+      padding:8px;
+      font-size:12px;
+    }
+
+    th { background:#eee; }
+
+    .green { color:#16a34a; font-weight:bold; }
+    .orange { color:#f59e0b; font-weight:bold; }
+    .red { color:#dc2626; font-weight:bold; }
+
+    .tag {
+      font-size:10px;
+      padding:3px 6px;
+      border-radius:6px;
+      font-weight:bold;
+    }
+
+    .urgent { background:red; color:white; }
+    .high { background:green; color:white; }
+    .normal { background:#ccc; }
+  </style>
+</head>
+
+<body>
+
+<h1>LDP Eviction Appeal Dashboard</h1>
+
+<div class="controls">
+  <input type="file" id="csvFile" />
+  <input type="text" id="search" placeholder="Search..." />
+  <input type="number" id="minAmount" value="500" />
+  <button onclick="exportCSV()">Export Leads</button>
+</div>
+
+<div class="stats" id="stats"></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Score</th>
+      <th>Case</th>
+      <th>Defendant</th>
+      <th>Amount</th>
+      <th>Hearing</th>
+      <th>Days</th>
+      <th>Tag</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+let data = [];
+let filtered = [];
+
+document.getElementById("csvFile").addEventListener("change", handleFile);
+document.getElementById("search").addEventListener("input", applyFilters);
+document.getElementById("minAmount").addEventListener("input", applyFilters);
+
+function handleFile(e){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+    const text = event.target.result;
+
+    // Better CSV parser (handles quotes)
+    const rows = text.match(/(\".*?\"|[^\",\\s]+)(?=\\s*,|$)/g);
+
+    const lines = text.split("\\n").map(r => r.split(/,(?=(?:(?:[^\"]*\"){2})*[^\"]*$)/));
+
+    const headers = lines[0];
+
+    data = lines.slice(1).map(row => {
+      let obj = {};
+      headers.forEach((h,i)=>{
+        obj[h.trim()] = row[i]?.replace(/\"/g,"").trim();
+      });
+      return obj;
+    });
+
+    applyFilters();
+  };
+
+  reader.readAsText(file);
+}
+
+function scoreCase(r){
+  let amount = Number(r["Claim Amount"] || 0);
+  let status = (r["Case Status "] || "").toLowerCase();
+  let hearing = new Date(r["Next Hearing Date"]);
+
+  let days = Math.floor((hearing - new Date()) / (1000*60*60*24));
+
+  let score = 0;
+
+  if(status.includes("active")) score += 40;
+  if(amount >= 1000) score += 25;
+  if(amount >= 2000) score += 20;
+  if(days <= 7) score += 15;
+  if(days <= 3) score += 20;
+
+  return { ...r, score, amount, days };
+}
+
+function applyFilters(){
+  let search = document.getElementById("search").value.toLowerCase();
+  let minAmount = Number(document.getElementById("minAmount").value);
+
+  filtered = data.map(scoreCase)
+    .filter(r => r.score >= 50 && r.amount >= minAmount)
+    .filter(r =>
+      Object.values(r).some(v =>
+        String(v).toLowerCase().includes(search)
+      )
+    )
+    .sort((a,b)=> b.score - a.score);
+
+  render();
+}
+
+function getColor(score){
+  if(score >= 80) return "green";
+  if(score >= 60) return "orange";
+  return "red";
+}
+
+function getTag(r){
+  if(r.days <= 3) return `<span class="tag urgent">URGENT</span>`;
+  if(r.score >= 80) return `<span class="tag high">HIGH</span>`;
+  return `<span class="tag normal">NORMAL</span>`;
+}
+
+function render(){
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  let fragment = document.createDocumentFragment();
+
+  filtered.forEach(r=>{
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td class="${getColor(r.score)}">${r.score}</td>
+      <td>${r["Case Number"]}</td>
+      <td>${r["Defendant Name"]}</td>
+      <td>$${r.amount}</td>
+      <td>${r["Next Hearing Date"]}</td>
+      <td>${r.days}</td>
+      <td>${getTag(r)}</td>
+    `;
+
+    fragment.appendChild(tr);
+  });
+
+  tbody.appendChild(fragment);
+  renderStats();
+}
+
+function renderStats(){
+  let total = filtered.length;
+  let high = filtered.filter(d=> d.score >= 80).length;
+  let urgent = filtered.filter(d=> d.days <= 3).length;
+
+  let avg = filtered.reduce((s,d)=> s + d.amount,0) / (filtered.length || 1);
+
+  document.getElementById("stats").innerHTML = `
+    <div class="card">Total<br><b>${total}</b></div>
+    <div class="card">High<br><b>${high}</b></div>
+    <div class="card">Urgent<br><b>${urgent}</b></div>
+    <div class="card">Avg $<br><b>${avg.toFixed(0)}</b></div>
+  `;
+}
+
+function exportCSV(){
+  let headers = ["Case Number","Defendant Name","Claim Amount","Score","Days"];
+  let rows = filtered.map(r=> [
+    r["Case Number"],
+    r["Defendant Name"],
+    r.amount,
+    r.score,
+    r.days
+  ]);
+
+  let csv = [headers.join(","), ...rows.map(r=>r.join(","))].join("\\n");
+
+  let blob = new Blob([csv]);
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "ldp_leads.csv";
+  a.click();
+}
+</script>
+
+</body>
+</html>
