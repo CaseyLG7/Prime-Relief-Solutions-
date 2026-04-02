@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; color:#000; transition: all 0.3s; }
+    .dark-mode { background:#121212; }
+
+    .box { background:white; padding:12px; margin-bottom:15px; border-radius:10px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .dark-mode .box { background:#1f1f1f; }
+
+    input, button { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:11px; }
+    button { background:black; color:white; cursor:pointer; }
+
+    table { width:100%; border-collapse:collapse; background:white; }
+
+    /* 🔥 DARKER GRID LINES */
+    th, td { 
+      border:1.5px solid #555; 
+      padding:6px; 
+      font-size:11px; 
+      color:#000; 
+    }
+
+    th { background:#ddd; }
+
+    .row-hot { background:#f8d7da; }
+    .row-warm { background:#fff3cd; }
+    .row-cold { background:#d4edda; }
+
+    h1 { color:#BFA13A; margin:0; }
+    .subtext { font-size:14px; color:#BFA13A; margin-top:2px; }
+
+    .toggle-container { display:flex; align-items:center; margin-left:auto; gap:8px; }
+
+    .toggle-label { position:relative; width:50px; height:26px; }
+    .toggle-label input { display:none; }
+
+    .slider {
+      position:absolute; cursor:pointer;
+      top:0; left:0; right:0; bottom:0;
+      background:#ccc; border-radius:34px;
+    }
+
+    .slider:before {
+      content:""; position:absolute;
+      height:22px; width:22px;
+      left:2px; bottom:2px;
+      background:white; border-radius:50%;
+      transition:0.3s;
+    }
+
+    input:checked + .slider { background:#BFA13A; }
+    input:checked + .slider:before { transform:translateX(24px); }
+
+    .mode-circle {
+      width:26px; height:26px;
+      border-radius:50%;
+      background: linear-gradient(to right, #3498db 50%, #000 50%);
+      border:1px solid #ccc;
+    }
+
+    .status-open { background:#6c757d; }
+    .status-contacted { background:#007bff; }
+    .status-processing { background:#fd7e14; }
+    .status-closed { background:#28a745; }
+  </style>
+</head>
+
+<body>
+
+<!-- ✅ ONLY CHANGE: LOGO MADE BIGGER -->
+<div style="display:flex; align-items:center; gap:15px; margin-bottom:10px;">
+  <img src="Prime Relief.PNG" style="height:95px;" />
+  <div>
+    <h1>Prime Relief Solutions</h1>
+    <div class="subtext">Professional LDP Eviction Support & Lead Management</div>
+  </div>
+</div>
+
+<div class="box">
+  <input type="file" id="file" />
+  <button onclick="startUpload()">Upload</button>
+
+  <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
+  <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
+  <input placeholder="Min $" id="minAmt" oninput="debounceFilter()">
+  <input placeholder="Max $" id="maxAmt" oninput="debounceFilter()">
+
+  <div class="toggle-container">
+    <label class="toggle-label">
+      <input type="checkbox" onchange="toggleDark()">
+      <span class="slider"></span>
+    </label>
+    <div class="mode-circle"></div>
+  </div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th>
+<th>Name</th>
+<th>Defendant Address</th>
+<th>Claim Amount</th>
+<th>Hearing Date</th>
+<th>Lead</th>
+<th>Status</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+let data=[];
+let filtered=[];
+
+let debounceTimer;
+function debounceFilter(){
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    applyFilters();
+  }, 250);
+}
+
+function toggleDark(){
+  document.body.classList.toggle("dark-mode");
+}
+
+function getField(row, name){
+  let key = Object.keys(row).find(k => k.trim().toLowerCase() === name.toLowerCase());
+  return key ? row[key] : "";
+}
+
+function clean(v){
+  if(!v) return "";
+  if(v.toLowerCase()==="null") return "";
+  return v.trim();
+}
+
+function parseDate(str){
+  if(!str) return new Date(0);
+  let p = str.split("/");
+  return new Date(p[2], p[0]-1, p[1]);
+}
+
+function startUpload(){
+  const file=document.getElementById("file").files[0];
+  if(!file) return alert("Choose file");
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    parseTSV(e.target.result);
+    process();
+  };
+  reader.readAsText(file);
+}
+
+function parseTSV(text){
+  const lines=text.split("\n").filter(l=>l.trim());
+  const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
+
+  data=[];
+
+  for(let i=1;i<lines.length;i++){
+    let values=lines[i].split("\t");
+    let obj={};
+
+    headers.forEach((h,idx)=>{
+      obj[h]=values[idx]?.replace(/"/g,"").trim();
+    });
+
+    data.push(obj);
+  }
+}
+
+function process(){
+  let seen = new Set();
+
+  filtered = data.map(r=>{
+
+    let address = [
+      clean(getField(r,"Defendant Addr Line 1")),
+      clean(getField(r,"Defendant Addr City")),
+      clean(getField(r,"Defendant Addr State")),
+      clean(getField(r,"Defendant Addr Zip"))
+    ].filter(v=>v).join(", ");
+
+    let name = clean(getField(r,"Defendant Name"));
+
+    let key = name + address;
+    if(seen.has(key)) return null;
+    seen.add(key);
+
+    let amount = Number(getField(r,"Claim Amount") || 0);
+
+    let leadStatus="", rowClass="", priority=3;
+
+    if(amount>1000){ leadStatus="Hot"; rowClass="row-hot"; priority=1; }
+    else if(amount>500){ leadStatus="Warm"; rowClass="row-warm"; priority=2; }
+    else{ leadStatus="Cold"; rowClass="row-cold"; priority=3; }
+
+    let caseNum = getField(r,"Case Number");
+
+    return {
+      caseNumber: caseNum,
+      name,
+      amount,
+      hearing: parseDate(getField(r,"Next Hearing Date")),
+      hearingText: getField(r,"Next Hearing Date") || "",
+      address,
+      zip: clean(getField(r,"Defendant Addr Zip")),
+      leadStatus,
+      rowClass,
+      priority,
+      status: localStorage.getItem(caseNum) || "Open"
+    };
+
+  }).filter(Boolean)
+  .sort((a,b)=>{
+    if(a.priority!==b.priority) return a.priority-b.priority;
+    return a.hearing-b.hearing;
+  });
+
+  applyFilters();
+}
+
+function applyFilters(){
+  let nameF = document.getElementById("searchName").value.toLowerCase();
+  let zipF = document.getElementById("searchZip").value;
+  let min = Number(document.getElementById("minAmt").value)||0;
+  let max = Number(document.getElementById("maxAmt").value)||999999;
+
+  let rows = filtered.filter(r=>{
+    return (
+      r.name.toLowerCase().includes(nameF) &&
+      r.zip.includes(zipF) &&
+      r.amount >= min &&
+      r.amount <= max
+    );
+  });
+
+  render(rows);
+}
+
+function cycleStatus(btn, caseNum){
+  const states = ["Open","Contacted","Processing","Closed"];
+  let next = (states.indexOf(btn.innerText)+1)%states.length;
+  let newState = states[next];
+
+  btn.innerText = newState;
+  localStorage.setItem(caseNum, newState);
+
+  btn.className="";
+  btn.classList.add(
+    newState==="Open"?"status-open":
+    newState==="Contacted"?"status-contacted":
+    newState==="Processing"?"status-processing":
+    "status-closed"
+  );
+}
+
+function render(rows){
+  let tbody=document.getElementById("tbody");
+  tbody.innerHTML="";
+
+  rows.forEach(r=>{
+    tbody.innerHTML+=`
+    <tr class="${r.rowClass}">
+      <td>${r.caseNumber}</td>
+      <td>${r.name}</td>
+      <td>${r.address}</td>
+      <td>$${r.amount}</td>
+      <td>${r.hearingText}</td>
+      <td>${r.leadStatus}</td>
+      <td>
+        <button class="status-${r.status.toLowerCase()}" 
+        onclick="cycleStatus(this,'${r.caseNumber}')">${r.status}</button>
+      </td>
+      <td><button onclick="openMap('${r.address}')">Map</button></td>
+    </tr>`;
+  });
+}
+
+function openMap(addr){
+  if(!addr) return alert("No address found");
+  window.open(`https://www.google.com/maps?q=${encodeURIComponent(addr)}`);
+}
+</script>
+
+</body>
+</html>
