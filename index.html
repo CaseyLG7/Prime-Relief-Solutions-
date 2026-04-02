@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: Arial;
+      padding:20px;
+      background:#f4f6f8;
+      color:#000;
+      transition:0.3s;
+    }
+
+    body.dark { background:#111; color:#fff; }
+
+    h1 {
+      font-size:28px;
+      font-weight:bold;
+      margin-bottom:5px;
+    }
+
+    .brand {
+      font-size:14px;
+      color:#666;
+      margin-bottom:15px;
+    }
+
+    body.dark .brand { color:#aaa; }
+
+    .box {
+      background:white;
+      padding:12px;
+      margin-bottom:15px;
+      border-radius:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    body.dark .box { background:#1f1f1f; }
+
+    input, button {
+      padding:8px;
+      border-radius:6px;
+      border:1px solid #ccc;
+    }
+
+    body.dark input {
+      background:#333;
+      color:white;
+      border:1px solid #555;
+    }
+
+    button {
+      background:black;
+      color:white;
+      cursor:pointer;
+      font-size:11px;
+    }
+
+    body.dark button { background:#444; }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+    }
+
+    body.dark table { background:#1f1f1f; }
+
+    th, td {
+      border:1px solid #ddd;
+      padding:6px;
+      font-size:11px;
+    }
+
+    body.dark th, body.dark td { border:1px solid #444; }
+
+    th { background:#eee; }
+    body.dark th { background:#333; }
+
+    .hot { background:#dc2626; color:white; padding:3px 6px; border-radius:6px; }
+    .warm { background:#f59e0b; color:white; padding:3px 6px; border-radius:6px; }
+    .low { background:#16a34a; color:white; padding:3px 6px; border-radius:6px; }
+
+    .cluster {
+      background:rgba(255,0,0,0.08);
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🏢 Prime Relief Solutions</h1>
+<div class="brand">Eviction Lead Intelligence System</div>
+
+<div class="box">
+  <input type="file" id="file" />
+  <button onclick="startUpload()">Upload</button>
+  <input type="text" id="search" placeholder="Search..." oninput="filter()" />
+  <input type="number" id="minAmount" value="500" oninput="filter()" />
+  <button onclick="toggleTheme()">🌗 Mode</button>
+</div>
+
+<div class="box" id="stats">Waiting for file...</div>
+
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Name</th>
+<th>Address</th>
+<th>Amount</th>
+<th>Hearing</th>
+<th>Priority</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+let data=[], filtered=[];
+let addressCount={};
+
+// THEME
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme",
+    document.body.classList.contains("dark")?"dark":"light");
+}
+if(localStorage.getItem("theme")==="dark"){
+  document.body.classList.add("dark");
+}
+
+// UPLOAD
+function startUpload(){
+  const file=document.getElementById("file").files[0];
+  if(!file) return alert("Choose file");
+
+  document.getElementById("stats").innerHTML="Reading...";
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    parseAsync(e.target.result.replace(/\r/g,"\n"));
+  };
+  reader.readAsText(file);
+}
+
+// PARSE
+function parseAsync(text){
+  const lines=text.split("\n").filter(l=>l.trim());
+  const delimiter=lines[0].includes("\t")?"\t":",";
+
+  const headers=lines[0].split(delimiter).map(h=>h.replace(/"/g,"").trim());
+
+  data=[];
+  let i=1;
+
+  function chunk(){
+    for(let j=0;j<200 && i<lines.length;j++,i++){
+      let values=lines[i].split(delimiter);
+      let obj={};
+
+      headers.forEach((h,idx)=>{
+        obj[h]=values[idx]?.replace(/"/g,"").trim();
+      });
+
+      data.push(obj);
+    }
+
+    if(i<lines.length){
+      setTimeout(chunk,0);
+    } else {
+      buildAddressClusters();
+      filter();
+    }
+  }
+
+  chunk();
+}
+
+// BUILD CLUSTERS
+function buildAddressClusters(){
+  addressCount={};
+
+  data.forEach(r=>{
+    let key=r["Defendant Addr Line 1 "];
+    if(!key) return;
+    addressCount[key]=(addressCount[key]||0)+1;
+  });
+}
+
+// SCORE
+function score(r){
+  let amount=Number(r["Claim Amount"]||0);
+  let hearing=new Date(r["Next Hearing Date"]);
+  let days=Math.floor((hearing-new Date())/(1000*60*60*24));
+
+  let s=0;
+  if(amount>1500) s+=50;
+  if(days<=7) s+=30;
+  if(days<=3) s+=20;
+
+  let tag=s>=70?"HOT":s>=40?"WARM":"LOW";
+
+  let address=[
+    r["Defendant Addr Line 1 "],
+    r["Defendant Addr City "],
+    r["Defendant Addr State"],
+    r["Defendant Addr Zip"]
+  ].filter(Boolean).join(", ");
+
+  let cluster = addressCount[r["Defendant Addr Line 1 "]] > 1;
+
+  return {...r,amount,days,score:s,tag,address,cluster};
+}
+
+// FILTER
+function filter(){
+  let search=document.getElementById("search").value.toLowerCase();
+  let min=Number(document.getElementById("minAmount").value);
+
+  filtered=data.map(score)
+    .filter(r=>r.amount>=min)
+    .filter(r=>Object.values(r).some(v =>
+      String(v).toLowerCase().includes(search)
+    ))
+    .sort((a,b)=>b.score-a.score);
+
+  render();
+}
+
+// RENDER
+function render(){
+  let tbody=document.getElementById("tbody");
+  tbody.innerHTML="";
+
+  filtered.forEach(r=>{
+    let rowClass = r.cluster ? "cluster" : "";
+
+    tbody.innerHTML+=`
+    <tr class="${rowClass}">
+      <td>${r.score}</td>
+      <td>${r["Defendant Name"]}</td>
+      <td>${r.address}</td>
+      <td>$${r.amount}</td>
+      <td>${r["Next Hearing Date"]}</td>
+      <td><span class="${r.tag.toLowerCase()}">${r.tag}</span></td>
+      <td>
+        <button onclick="openMap('${r.address}')">Map</button>
+        <button onclick="openDirections('${r.address}')">Go</button>
+        <button onclick="sendSMS('${r["Defendant Name"]}')">SMS</button>
+        <button onclick="sendEmail('${r["Defendant Name"]}')">Email</button>
+      </td>
+    </tr>`;
+  });
+}
+
+// MAP
+function openMap(addr){
+  window.open(`https://www.google.com/maps?q=${encodeURIComponent(addr)}`);
+}
+
+// DIRECTIONS
+function openDirections(addr){
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`);
+}
+
+// SMS
+function sendSMS(name){
+  window.open(`sms:?body=Hello ${name}, we help with eviction appeals. Contact Prime Relief Solutions.`);
+}
+
+// EMAIL
+function sendEmail(name){
+  window.open(`mailto:?subject=Eviction Help&body=Hello ${name}, we help with eviction appeals. Contact Prime Relief Solutions.`);
+}
+</script>
+
+</body>
+</html>
