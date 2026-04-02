@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LDP Eviction Appeal System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body { font-family: Arial; background:#f5f5f5; padding:20px; }
+    h1 { margin-bottom:10px; }
+    .box { background:white; padding:10px; margin-bottom:10px; border-radius:8px; }
+    input { padding:8px; margin-right:10px; }
+    table { width:100%; border-collapse:collapse; background:white; }
+    th, td { border:1px solid #ddd; padding:8px; font-size:12px; }
+    th { background:#eee; }
+    .green { color:green; font-weight:bold; }
+    .orange { color:orange; font-weight:bold; }
+    .red { color:red; font-weight:bold; }
+  </style>
+</head>
+
+<body>
+
+<h1>LDP Eviction Appeal Dashboard</h1>
+
+<div class="box">
+  <input type="file" id="csvFile" />
+  <input type="text" id="search" placeholder="Search..." />
+  <input type="number" id="minAmount" value="500" />
+  <button onclick="exportCSV()">Export Leads</button>
+</div>
+
+<div class="box" id="stats"></div>
+
+<table id="table">
+  <thead>
+    <tr>
+      <th>Score</th>
+      <th>Case</th>
+      <th>Defendant</th>
+      <th>Amount</th>
+      <th>Hearing</th>
+      <th>Tag</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+let data = [];
+let filtered = [];
+
+document.getElementById("csvFile").addEventListener("change", handleFile);
+document.getElementById("search").addEventListener("input", applyFilters);
+document.getElementById("minAmount").addEventListener("input", applyFilters);
+
+function handleFile(e){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+    const text = event.target.result;
+    const rows = text.split("\\n").map(r => r.split(","));
+
+    const headers = rows[0];
+
+    data = rows.slice(1).map(row => {
+      let obj = {};
+      headers.forEach((h,i)=>{
+        obj[h.trim()] = row[i]?.trim();
+      });
+      return obj;
+    });
+
+    applyFilters();
+  };
+
+  reader.readAsText(file);
+}
+
+function scoreCase(r){
+  let amount = Number(r["Claim Amount"] || 0);
+  let status = (r["Case Status "] || "").toLowerCase();
+
+  let score = 0;
+  if(status.includes("active")) score += 40;
+  if(amount >= 1000) score += 30;
+  if(amount >= 2000) score += 20;
+
+  return { ...r, score, amount };
+}
+
+function applyFilters(){
+  let search = document.getElementById("search").value.toLowerCase();
+  let minAmount = Number(document.getElementById("minAmount").value);
+
+  filtered = data.map(scoreCase)
+    .filter(r => r.score >= 50 && r.amount >= minAmount)
+    .filter(r =>
+      Object.values(r).some(v =>
+        String(v).toLowerCase().includes(search)
+      )
+    )
+    .sort((a,b)=> b.score - a.score);
+
+  render();
+}
+
+function getColor(score){
+  if(score >= 80) return "green";
+  if(score >= 60) return "orange";
+  return "red";
+}
+
+function getTag(r){
+  let date = new Date(r["Next Hearing Date"]);
+  let diff = (date - new Date()) / (1000*60*60*24);
+
+  if(diff < 5) return "URGENT";
+  if(r.score >= 80) return "HIGH";
+  return "";
+}
+
+function render(){
+  let tbody = document.querySelector("#table tbody");
+  tbody.innerHTML = "";
+
+  filtered.forEach(r=>{
+    let tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td class="${getColor(r.score)}">${r.score}</td>
+      <td>${r["Case Number"]}</td>
+      <td>${r["Defendant Name"]}</td>
+      <td>$${r.amount}</td>
+      <td>${r["Next Hearing Date"]}</td>
+      <td>${getTag(r)}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  renderStats();
+}
+
+function renderStats(){
+  let total = filtered.length;
+  let high = filtered.filter(d=> d.score >= 80).length;
+  let avg = filtered.reduce((s,d)=> s + d.amount,0) / (filtered.length || 1);
+
+  document.getElementById("stats").innerHTML = `
+    <b>Total:</b> ${total} |
+    <b>High:</b> ${high} |
+    <b>Avg:</b> $${avg.toFixed(0)}
+  `;
+}
+
+function exportCSV(){
+  let headers = ["Case Number","Defendant Name","Claim Amount"];
+  let rows = filtered.map(r=> [
+    r["Case Number"],
+    r["Defendant Name"],
+    r.amount
+  ]);
+
+  let csv = [headers.join(","), ...rows.map(r=>r.join(","))].join("\\n");
+
+  let blob = new Blob([csv]);
+  let url = URL.createObjectURL(blob);
+
+  let a = document.createElement("a");
+  a.href = url;
+  a.download = "ldp_leads.csv";
+  a.click();
+}
+</script>
+
+</body>
+</html>
