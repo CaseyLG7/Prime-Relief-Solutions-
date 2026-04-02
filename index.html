@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Prime Relief Solutions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style>
+body { font-family: Arial; padding:20px; background:#f4f6f8; }
+.dark { background:#111; }
+
+.header { display:flex; justify-content:space-between; align-items:center; }
+
+.logoBox { display:flex; align-items:center; gap:15px; }
+
+.logoBox img { height:70px; }
+
+.brandText h1 { margin:0; color:#C9A24A; }
+.brandText p { margin:0; color:#C9A24A; font-size:14px; }
+
+.toggleBox { display:flex; align-items:center; gap:10px; }
+
+.toggle {
+  width:50px; height:25px;
+  background:#ccc;
+  border-radius:20px;
+  position:relative;
+  cursor:pointer;
+}
+.toggle::after {
+  content:'';
+  width:20px; height:20px;
+  background:white;
+  position:absolute;
+  top:2.5px; left:3px;
+  border-radius:50%;
+  transition:0.3s;
+}
+.dark .toggle { background:#444; }
+.dark .toggle::after { left:26px; }
+
+.modeIcon {
+  width:20px; height:20px;
+  border-radius:50%;
+  background:linear-gradient(90deg,#3498db 50%,#000 50%);
+}
+
+.box { background:white; padding:12px; margin:15px 0; border-radius:10px; }
+.dark .box { background:#222; }
+
+input, button { padding:8px; border-radius:6px; border:1px solid #ccc; }
+button { background:black; color:white; cursor:pointer; font-size:11px; }
+
+table { width:100%; border-collapse:collapse; background:white; }
+.dark table { background:#222; }
+
+th, td { border:1px solid #ddd; padding:6px; font-size:11px; color:black; }
+
+.row-hot { background:#f8d7da; }
+.row-warm { background:#fff3cd; }
+.row-cold { background:#d4edda; }
+
+select { font-size:10px; }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logoBox">
+    <img src="Prime Relief.PNG">
+    <div class="brandText">
+      <h1>Prime Relief Solutions</h1>
+      <p>Professional LDP Eviction Support & Lead Management</p>
+    </div>
+  </div>
+
+  <div class="toggleBox">
+    <div class="toggle" onclick="toggleMode()"></div>
+    <div class="modeIcon"></div>
+  </div>
+</div>
+
+<div class="box">
+  <input type="file" id="file">
+  <button onclick="startUpload()">Upload</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th>
+<th>Name</th>
+<th>Defendant Address</th>
+<th>Amount</th>
+<th>Hearing Date</th>
+<th>Lead</th>
+<th>Status</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+let data=[];
+
+function toggleMode(){
+  document.body.classList.toggle("dark");
+}
+
+function clean(v){
+  if(!v) return "";
+  if(v.toLowerCase()=="null") return "";
+  return v.trim();
+}
+
+function getField(row,name){
+  let key=Object.keys(row).find(k=>k.trim().toLowerCase()===name.toLowerCase());
+  return key?row[key]:"";
+}
+
+function parseDate(str){
+  if(!str) return new Date(0);
+  let p=str.split("/");
+  return new Date(p[2],p[0]-1,p[1]);
+}
+
+function startUpload(){
+  let file=document.getElementById("file").files[0];
+  if(!file) return alert("Upload file");
+
+  let reader=new FileReader();
+  reader.onload=e=>parse(e.target.result);
+  reader.readAsText(file);
+}
+
+function parse(text){
+  let lines=text.split("\n").filter(l=>l.trim());
+  let d=lines[0].includes("\t")?"\t":",";
+
+  let headers=lines[0].split(d);
+  data=[];
+
+  for(let i=1;i<lines.length;i++){
+    let vals=lines[i].split(d);
+    let obj={};
+    headers.forEach((h,j)=>{
+      obj[h]=vals[j]?.replace(/"/g,"").trim();
+    });
+    data.push(obj);
+  }
+
+  process();
+}
+
+function process(){
+  let results=data.map(r=>{
+    let amount=Number(getField(r,"Claim Amount")||0);
+
+    let address=[
+      clean(getField(r,"Defendant Addr Line 1")),
+      clean(getField(r,"Defendant Addr Line 2")),
+      clean(getField(r,"Defendant Addr City")),
+      clean(getField(r,"Defendant Addr State")),
+      clean(getField(r,"Defendant Addr Zip"))
+    ].filter(v=>v).join(", ");
+
+    let lead="Cold", rowClass="row-cold", rank=3;
+
+    if(amount > 1000){
+      lead="Hot"; rowClass="row-hot"; rank=1;
+    } else if(amount > 500){
+      lead="Warm"; rowClass="row-warm"; rank=2;
+    }
+
+    return{
+      case:getField(r,"Case Number"),
+      name:clean(getField(r,"Defendant Name")),
+      address,
+      amount,
+      hearing:parseDate(getField(r,"Next Hearing Date")),
+      hearingText:getField(r,"Next Hearing Date") || "",
+      lead,
+      rowClass,
+      rank
+    };
+  })
+  .sort((a,b)=>{
+    if(a.rank !== b.rank){
+      return a.rank - b.rank;
+    }
+    return a.hearing - b.hearing;
+  });
+
+  render(results);
+}
+
+function render(rows){
+  let tbody=document.getElementById("tbody");
+  tbody.innerHTML="";
+
+  rows.forEach(r=>{
+    tbody.innerHTML+=`
+    <tr class="${r.rowClass}">
+      <td>${r.case}</td>
+      <td>${r.name}</td>
+      <td>${r.address}</td>
+      <td>$${(r.amount||0).toFixed(2)}</td>
+      <td>${r.hearingText}</td>
+      <td>${r.lead}</td>
+      <td>
+        <select>
+          <option>Open</option>
+          <option>Contacted</option>
+          <option>Processing</option>
+          <option>Closed</option>
+        </select>
+      </td>
+      <td><button onclick="map('${r.address}')">Map</button></td>
+    </tr>`;
+  });
+}
+
+function map(addr){
+  if(!addr) return alert("No address");
+  window.open("https://www.google.com/maps?q="+encodeURIComponent(addr));
+}
+</script>
+
+</body>
+</html>
