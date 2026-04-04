@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; }
+    #loginBox { max-width:300px; margin:100px auto; text-align:center; }
+    input { padding:8px; margin:5px; width:90%; }
+    button { padding:8px; cursor:pointer; }
+
+    .hidden { display:none; }
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <h2>Team Login</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+
+<h1>Prime Relief Solutions</h1>
+
+<input type="file" id="file">
+<button onclick="upload()">Upload</button>
+
+<table border="1" width="100%">
+<thead>
+<tr>
+<th>Case</th>
+<th>Name</th>
+<th>Amount</th>
+<th>Status</th>
+<th>Last Updated By</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
+  authDomain: "prsolutions-lead-management.firebaseapp.com",
+  projectId: "prsolutions-lead-management",
+  storageBucket: "prsolutions-lead-management.firebasestorage.app",
+  messagingSenderId: "354105448091",
+  appId: "1:354105448091:web:faca5ab067608a7fbb983e"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let currentUser="";
+
+// LOGIN
+function login(){
+  auth.signInWithEmailAndPassword(
+    email.value,
+    password.value
+  ).catch(e=>alert(e.message));
+}
+
+// AUTH STATE
+auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUser = user.email;
+
+    loginBox.classList.add("hidden");
+    app.classList.remove("hidden");
+
+    load();
+  }
+});
+
+// UPLOAD
+function upload(){
+  const file=document.getElementById("file").files[0];
+  const reader=new FileReader();
+
+  reader.onload=e=>{
+    const lines=e.target.result.split("\n").filter(l=>l.trim());
+    const headers=lines[0].split("\t");
+
+    for(let i=1;i<lines.length;i++){
+      let vals=lines[i].split("\t");
+      let row={};
+
+      headers.forEach((h,idx)=> row[h]=vals[idx]);
+
+      let caseNum=row["Case Number"];
+
+      db.collection("cases").doc(caseNum).set({
+        caseNumber: caseNum,
+        name: row["Defendant Name"],
+        amount: Number(row["Claim Amount"]||0),
+        status:"Open",
+        updatedBy: currentUser
+      });
+    }
+
+    alert("Uploaded");
+  };
+
+  reader.readAsText(file);
+}
+
+// LOAD
+function load(){
+  db.collection("cases").onSnapshot(snap=>{
+    let rows = snap.docs.map(d=>d.data());
+
+    tbody.innerHTML="";
+
+    rows.forEach(r=>{
+      tbody.innerHTML+=`
+      <tr>
+        <td>${r.caseNumber}</td>
+        <td>${r.name}</td>
+        <td>$${r.amount}</td>
+        <td>
+          <button onclick="updateStatus('${r.caseNumber}',this)">
+            ${r.status}
+          </button>
+        </td>
+        <td>${r.updatedBy || ""}</td>
+      </tr>`;
+    });
+  });
+}
+
+// UPDATE STATUS + TRACK USER
+function updateStatus(id, btn){
+  const states=["Open","Contacted","Processing","Closed"];
+  let next=(states.indexOf(btn.innerText)+1)%states.length;
+
+  db.collection("cases").doc(id).update({
+    status: states[next],
+    updatedBy: currentUser
+  });
+}
+
+</script>
+
+</body>
+</html>
