@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; color:#000; }
+    .dark-mode { background:#121212; }
+
+    .box { background:white; padding:12px; margin-bottom:15px; border-radius:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .dark-mode .box { background:#1f1f1f; }
+
+    input, button { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:11px; }
+    button { background:black; color:white; cursor:pointer; }
+
+    table { width:100%; border-collapse:collapse; background:white; }
+    th, td { border:1.5px solid #555; padding:6px; font-size:11px; color:#000; }
+    th { background:#ddd; }
+
+    .row-hot { background:#f8d7da; }
+    .row-warm { background:#fff3cd; }
+    .row-cold { background:#d4edda; }
+
+    h1, .subtext { color:#BFA13A; margin:0; }
+    .subtext { font-size:14px; margin-top:2px; }
+
+    .toggle-container { margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+    .toggle-label { position:relative; width:50px; height:26px; }
+    .toggle-label input { display:none; }
+
+    .slider { position:absolute; top:0; left:0; right:0; bottom:0; background:#ccc; border-radius:34px; }
+    .slider:before { content:""; position:absolute; height:22px; width:22px; left:2px; bottom:2px; background:white; border-radius:50%; transition:.3s; }
+
+    input:checked + .slider { background:#BFA13A; }
+    input:checked + .slider:before { transform:translateX(24px); }
+
+    .mode-circle {
+      width:26px; height:26px; border-radius:50%;
+      background: linear-gradient(to right, #3498db 50%, #000 50%);
+    }
+
+    .status-open { background:#6c757d; }
+    .status-contacted { background:#007bff; }
+    .status-processing { background:#fd7e14; }
+    .status-closed { background:#28a745; }
+
+    /* 🔥 LOGIN OVERLAY WITH LOGO BACKGROUND */
+    #loginOverlay {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+
+      background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)),
+                  url("Prime Relief.PNG") center/cover no-repeat;
+
+      animation: fadeInBg 0.8s ease-in-out;
+    }
+
+    @keyframes fadeInBg {
+      from { opacity:0; }
+      to { opacity:1; }
+    }
+
+    /* 🔥 GLASS LOGIN BOX */
+    #loginBox {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(6px);
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 8px 25px rgba(0,0,0,0.2);
+      text-align:center;
+      min-width:260px;
+    }
+
+    .logout-btn { background:#dc3545; }
+
+    .header-bar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h3>Team Login</h3>
+    <input id="email" placeholder="Email"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<div class="header-bar">
+  <div style="display:flex; align-items:center; gap:15px;">
+    <img src="Prime Relief.PNG" style="height:95px;" />
+    <div>
+      <h1>Prime Relief Solutions</h1>
+      <div class="subtext">Professional LDP Eviction Support & Lead Management</div>
+    </div>
+  </div>
+
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<div class="box">
+  <input type="file" id="file" />
+  <button onclick="upload()">Upload</button>
+
+  <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
+  <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
+  <input placeholder="Min $" id="minAmt" oninput="debounceFilter()">
+  <input placeholder="Max $" id="maxAmt" oninput="debounceFilter()">
+
+  <div class="toggle-container">
+    <label class="toggle-label">
+      <input type="checkbox" onchange="toggleDark()">
+      <span class="slider"></span>
+    </label>
+    <div class="mode-circle"></div>
+  </div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th>
+<th>Name</th>
+<th>Address</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Lead</th>
+<th>Status</th>
+<th>Updated By</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
+  authDomain: "prsolutions-lead-management.firebaseapp.com",
+  projectId: "prsolutions-lead-management"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let currentUser="";
+let allData=[];
+let existingCases = new Set();
+let debounceTimer;
+
+function login(){
+  auth.signInWithEmailAndPassword(email.value, password.value)
+  .catch(e=>alert(e.message));
+}
+
+function logout(){
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUser=user.email;
+    loginOverlay.style.display="none";
+    load();
+  } else {
+    loginOverlay.style.display="flex";
+  }
+});
+
+function load(){
+  db.collection("cases").onSnapshot(snap=>{
+    existingCases.clear();
+
+    allData = snap.docs.map(d=>{
+      let data=d.data();
+      existingCases.add(data.caseNumber);
+      return data;
+    })
+    .sort((a,b)=> a.p!==b.p ? a.p-b.p : parseDate(a.hearing)-parseDate(b.hearing));
+
+    applyFilters();
+  });
+}
+
+function upload(){
+  const file=document.getElementById("file").files[0];
+  if(!file) return alert("Choose file");
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split("\n").filter(l=>l.trim());
+    const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
+
+    for(let i=1;i<lines.length;i++){
+      let values=lines[i].split("\t");
+      let row={};
+
+      headers.forEach((h,idx)=>{
+        row[h]=values[idx]?.replace(/"/g,"").trim();
+      });
+
+      let caseNum=row["Case Number"];
+      if(existingCases.has(caseNum)) continue;
+
+      let amount=Number(row["Claim Amount"]||0);
+
+      let lead="Cold", cls="row-cold", p=3;
+      if(amount>1000){lead="Hot"; cls="row-hot"; p=1;}
+      else if(amount>500){lead="Warm"; cls="row-warm"; p=2;}
+
+      db.collection("cases").doc(caseNum).set({
+        caseNumber: caseNum,
+        name: row["Defendant Name"] || "",
+        address: row["Defendant Addr Line 1"] + ", " + row["Defendant Addr City"],
+        amount,
+        hearing: row["Next Hearing Date"] || "",
+        zip: row["Defendant Addr Zip"] || "",
+        lead,
+        cls,
+        p,
+        status:"Open",
+        updatedBy: currentUser
+      });
+    }
+
+    alert("Upload Complete ✅");
+  };
+
+  reader.readAsText(file);
+}
+
+function toggleDark(){
+  document.body.classList.toggle("dark-mode");
+}
+
+function parseDate(str){
+  if(!str) return new Date(0);
+  let p=str.split("/");
+  return new Date(p[2], p[0]-1, p[1]);
+}
+
+function debounceFilter(){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(applyFilters,200);
+}
+
+function applyFilters(){
+  render(allData);
+}
+
+function cycle(btn, id){
+  const states=["Open","Contacted","Processing","Closed"];
+  let next=(states.indexOf(btn.innerText)+1)%states.length;
+  let newState = states[next];
+
+  btn.innerText = newState;
+  btn.className="";
+  btn.classList.add(
+    newState==="Open"?"status-open":
+    newState==="Contacted"?"status-contacted":
+    newState==="Processing"?"status-processing":
+    "status-closed"
+  );
+
+  setTimeout(()=>{
+    db.collection("cases").doc(id).update({
+      status:newState,
+      updatedBy: currentUser
+    });
+  },0);
+}
+
+function render(rows){
+  tbody.innerHTML="";
+  rows.forEach(r=>{
+    tbody.innerHTML+=`
+    <tr class="${r.cls}">
+      <td>${r.caseNumber}</td>
+      <td>${r.name}</td>
+      <td>${r.address}</td>
+      <td>$${r.amount}</td>
+      <td>${r.hearing}</td>
+      <td>${r.lead}</td>
+      <td>
+        <button class="status-${r.status.toLowerCase()}" onclick="cycle(this,'${r.caseNumber}')">
+          ${r.status}
+        </button>
+      </td>
+      <td>${r.updatedBy || ""}</td>
+      <td><button onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(r.address)}')">Map</button></td>
+    </tr>`;
+  });
+}
+
+</script>
+
+</body>
+</html>
