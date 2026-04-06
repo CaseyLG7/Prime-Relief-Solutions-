@@ -1,0 +1,30 @@
+<!-- YOUR FILE REMAINS EXACT — ONLY 2 FUNCTIONS UPDATED -->
+
+<script>
+
+/* ✅ FIXED ZIP INPUT (SAFE) */
+function debounceFilter(){
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    applyFilters();
+  }, 200);
+}
+
+/* ✅ FIXED BUTTON INP (SAFE) */
+function cycle(btn,id){
+  const states=["Open","Contacted","Processing","Closed"];
+  let next=(states.indexOf(btn.innerText)+1)%states.length;
+  let newState=states[next];
+
+  btn.innerText=newState;
+  btn.className="status-"+newState.toLowerCase();
+
+  setTimeout(()=>{
+    db.collection("cases").doc(id).update({
+      status:newState,
+      updatedBy:currentUser
+    });
+  },10);
+}
+
+</script>
