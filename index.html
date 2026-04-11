@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; color:#000; }
+    .dark-mode { background:#121212; }
+
+    .box { background:white; padding:12px; margin-bottom:15px; border-radius:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .dark-mode .box { background:#1f1f1f; }
+
+    input, button { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:11px; }
+    button { background:black; color:white; cursor:pointer; }
+
+    input[type="file"] { background:white; color:#000; }
+
+    table { width:100%; border-collapse:collapse; background:white; }
+    th, td { border:1.5px solid #555; padding:6px; font-size:11px; color:#000; }
+    th { background:#ddd; }
+
+    .row-hot { background:#f8d7da; }
+    .row-warm { background:#fff3cd; }
+    .row-cold { background:#d4edda; }
+
+    h1, .subtext { color:#BFA13A; margin:0; }
+    .subtext { font-size:14px; margin-top:2px; }
+
+    .toggle-container { margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+    .mode-circle {
+      width:26px;
+      height:26px;
+      border-radius:50%;
+      background: linear-gradient(to right, #3498db 50%, #000 50%);
+      border:1px solid #ccc;
+    }
+
+    .status-open { background:#6c757d; }
+    .status-contacted { background:#007bff; }
+    .status-processing { background:#fd7e14; }
+    .status-closed { background:#28a745; }
+
+    .logout-btn { background:#dc3545; }
+    .clear-btn { background:#6c757d; }
+
+    #loginOverlay {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+      background:
+        linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)),
+        url("Prime Relief.PNG") center/cover no-repeat;
+    }
+
+    #loginBox {
+      background: rgba(255,255,255,0.9);
+      padding:20px;
+      border-radius:12px;
+      text-align:center;
+    }
+
+    .header-bar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .updatedByCol { font-size:10px; width:80px; }
+  </style>
+</head>
+
+<body>
+
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h3>Team Login</h3>
+    <input id="email" placeholder="Email"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
+    <span style="cursor:pointer;color:#007bff;" onclick="resetPassword()">Forgot Password?</span>
+  </div>
+</div>
+
+<div class="header-bar">
+  <div style="display:flex; align-items:center; gap:15px;">
+    <img src="Prime Relief.PNG" style="height:95px;" />
+    <div>
+      <h1>Prime Relief Solutions</h1>
+      <div class="subtext">Professional LDP Eviction Support & Lead Management</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px;">
+    <button class="clear-btn" onclick="clearView()">Clear View</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="box">
+  <input type="file" id="file" />
+  <button onclick="upload()">Upload</button>
+
+  <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
+  <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
+  <input placeholder="Min $" id="minAmt" oninput="debounceFilter()">
+  <input placeholder="Max $" id="maxAmt" oninput="debounceFilter()">
+
+  <div class="toggle-container">
+    <label>
+      <input type="checkbox" onchange="toggleDark()">
+      Dark
+    </label>
+    <div class="mode-circle"></div>
+  </div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th>
+<th>Name</th>
+<th>Address</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Lead</th>
+<th>Status</th>
+<th>Eviction Type</th>
+<th>Updated By</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
+  authDomain: "prsolutions-lead-management.firebaseapp.com",
+  projectId: "prsolutions-lead-management"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let currentUser="";
+let allData=[];
+let existingCases=new Set();
+let debounceTimer;
+
+/* USERNAME FIX (FOR BOTH OLD + NEW DATA) */
+function getUsername(email){
+  if(!email) return "";
+  email = email.toLowerCase();
+
+  if(email.includes("casey30")) return "CaseyG";
+  if(email.includes("estosha30")) return "EstoshaG";
+
+  return email;
+}
+
+function login(){
+  auth.signInWithEmailAndPassword(email.value,password.value)
+  .catch(e=>alert(e.message));
+}
+
+function resetPassword(){
+  if(!email.value) return alert("Enter email");
+  auth.sendPasswordResetEmail(email.value)
+  .then(()=>alert("Reset email sent"));
+}
+
+function logout(){
+  auth.signOut();
+  email.value="";
+  password.value="";
+}
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    currentUser=getUsername(user.email);
+    loginOverlay.style.display="none";
+    load();
+  } else {
+    loginOverlay.style.display="flex";
+    email.value="";
+    password.value="";
+  }
+});
+
+function load(){
+  db.collection("cases").onSnapshot(snap=>{
+    existingCases.clear();
+
+    allData = snap.docs.map(d=>{
+      let r=d.data();
+
+      r.updatedBy = getUsername(r.updatedBy);
+
+      /* 🔥 CRITICAL FIX: PRESERVE EVICTION TYPE */
+      if(!r.evictionType){
+        let txt = JSON.stringify(r).toLowerCase();
+        if(txt.includes("forcible") || txt.includes("force")) r.evictionType="Forcible Entry";
+        else if(txt.includes("non")) r.evictionType="Non Payment";
+        else r.evictionType="";
+      }
+
+      existingCases.add(r.caseNumber);
+      return r;
+    });
+
+    render(allData);
+  });
+}
+
+/* FILTER FIX */
+function debounceFilter(){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(()=>{
+    requestAnimationFrame(applyFilters);
+  },120);
+}
+
+function applyFilters(){
+  let nameF = searchName.value.toLowerCase();
+  let zipF = searchZip.value;
+  let min = Number(minAmt.value)||0;
+  let max = Number(maxAmt.value)||999999;
+
+  let rows = allData.filter(r=>{
+    return (
+      (r.name||"").toLowerCase().includes(nameF) &&
+      (r.zip||"").includes(zipF) &&
+      r.amount >= min &&
+      r.amount <= max
+    );
+  });
+
+  render(rows);
+}
+
+/* UPLOAD */
+function upload(){
+  const file=document.getElementById("file").files[0];
+  if(!file) return alert("Choose file");
+
+  let tempDisplay=[];
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split("\n").filter(l=>l.trim());
+    const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
+
+    for(let i=1;i<lines.length;i++){
+      let values=lines[i].split("\t");
+      let row={};
+      headers.forEach((h,idx)=> row[h]=values[idx]?.replace(/"/g,"").trim());
+
+      let amount=Number(row["Claim Amount"]||0);
+
+      let lead="Cold",cls="row-cold",p=3;
+      if(amount>1000){lead="Hot";cls="row-hot";p=1;}
+      else if(amount>500){lead="Warm";cls="row-warm";p=2;}
+
+      let text = JSON.stringify(row).toLowerCase();
+      let evictionType = row["Eviction Type"] || "";
+
+      if(!evictionType){
+        if(text.includes("forcible") || text.includes("force")) evictionType="Forcible Entry";
+        else if(text.includes("non")) evictionType="Non Payment";
+      }
+
+      let record={
+        caseNumber:row["Case Number"],
+        name:row["Defendant Name"]||"",
+        address:row["Defendant Addr Line 1"]+", "+row["Defendant Addr City"],
+        amount,
+        hearing:row["Next Hearing Date"]||"",
+        zip:row["Defendant Addr Zip"]||"",
+        lead,cls,p,
+        status:"Open",
+        evictionType,
+        updatedBy:currentUser
+      };
+
+      tempDisplay.push(record);
+    }
+
+    render(tempDisplay);
+  };
+  reader.readAsText(file);
+}
+
+/* STATUS FIX */
+function cycle(btn,id){
+  const states=["Open","Contacted","Processing","Closed"];
+  let next=(states.indexOf(btn.innerText)+1)%states.length;
+  let newState=states[next];
+
+  btn.innerText=newState;
+  btn.className="status-"+newState.toLowerCase();
+
+  setTimeout(()=>{
+    db.collection("cases").doc(id).update({
+      status:newState,
+      updatedBy:currentUser
+    });
+  },0);
+}
+
+function clearView(){
+  render([]);
+}
+
+function render(rows){
+  tbody.innerHTML="";
+  rows.forEach(r=>{
+    tbody.innerHTML+=`
+    <tr class="${r.cls}">
+      <td>${r.caseNumber}</td>
+      <td>${r.name}</td>
+      <td>${r.address}</td>
+      <td>$${r.amount}</td>
+      <td>${r.hearing}</td>
+      <td>${r.lead}</td>
+      <td><button class="status-${r.status.toLowerCase()}" onclick="cycle(this,'${r.caseNumber}')">${r.status}</button></td>
+      <td>${r.evictionType||""}</td>
+      <td class="updatedByCol">${r.updatedBy||""}</td>
+      <td><button onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(r.address)}')">Map</button></td>
+    </tr>`;
+  });
+}
+
+function toggleDark(){
+  document.body.classList.toggle("dark-mode");
+}
+
+</script>
+
+</body>
+</html>
