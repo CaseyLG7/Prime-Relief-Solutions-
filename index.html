@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; color:#000; }
+    .dark-mode { background:#121212; }
+
+    .box { background:white; padding:12px; margin-bottom:15px; border-radius:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .dark-mode .box { background:#1f1f1f; }
+
+    input, button { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:11px; }
+    button { background:black; color:white; cursor:pointer; }
+
+    table { width:100%; border-collapse:collapse; background:white; }
+    th, td { border:1.5px solid #555; padding:6px; font-size:11px; }
+
+    h1, .subtext { color:#BFA13A; margin:0; }
+
+    .toggle-container { margin-left:auto; display:flex; gap:8px; align-items:center; }
+
+    #loginOverlay {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+      background:
+        linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)),
+        url("Prime Relief.PNG") center/cover no-repeat;
+    }
+
+    #loginBox {
+      background: rgba(255,255,255,0.9);
+      padding:20px;
+      border-radius:12px;
+      text-align:center;
+    }
+
+    .header-bar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h3>Team Login</h3>
+    <input id="email" placeholder="Email"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header-bar">
+  <div style="display:flex; align-items:center; gap:15px;">
+    <img src="Prime Relief.PNG" style="height:95px;" />
+    <div>
+      <h1>Prime Relief Solutions</h1>
+      <div class="subtext">Professional LDP Eviction Support & Lead Management</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px;">
+    <button onclick="window.open('https://jpwebsite.harriscountytx.gov/FindMyCase/search.jsp')">
+      Case Search
+    </button>
+
+    <button onclick="openDoc('intake')">Intake</button>
+    <button onclick="openDoc('checklist')">Checklist</button>
+    <button onclick="openDoc('script')">Call Script</button>
+    <button onclick="openDoc('appeal')">Appeal</button>
+    <button onclick="openDoc('workflow')">Workflow</button>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- BOX -->
+<div class="box">
+  <input type="file" id="file" />
+  <button onclick="upload()">Upload</button>
+
+  <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
+  <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
+  <input placeholder="Min $" id="minAmt" oninput="debounceFilter()">
+  <input placeholder="Max $" id="maxAmt" oninput="debounceFilter()">
+
+  <div class="toggle-container">
+    <label><input type="checkbox" onchange="toggleDark()"> Dark</label>
+  </div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th>
+<th>Name</th>
+<th>Address</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Lead</th>
+<th>Status</th>
+<th>Updated By</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+
+/* ONLY FIXED CONTENT — NOTHING ELSE CHANGED */
+function openDoc(type){
+let content="";
+
+if(type==="intake"){
+content = `
+INITIAL CALL — INTAKE & ELIGIBILITY CHECK
+
+Goal: confirm appeal is still possible.
+
+ASK IMMEDIATELY:
+- Judgment signed date
+- Justice Court (Precinct & County)
+- Date received judgment
+- Filed Notice of Appeal?
+- Appeal method:
+  • Appeal Bond
+  • Cash Deposit
+  • Statement of Inability to Pay
+
+EXPLAIN DEADLINE:
+"In Texas, eviction appeals must usually be filed within 5 calendar days."
+
+If missed: politely advise it may not qualify.
+`;
+}
+
+if(type==="checklist"){
+content = `
+NOTICE OF APPEAL
+FILING FEE / PAUPER
+COURT COPY
+LANDLORD COPY
+LEASE AGREEMENT
+PAYMENT RECORDS
+`;
+}
+
+if(type==="script"){
+content = `
+CALL SCRIPT:
+
+"Hello, this is regarding your eviction case."
+
+- Do you need more time?
+- Can you pay partial?
+- We can prepare filing today.
+`;
+}
+
+if(type==="appeal"){
+content = `
+NOTICE OF APPEAL TEMPLATE
+
+Defendant: ________
+Case #: ________
+Court: ________
+
+"I hereby appeal the eviction judgment."
+`;
+}
+
+if(type==="workflow"){
+content = `
+1 Import case
+2 Contact client
+3 Confirm eligibility
+4 Prepare documents
+5 File appeal
+6 Track status
+7 Close case
+`;
+}
+
+let w = window.open("");
+w.document.write(`
+<html>
+<body style="font-family:Arial;padding:20px;">
+${content}
+<br><br>
+<button onclick="window.print()">Print</button>
+</body>
+</html>
+`);
+}
+
+/* FIREBASE (UNCHANGED) */
+const firebaseConfig = {
+apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkXKDp_pA",
+authDomain: "prsolutions-lead-management.firebaseapp.com",
+projectId: "prsolutions-lead-management"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+function login(){
+auth.signInWithEmailAndPassword(email.value,password.value)
+.catch(e=>alert(e.message));
+}
+
+function logout(){
+auth.signOut();
+}
+
+auth.onAuthStateChanged(user=>{
+if(user){
+loginOverlay.style.display="none";
+} else {
+loginOverlay.style.display="flex";
+}
+});
+
+function toggleDark(){
+document.body.classList.toggle("dark-mode");
+}
+
+</script>
+
+</body>
+</html>
