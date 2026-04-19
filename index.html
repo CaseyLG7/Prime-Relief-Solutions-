@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Prime Relief Solutions</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+.dark-mode {
+  background:#121212;
+  color:white;
+}
+
+button {
+  cursor:pointer;
+  color:white;
+  font-weight:bold;
+  border:none;
+  padding:8px 10px;
+  border-radius:6px;
+}
+
+/* COLORS */
+.case { background:#6f42c1; }
+.intake { background:#0d6efd; }
+.legal { background:#20c997; }
+.service { background:#fd7e14; }
+.documents { background:#198754; }
+.filing { background:#6610f2; }
+.compliance { background:#dc3545; }
+.link { background:#343a40; }
+
+.header-bar {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+  align-items:center;
+}
+
+#loginOverlay {
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:rgba(0,0,0,0.5);
+}
+
+#loginBox {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h3>Team Login</h3>
+    <input id="email" placeholder="Email"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button class="case" onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- HEADER BUTTONS -->
+<div class="header-bar">
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+    <button class="link" onclick="window.open('https://jpwebsite.harriscountytx.gov/FindMyCase/search.jsp')">
+      Case Search
+    </button>
+
+    <button class="case" onclick="openDoc('overview')">Intake Overview</button>
+    <button class="intake" onclick="openDoc('questions')">Required Questions</button>
+    <button class="legal" onclick="openDoc('disclosure')">LDP Disclosure</button>
+    <button class="service" onclick="openDoc('service')">Service Explanation</button>
+    <button class="documents" onclick="openDoc('documents')">Documents List</button>
+    <button class="filing" onclick="openDoc('filing')">Filing Steps</button>
+    <button class="compliance" onclick="openDoc('compliance')">Compliance Rules</button>
+
+  </div>
+</div>
+
+<script>
+
+/* ================= FULL INTAKE SYSTEM ================= */
+function openDoc(type){
+let content="";
+
+if(type==="overview"){
+content=`
+INITIAL CALL — INTAKE & ELIGIBILITY CHECK
+
+Goal: confirm appeal is still possible.
+
+Timeline:
+- Eviction judgment date critical
+- Texas deadline: usually 5 days
+
+Stop immediately if:
+- Deadline passed
+`;
+}
+
+if(type==="questions"){
+content=`
+ASK THESE QUESTIONS:
+
+1. Judgment signed date?
+2. Which Justice Court? (Precinct & County)
+3. When did you receive judgment?
+4. Filed Notice of Appeal yet?
+5. Appeal method:
+   - Appeal Bond
+   - Cash Deposit
+   - Statement of Inability to Pay
+
+EXPLAIN:
+"You must be within the 5-day filing window."
+`;
+}
+
+if(type==="disclosure"){
+content=`
+LDP DISCLOSURE:
+
+"We are a Legal Document Preparation service, not attorneys.
+We do not give legal advice or represent clients in court.
+We prepare documents based on your information."
+`;
+}
+
+if(type==="service"){
+content=`
+SERVICE EXPLANATION:
+
+We prepare:
+- Notice of Appeal
+- Statement of Inability to Pay (if needed)
+- Appeal Bond forms
+
+Clients:
+- File themselves
+- We do not appear in court
+`;
+}
+
+if(type==="documents"){
+content=`
+CASE INFORMATION REQUIRED:
+
+- Full Name
+- Phone / Email
+- Address
+- Case Number
+- Court / Precinct
+- Landlord Info
+- Judgment Date
+`;
+}
+
+if(type==="filing"){
+content=`
+FILING INSTRUCTIONS:
+
+- File at Justice Court
+- Must meet deadline
+- Bring copies
+- Ask clerk for stamp
+`;
+}
+
+if(type==="compliance"){
+content=`
+COMPLIANCE RULES:
+
+NEVER:
+❌ Give legal advice
+❌ Choose strategy
+❌ Predict outcome
+❌ Contact court
+❌ Represent in hearings
+
+ALWAYS SAY:
+"You may want to consult a licensed Texas attorney."
+`;
+}
+
+let w=window.open("");
+w.document.write(`<html><body style="font-family:Arial;padding:20px;">${content}<br><button onclick="window.print()">Print</button></body></html>`);
+}
+
+/* LOGIN */
+function login(){
+auth.signInWithEmailAndPassword(email.value,password.value)
+.catch(e=>alert(e.message));
+}
+
+function logout(){ auth.signOut(); }
+
+</script>
+
+</body>
+</html>
