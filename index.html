@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; color:#000; }
+    .dark-mode { background:#121212; color:#fff; }
+    .box { background:white; padding:12px; margin-bottom:15px; border-radius:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .dark-mode .box { background:#1f1f1f; }
+    input, button { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:11px; }
+    button { background:black; color:white; cursor:pointer; }
+    .status-open { background:#6c757d; color:#fff; }
+    .status-contacted { background:#17a2b8; color:#fff; }
+    .status-processing { background:#ffc107; color:#000; }
+    .status-closed { background:#28a745; color:#fff; }
+    table { width:100%; border-collapse:collapse; background:white; }
+    th, td { border:1.5px solid #555; padding:6px; font-size:11px; }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
+  <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
+  <input placeholder="Min $" id="minAmt" oninput="debounceFilter()">
+  <input placeholder="Max $" id="maxAmt" oninput="debounceFilter()">
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th><th>Name</th><th>Address</th><th>Amount</th><th>Status</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+
+/* 🔥 FIX 1 — BETTER DEBOUNCE */
+let debounceTimer;
+function debounceFilter(){
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    requestIdleCallback(applyFilters); // non-blocking
+  }, 300);
+}
+
+/* 🔥 FIX 2 — LIGHTER FILTER */
+function applyFilters(){
+  const nameF = searchName.value.toLowerCase();
+  const zipF = searchZip.value;
+  const min = Number(minAmt.value)||0;
+  const max = Number(maxAmt.value)||999999;
+
+  const rows = allData.filter(r =>
+    r.name.toLowerCase().includes(nameF) &&
+    r.zip.includes(zipF) &&
+    r.amount >= min &&
+    r.amount <= max
+  );
+
+  render(rows);
+}
+
+/* 🔥 FIX 3 — FAST RENDER (NO innerHTML +=) */
+function render(rows){
+  const frag = document.createDocumentFragment();
+  tbody.innerHTML = "";
+
+  rows.forEach(r=>{
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${r.caseNumber}</td>
+      <td>${r.name}</td>
+      <td>${r.address}</td>
+      <td>$${r.amount}</td>
+      <td>
+        <button class="status-${r.status.toLowerCase()}" 
+          onclick="cycle(this,'${r.caseNumber}')">
+          ${r.status}
+        </button>
+      </td>
+    `;
+
+    frag.appendChild(tr);
+  });
+
+  tbody.appendChild(frag);
+}
+
+/* 🔥 FIX 4 — NON-BLOCKING FIRESTORE */
+function cycle(btn,id){
+  const states=["Open","Contacted","Processing","Closed"];
+  let next=(states.indexOf(btn.innerText)+1)%states.length;
+  let newState=states[next];
+
+  btn.innerText=newState;
+  btn.className="status-"+newState.toLowerCase();
+
+  setTimeout(()=>{ // 🔥 prevents UI freeze
+    db.collection("cases").doc(id).update({
+      status:newState,
+      updatedBy:currentUser
+    });
+  },0);
+}
+
+</script>
+</body>
+</html>
