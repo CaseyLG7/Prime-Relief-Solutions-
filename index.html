@@ -222,133 +222,240 @@ COMMON CLIENT QUESTIONS
 • Q: Will you tell me what I should do?
   A: We can explain the document preparation process and court procedures, but we cannot provide legal advice or recommend legal strategies.
 </div>`;}
-if(type==="intake"){ content=`<div style="${style}">Collect Basic Client Information Record:
+if(type==="intake"){ content=`
+<div style="font-family:Arial;font-size:15px;max-width:900px;margin:auto;">
 
-Full Name
-Phone number
-Email
-Property address
-County & Precinct Court
-Landlord / property management name
-Case number (if available)
+<h2 style="text-align:center;color:#BFA13A;">Prime Relief Solutions</h2>
 
-Keep this organized in a case intake sheet</div>`;}
+<h3 style="text-align:center;">Texas Eviction Appeal Client Intake Form</h3>
 
-if(type==="appeal"){ content=`<div style="${style}">
+<hr><br>
 
-<b>TEXAS EVICTION APPEAL INFORMATION</b>
+<h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT INFORMATION</h3>
 
-• Texas provides three common methods to perfect an eviction appeal from Justice Court:
+<b>Date:</b><br>
+<input type="date" style="width:220px;"><br><br>
 
-──────────────────────────────
+<b>Full Name:</b><br>
+<input style="width:350px;"><br><br>
 
-<b>1. Appeal Bond</b>
+<b>Date of Birth:</b><br>
+<input type="date" style="width:220px;"><br><br>
 
-• An Appeal Bond is a written guarantee filed with the Justice Court.
+<b>Phone Number:</b><br>
+<input style="width:250px;"><br><br>
 
-• The amount of the bond is generally determined by the judge.
+<b>Alternate Phone:</b><br>
+<input style="width:250px;"><br><br>
 
-• The bond usually requires one or more qualified sureties (people or companies willing to guarantee payment if required).
+<b>Email Address:</b><br>
+<input style="width:350px;"><br><br>
 
-• The bond must generally be filed within the appeal deadline established by Texas law.
+<hr>
 
-• The court clerk can explain the filing requirements and bond amount.
+<h3 style="background:#BFA13A;color:white;padding:8px;">PROPERTY INFORMATION</h3>
 
-Common Questions
+<b>Property Address:</b><br>
+<textarea style="width:70%;height:45px;"></textarea><br><br>
 
-Q: Who sets the Appeal Bond amount?
+<b>Apartment #:</b><br>
+<input style="width:120px;"><br><br>
 
-A: The Justice Court judge determines the required amount.
+<b>City:</b><br>
+<input style="width:220px;">
 
-Q: Do I pay the bond directly to the court?
+<b style="margin-left:30px;">State:</b>
 
-A: The court will explain the filing requirements. An Appeal Bond is different from making a cash deposit.
+<input value="TX" style="width:70px;">
 
-──────────────────────────────
+<b style="margin-left:30px;">ZIP:</b>
 
-<b>2. Cash Deposit (Cash Bond)</b>
+<input style="width:100px;">
 
-• Instead of filing an Appeal Bond, a tenant may qualify to make a cash deposit with the court.
+<br><br>
 
-• The amount is generally determined by the Justice Court.
+<hr>
 
-• The funds are deposited directly with the court.
+<h3 style="background:#BFA13A;color:white;padding:8px;">MAILING ADDRESS (If Different)</h3>
 
-• Court staff can explain acceptable payment methods.
+<textarea style="width:70%;height:45px;"></textarea>
 
-Common Questions
+<br><br>
 
-Q: Is a Cash Deposit the same as an Appeal Bond?
+<hr>
 
-A: No. A Cash Deposit places money directly with the court, while an Appeal Bond is a written guarantee that satisfies the court's bond requirement.
+<h3 style="background:#BFA13A;color:white;padding:8px;">LANDLORD INFORMATION</h3>
 
-Q: Do I get the money back?
+<b>Landlord / Property Management:</b><br>
 
-A: The handling of deposited funds depends on the court's final orders and applicable Texas law.
+<input style="width:420px;"><br><br>
 
-──────────────────────────────
+<b>Attorney (if known):</b><br>
 
-<b>3. Statement of Inability to Pay Court Costs</b>
+<input style="width:420px;"><br><br>
 
-• A person who cannot afford court costs may file a Statement of Inability to Pay Court Costs if permitted by law.
+<hr>
 
-• The completed statement is filed with the Justice Court.
+<h3 style="background:#BFA13A;color:white;padding:8px;">COURT INFORMATION</h3>
 
-• The court may review the statement and determine whether it meets legal requirements.
+<b>County:</b><br>
 
-Common Questions
+<input style="width:220px;"><br><br>
 
-Q: Does filing this statement automatically approve my appeal?
+<b>Justice Court Precinct:</b><br>
 
-A: The court determines whether the statement satisfies legal requirements.
+<input style="width:220px;"><br><br>
 
-Q: What information is requested?
+<b>Case Number:</b><br>
 
-A: The form generally requests financial information regarding income, expenses, assets, and other relevant information.
+<input style="width:220px;"><br><br>
 
-──────────────────────────────
+<b>Judgment Date:</b><br>
 
-<b>Appeal Bond vs. Cash Deposit</b>
+<input type="date"><br><br>
 
-Appeal Bond
+<b>Upcoming Court Date:</b><br>
 
-• Written guarantee
+<input type="date"><br><br>
 
-• Usually requires sureties
+<hr>
 
-• Bond amount determined by the judge
+<h3 style="background:#BFA13A;color:white;padding:8px;">APPEAL INFORMATION</h3>
 
-• Does not involve depositing cash with the court
+<b>Appeal Method</b><br><br>
 
-Cash Deposit
+<label><input type="checkbox"> Appeal Bond</label><br>
 
-• Money deposited directly with the court
+<label><input type="checkbox"> Cash Deposit</label><br>
 
-• No sureties required
+<label><input type="checkbox"> Statement of Inability to Pay Court Costs</label>
 
-• Deposit amount determined by the court
+<br><br>
 
-──────────────────────────────
+<b>Has the client already filed a Notice of Appeal?</b><br>
 
-<b>Frequently Asked Questions</b>
+<label><input type="checkbox"> Yes</label>
 
-Q: Does filing an appeal stop the eviction?
+<label style="margin-left:20px;">
+<input type="checkbox"> No
+</label>
 
-A: Texas law contains procedures regarding possession during an appeal. The court determines how the appeal proceeds.
+<br><br>
 
-Q: Do I still have to attend court?
+<b>Has a Writ of Possession been issued?</b><br>
 
-A: Court appearance requirements depend on the case and court proceedings.
+<label><input type="checkbox"> Yes</label>
 
-Q: How long does an appeal take?
+<label style="margin-left:20px;">
+<input type="checkbox"> No
+</label>
 
-A: Timeframes vary depending on the court and the circumstances of each case.
+<br><br>
 
-Q: Can Prime Relief Solutions tell me which appeal option I should choose?
+<b>Has the Constable posted a Notice to Vacate?</b><br>
 
-A: No. We are a Legal Document Preparation service. We prepare documents based on the information you provide but do not provide legal advice or recommend legal strategies.
+<label><input type="checkbox"> Yes</label>
 
-</div>`;}
+<label style="margin-left:20px;">
+<input type="checkbox"> No
+</label>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">SERVICE INFORMATION</h3>
+
+<b>Service Selected:</b><br>
+
+<input value="Texas Eviction Appeal Document Preparation" style="width:420px;"><br><br>
+
+<b>Service Fee:</b><br>
+
+<input value="$190.00" style="width:120px;"><br><br>
+
+<b>Payment Method</b><br><br>
+
+<label><input type="checkbox"> Cash</label>
+
+<label style="margin-left:15px;">
+<input type="checkbox"> Credit / Debit
+</label>
+
+<label style="margin-left:15px;">
+<input type="checkbox"> Cash App
+</label>
+
+<label style="margin-left:15px;">
+<input type="checkbox"> Zelle
+</label>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">DOCUMENT CHECKLIST</h3>
+
+<label><input type="checkbox"> Eviction Petition</label><br>
+
+<label><input type="checkbox"> Judgment</label><br>
+
+<label><input type="checkbox"> Lease Agreement</label><br>
+
+<label><input type="checkbox"> Driver License / ID</label><br>
+
+<label><input type="checkbox"> Court Documents</label><br>
+
+<label><input type="checkbox"> Other</label>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT NOTES</h3>
+
+<textarea style="width:70%;height:90px;"></textarea>
+
+<br><br>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">INTERNAL STAFF NOTES</h3>
+
+<textarea style="width:70%;height:90px;"></textarea>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT ACKNOWLEDGEMENT</h3>
+
+I understand that Prime Relief Solutions is a Legal Document Preparation service and is not a law firm. I understand that no legal advice or legal representation has been provided.
+
+<br><br><br>
+
+<b>Client Signature</b>
+
+<hr style="width:320px;margin-left:0;">
+
+<br>
+
+<b>Date</b>
+
+<hr style="width:180px;margin-left:0;">
+
+<br>
+
+<b>Staff Member</b>
+
+<hr style="width:320px;margin-left:0;">
+
+<br>
+
+<b>Staff Signature</b>
+
+<hr style="width:320px;margin-left:0;">
+
+</div>`;
+}
 
 if(type==="checklist"){ content=`<div style="${style}">
 <ul>
