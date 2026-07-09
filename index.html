@@ -230,43 +230,43 @@ if(type==="intake"){ content=`
 <h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT INFORMATION</h3>
 
 <b>Date:</b><br>
-<input type="date" style="width:220px;"><br><br>
+<input id="intakeDate" type="date" style="width:220px;"><br><br>
 
 <b>Full Name:</b><br>
-<input style="width:350px;"><br><br>
+<input id="clientName" style="width:350px;"><br><br>
 
 <b>Date of Birth:</b><br>
-<input type="date" style="width:220px;"><br><br>
+<input id="dob" type="date" style="width:220px;"><br><br>
 
 <b>Phone Number:</b><br>
-<input style="width:250px;"><br><br>
+<input id="phone" style="width:250px;"><br><br>
 
 <b>Alternate Phone:</b><br>
-<input style="width:250px;"><br><br>
+<input id="alternatePhone" style="width:250px;"><br><br>
 
 <b>Email Address:</b><br>
-<input style="width:350px;"><br><br>
+<input id="clientEmail" style="width:350px;"><br><br>
 
 <hr>
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">PROPERTY INFORMATION</h3>
 
 <b>Property Address:</b><br>
-<textarea style="width:70%;height:45px;"></textarea><br><br>
+<textarea id="propertyAddress" style="width:70%;height:45px;"></textarea><br><br>
 
 <b>Apartment #:</b><br>
-<input style="width:120px;"><br><br>
+<input id="apartment" style="width:120px;"><br><br>
 
 <b>City:</b><br>
-<input style="width:220px;">
+<input id="city" style="width:220px;">
 
 <b style="margin-left:30px;">State:</b>
 
-<input value="TX" style="width:70px;">
+<input id="state" value="TX" style="width:70px;">
 
 <b style="margin-left:30px;">ZIP:</b>
 
-<input style="width:100px;">
+<input id="zip" style="width:100px;">
 
 <br><br>
 
@@ -274,7 +274,7 @@ if(type==="intake"){ content=`
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">MAILING ADDRESS (If Different)</h3>
 
-<textarea style="width:70%;height:45px;"></textarea>
+<textarea id="mailingAddress" style="width:70%;height:45px;"></textarea>
 
 <br><br>
 
@@ -284,11 +284,11 @@ if(type==="intake"){ content=`
 
 <b>Landlord / Property Management:</b><br>
 
-<input style="width:420px;"><br><br>
+<input id="landlord" style="width:420px;"><br><br>
 
 <b>Attorney (if known):</b><br>
 
-<input style="width:420px;"><br><br>
+<input id="attorney" style="width:420px;"><br><br>
 
 <hr>
 
@@ -296,25 +296,23 @@ if(type==="intake"){ content=`
 
 <b>County:</b><br>
 
-<input style="width:220px;"><br><br>
+<input id="county" style="width:220px;"><br><br>
 
 <b>Justice Court Precinct:</b><br>
 
-<input style="width:220px;"><br><br>
+<input id="precinct" style="width:220px;"><br><br>
 
 <b>Case Number:</b><br>
 
-<input style="width:220px;"><br><br>
+<input id="caseNumber" style="width:220px;"><br><br>
 
 <b>Judgment Date:</b><br>
 
-<input type="date"><br><br>
+<input id="judgmentDate" type="date" style="width:220px;"><br><br>
 
 <b>Upcoming Court Date:</b><br>
 
-<input type="date"><br><br>
-
-<hr>
+<input id="courtDate" type="date" style="width:220px;"><br><br>
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">APPEAL INFORMATION</h3>
 
