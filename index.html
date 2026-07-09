@@ -318,40 +318,40 @@ if(type==="intake"){ content=`
 
 <b>Appeal Method</b><br><br>
 
-<label><input type="checkbox"> Appeal Bond</label><br>
+<label><input id="appealBond" type="checkbox"> Appeal Bond</label><br>
 
-<label><input type="checkbox"> Cash Deposit</label><br>
+<label><input id="cashDeposit" type="checkbox"> Cash Deposit</label><br>
 
-<label><input type="checkbox"> Statement of Inability to Pay Court Costs</label>
+<label><input id="inabilityPay" type="checkbox"> Statement of Inability to Pay Court Costs</label>
 
 <br><br>
 
 <b>Has the client already filed a Notice of Appeal?</b><br>
 
-<label><input type="checkbox"> Yes</label>
+<label><input id="noticeYes" type="radio" name="noticeAppeal"> Yes</label>
 
 <label style="margin-left:20px;">
-<input type="checkbox"> No
+<input id="noticeNo" type="radio" name="noticeAppeal"> No
 </label>
 
 <br><br>
 
 <b>Has a Writ of Possession been issued?</b><br>
 
-<label><input type="checkbox"> Yes</label>
+<label><input id="writYes" type="radio" name="writ"> Yes</label>
 
 <label style="margin-left:20px;">
-<input type="checkbox"> No
+<input id="writNo" type="radio" name="writ"> No
 </label>
 
 <br><br>
 
 <b>Has the Constable posted a Notice to Vacate?</b><br>
 
-<label><input type="checkbox"> Yes</label>
+<label><input id="vacateYes" type="radio" name="vacate"> Yes</label>
 
 <label style="margin-left:20px;">
-<input type="checkbox"> No
+<input id="vacateNo" type="radio" name="vacate"> No
 </label>
 
 <br><br>
@@ -362,26 +362,26 @@ if(type==="intake"){ content=`
 
 <b>Service Selected:</b><br>
 
-<input value="Texas Eviction Appeal Document Preparation" style="width:420px;"><br><br>
+<input id="serviceSelected" value="Texas Eviction Appeal Document Preparation" style="width:420px;"><br><br>
 
 <b>Service Fee:</b><br>
 
-<input value="$190.00" style="width:120px;"><br><br>
+<input id="serviceFee" value="$190.00" style="width:120px;"><br><br>
 
 <b>Payment Method</b><br><br>
 
-<label><input type="checkbox"> Cash</label>
+<label><input id="payCash" type="checkbox"> Cash</label>
 
 <label style="margin-left:15px;">
-<input type="checkbox"> Credit / Debit
+<input id="payCard" type="checkbox"> Credit / Debit
 </label>
 
 <label style="margin-left:15px;">
-<input type="checkbox"> Cash App
+<input id="payCashApp" type="checkbox"> Cash App
 </label>
 
 <label style="margin-left:15px;">
-<input type="checkbox"> Zelle
+<input id="payZelle" type="checkbox"> Zelle
 </label>
 
 <br><br>
@@ -390,17 +390,17 @@ if(type==="intake"){ content=`
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">DOCUMENT CHECKLIST</h3>
 
-<label><input type="checkbox"> Eviction Petition</label><br>
+<label><input id="docPetition" type="checkbox"> Eviction Petition</label><br>
 
-<label><input type="checkbox"> Judgment</label><br>
+<label><input id="docJudgment" type="checkbox"> Judgment</label><br>
 
-<label><input type="checkbox"> Lease Agreement</label><br>
+<label><input id="docLease" type="checkbox"> Lease Agreement</label><br>
 
-<label><input type="checkbox"> Driver License / ID</label><br>
+<label><input id="docID" type="checkbox"> Driver License / ID</label><br>
 
-<label><input type="checkbox"> Court Documents</label><br>
+<label><input id="docCourt" type="checkbox"> Court Documents</label><br>
 
-<label><input type="checkbox"> Other</label>
+<label><input id="docOther" type="checkbox"> Other</label>
 
 <br><br>
 
@@ -408,13 +408,13 @@ if(type==="intake"){ content=`
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT NOTES</h3>
 
-<textarea style="width:70%;height:90px;"></textarea>
+<textarea id="clientNotes" style="width:70%;height:90px;"></textarea>
 
 <br><br>
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">INTERNAL STAFF NOTES</h3>
 
-<textarea style="width:70%;height:90px;"></textarea>
+<textarea id="staffNotes" style="width:70%;height:90px;"></textarea>
 
 <br><br>
 
@@ -440,13 +440,25 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 
 <b>Staff Member</b>
 
-<hr style="width:320px;margin-left:0;">
-
-<br>
+<input id="staffMember" style="width:320px;"><br><br>
 
 <b>Staff Signature</b>
 
 <hr style="width:320px;margin-left:0;">
+
+<br><br>
+
+<hr>
+
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+
+<button type="button" onclick="saveIntake()">💾 Save Intake</button>
+
+<button type="button" onclick="loadIntake()">📂 Open Saved Intake</button>
+
+<button type="button" onclick="window.print()">🖨 Save / Print</button>
+
+</div>
 
 </div>`;
 }
