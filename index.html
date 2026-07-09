@@ -453,7 +453,128 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 <b>Staff Signature</b>
 
 <hr style="width:320px;margin-left:0;">
+<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+    <button type="button" onclick="saveIntake()">💾 Save Intake</button>
 
+    <button type="button" onclick="loadIntake()">📂 Load Intake</button>
+
+    <button type="button" onclick="window.print()">🖨 Save / Print</button>
+</div>
+function getFormData(){
+
+return{
+
+caseNumber:document.getElementById("caseNumber").value,
+
+clientName:document.getElementById("clientName").value,
+
+phone:document.getElementById("phone").value,
+
+email:document.getElementById("clientEmail").value,
+
+address:document.getElementById("address").value,
+
+county:document.getElementById("county").value,
+
+precinct:document.getElementById("precinct").value,
+
+landlord:document.getElementById("landlord").value,
+
+courtDate:document.getElementById("courtDate").value,
+
+appealType:document.getElementById("appealType").value,
+
+notes:document.getElementById("notes").value
+
+};
+
+}
+async function saveIntake(){
+
+const data=getFormData();
+
+if(!data.caseNumber){
+
+alert("Please enter the Case Number first.");
+
+return;
+
+}
+
+data.lastUpdated=new Date().toLocaleString();
+
+data.updatedBy=window.opener.currentUser;
+
+await window.opener.db
+
+.collection("intakes")
+
+.doc(data.caseNumber)
+
+.set(data);
+
+alert("Intake Saved Successfully.");
+
+}
+async function loadIntake(){
+
+const caseNumber=prompt("Enter Case Number");
+
+if(!caseNumber)return;
+
+const doc=await window.opener.db
+
+.collection("intakes")
+
+.doc(caseNumber)
+
+.get();
+
+if(!doc.exists){
+
+alert("No Intake Found.");
+
+return;
+
+}
+
+const d=doc.data();
+
+document.getElementById("caseNumber").value=d.caseNumber||"";
+
+document.getElementById("clientName").value=d.clientName||"";
+
+document.getElementById("phone").value=d.phone||"";
+
+document.getElementById("clientEmail").value=d.email||"";
+
+document.getElementById("address").value=d.address||"";
+
+document.getElementById("county").value=d.county||"";
+
+document.getElementById("precinct").value=d.precinct||"";
+
+document.getElementById("landlord").value=d.landlord||"";
+
+document.getElementById("courtDate").value=d.courtDate||"";
+
+document.getElementById("appealType").value=d.appealType||"";
+
+document.getElementById("notes").value=d.notes||"";
+
+alert(
+
+"Loaded.\n\nLast Edited By: "
+
++(d.updatedBy||"")
+
++"\n"
+
++(d.lastUpdated||"")
+
+);
+
+}
 </div>`;
 }
 if(type==="appeal"){ content=`<div style="${style}">
