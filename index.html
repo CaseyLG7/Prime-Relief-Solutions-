@@ -657,7 +657,73 @@ Phone: (877) 234-3578<br>
 Email: help@prsolution.org
 </p>
 </div>`;}
+`;
 
+let w = window.open("", "_blank");
+
+w.document.open();
+
+w.document.write(`
+<html>
+<head>
+<title>Prime Relief Solutions - Intake Form</title>
+
+<style>
+body{
+    font-family:Arial;
+    padding:25px;
+    background:white;
+    color:#000;
+}
+
+input,
+textarea{
+    border:1px solid #999;
+    padding:5px;
+    font-size:14px;
+}
+
+button{
+    padding:10px 20px;
+    margin:10px 5px;
+    cursor:pointer;
+    font-size:15px;
+    border:none;
+    border-radius:6px;
+    background:#BFA13A;
+    color:white;
+}
+
+button:hover{
+    opacity:.9;
+}
+</style>
+
+</head>
+
+<body>
+
+${content}
+
+<br><br>
+
+<center>
+
+<button onclick="window.print()">
+Save / Print
+</button>
+
+</center>
+
+</body>
+
+</html>
+`);
+
+w.document.close();
+
+return;
+}
 let w=window.open("");
 w.document.open();
 w.document.write(`<html><body style="font-family:Arial;padding:20px;">${content}<br><br>
