@@ -455,7 +455,40 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 <button type="button" onclick="saveIntake()">💾 Save Intake</button>
 
 <button type="button" onclick="loadIntake()">📂 Open Saved Intake</button>
+//======================================
+// LOAD INTAKE
+//======================================
 
+async function loadIntake(){
+
+let id=prompt("Enter Intake ID");
+
+if(!id) return;
+
+let doc=await db.collection("intakes").doc(id).get();
+
+if(!doc.exists){
+alert("Intake Not Found");
+return;
+}
+
+let d=doc.data();
+
+currentIntakeID=id;
+
+document.querySelector('input[type="date"]').value=d.date||"";
+
+document.querySelectorAll("input")[1].value=d.name||"";
+
+document.querySelectorAll("input")[3].value=d.phone||"";
+
+document.querySelectorAll("input")[5].value=d.email||"";
+
+document.getElementById("staffMember").value=d.staff||"";
+
+alert("Intake Loaded");
+
+}
 <button type="button" onclick="window.print()">🖨 Save / Print</button>
 
 </div>
