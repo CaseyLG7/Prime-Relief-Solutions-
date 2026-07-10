@@ -489,6 +489,40 @@ document.getElementById("staffMember").value=d.staff||"";
 alert("Intake Loaded");
 
 }
+//======================================
+// SEARCH SAVED CLIENTS
+//======================================
+
+async function searchIntakes(){
+
+let name=prompt("Client Name");
+
+if(!name) return;
+
+let snap=await db.collection("intakes")
+.where("name",">=",name)
+.where("name","<=",name+"\uf8ff")
+.get();
+
+let results="";
+
+snap.forEach(doc=>{
+
+results+=doc.id+" - "+doc.data().name+"\n";
+
+});
+
+if(results==""){
+
+alert("No Clients Found");
+
+return;
+
+}
+
+alert(results);
+
+}
 <button type="button" onclick="window.print()">🖨 Save / Print</button>
 
 </div>
