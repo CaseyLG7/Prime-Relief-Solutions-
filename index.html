@@ -733,7 +733,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+//========================
+// Intake Variables
+//========================
 
+let currentIntakeID="";
 let currentUser="";
 let allData=[];
 let existingCases=new Set();
@@ -922,7 +926,49 @@ function render(rows){
 
   tbody.innerHTML=html;
 }
+//======================================
+// SAVE INTAKE
+//======================================
 
+async function saveIntake(){
+
+try{
+
+const data={
+
+date:document.querySelector('input[type="date"]').value,
+
+name:document.querySelectorAll("input")[1].value,
+
+phone:document.querySelectorAll("input")[3].value,
+
+email:document.querySelectorAll("input")[5].value,
+
+staff:document.getElementById("staffMember").value,
+
+savedBy:currentUser,
+
+savedOn:new Date()
+
+};
+
+let id=currentIntakeID || Date.now().toString();
+
+await db.collection("intakes").doc(id).set(data);
+
+currentIntakeID=id;
+
+alert("✅ Intake Saved Successfully");
+
+}
+
+catch(err){
+
+alert(err.message);
+
+}
+
+}
 </script>
 </body>
 </html>
