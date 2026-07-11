@@ -219,7 +219,7 @@ COMMON CLIENT QUESTIONS
   A: We can explain the document preparation process and court procedures, but we cannot provide legal advice or recommend legal strategies.
 </div>`;}
 if(type==="intake"){ content=`
-<div style="font-family:Arial;font-size:15px;max-width:900px;margin:auto;">
+<form id="intakeForm" style="font-family:Arial;font-size:15px;max-width:900px;margin:auto;">
 
 <h2 style="text-align:center;color:#BFA13A;">Prime Relief Solutions</h2>
 
@@ -242,10 +242,10 @@ if(type==="intake"){ content=`
 <input id="phone" style="width:250px;"><br><br>
 
 <b>Alternate Phone:</b><br>
-<input id="alternatePhone" style="width:250px;"><br><br>
+<input id="altPhone" style="width:250px;"><br><br>
 
 <b>Email Address:</b><br>
-<input id="clientEmail" style="width:350px;"><br><br>
+<input id="email" style="width:350px;"><br><br>
 
 <hr>
 
@@ -255,7 +255,7 @@ if(type==="intake"){ content=`
 <textarea id="propertyAddress" style="width:70%;height:45px;"></textarea><br><br>
 
 <b>Apartment #:</b><br>
-<input id="apartment" style="width:120px;"><br><br>
+<input id="aptNumber" style="width:120px;"><br><br>
 
 <b>City:</b><br>
 <input id="city" style="width:220px;">
@@ -308,11 +308,11 @@ if(type==="intake"){ content=`
 
 <b>Judgment Date:</b><br>
 
-<input id="judgmentDate" type="date" style="width:220px;"><br><br>
+<input id="judgmentDate" type="date"><br><br>
 
 <b>Upcoming Court Date:</b><br>
 
-<input id="courtDate" type="date" style="width:220px;"><br><br>
+<input id="courtDate" type="date"><br><br>
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">APPEAL INFORMATION</h3>
 
@@ -328,30 +328,30 @@ if(type==="intake"){ content=`
 
 <b>Has the client already filed a Notice of Appeal?</b><br>
 
-<label><input id="noticeYes" type="radio" name="noticeAppeal"> Yes</label>
+<label><input id="noticeYes" type="checkbox"> name="noticeAppeal"> Yes</label>
 
 <label style="margin-left:20px;">
-<input id="noticeNo" type="radio" name="noticeAppeal"> No
+<input id="noticeNo" type="checkbox"> name="noticeAppeal"> No
 </label>
 
 <br><br>
 
 <b>Has a Writ of Possession been issued?</b><br>
 
-<label><input id="writYes" type="radio" name="writ"> Yes</label>
+<label><input id="writYes" type="checkbox"> name="writ"> Yes</label>
 
 <label style="margin-left:20px;">
-<input id="writNo" type="radio" name="writ"> No
+<input id="writNo" type="checkbox"> name="writ"> No
 </label>
 
 <br><br>
 
 <b>Has the Constable posted a Notice to Vacate?</b><br>
 
-<label><input id="vacateYes" type="radio" name="vacate"> Yes</label>
+<label><input id="writNo" type="checkbox"> name="vacate"> Yes</label>
 
 <label style="margin-left:20px;">
-<input id="vacateNo" type="radio" name="vacate"> No
+<input id="constableNo" type="checkbox"> name="vacate"> No
 </label>
 
 <br><br>
@@ -460,7 +460,7 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 
 </div>
 
-</div>`;
+</form>`;
 }
 if(type==="appeal"){ content=`<div style="${style}">
 
@@ -1043,6 +1043,85 @@ return;
 }
 
 alert(results);
+
+}
+// ===============================
+// SAVE / OPEN INTAKE BY CASE NUMBER
+// ===============================
+
+function saveIntake(){
+
+    let caseNumber=document.getElementById("caseNumber").value.trim();
+
+    if(caseNumber===""){
+        alert("Enter the Case Number first.");
+        return;
+    }
+
+    let fields=document.querySelectorAll("#intakeForm input,#intakeForm textarea,#intakeForm select");
+
+    let data={};
+
+    fields.forEach(f=>{
+
+        if(!f.id) return;
+
+        if(f.type==="checkbox"){
+
+            data[f.id]=f.checked;
+
+        }else{
+
+            data[f.id]=f.value;
+
+        }
+
+    });
+
+    localStorage.setItem("Intake_"+caseNumber,JSON.stringify(data));
+
+    alert("Intake Saved!");
+}
+
+
+
+function loadIntake(){
+
+    let caseNumber=prompt("Enter Case Number");
+
+    if(!caseNumber) return;
+
+    let saved=localStorage.getItem("Intake_"+caseNumber);
+
+    if(saved==null){
+
+        alert("No Intake Found.");
+
+        return;
+
+    }
+
+    saved=JSON.parse(saved);
+
+    Object.keys(saved).forEach(function(key){
+
+        let field=document.getElementById(key);
+
+        if(!field) return;
+
+        if(field.type==="checkbox"){
+
+            field.checked=saved[key];
+
+        }else{
+
+            field.value=saved[key];
+
+        }
+
+    });
+
+    alert("Intake Loaded!");
 
 }
 </script>
