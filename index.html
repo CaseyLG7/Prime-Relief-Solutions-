@@ -967,6 +967,7 @@ await db.collection("intakes").doc(id).set(data);
 currentIntakeID=id;
 
 alert("✅ Intake Saved Successfully");
+startAutoSave();
 
 }
 
@@ -1009,6 +1010,7 @@ document.querySelectorAll("input")[5].value=d.email||"";
 document.getElementById("staffMember").value=d.staff||"";
 
 alert("Intake Loaded");
+startAutoSave();
 
 }
 //======================================
@@ -1043,6 +1045,27 @@ return;
 }
 
 alert(results);
+
+}
+//======================================
+// AUTO SAVE
+//======================================
+
+let autoSave;
+
+function startAutoSave(){
+
+clearInterval(autoSave);
+
+autoSave=setInterval(()=>{
+
+if(currentIntakeID!=""){
+
+saveIntake();
+
+}
+
+},30000);
 
 }
 </script>
