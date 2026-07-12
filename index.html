@@ -1012,41 +1012,42 @@ function render(rows){
 
 async function saveIntake(){
 
-try{
+const caseNumber=document.getElementById("caseNumber").value.trim();
 
-const data={
+if(!caseNumber){
 
-date:document.querySelector('input[type="date"]').value,
+alert("Enter a Case Number first.");
 
-name:document.querySelectorAll("input")[1].value,
-
-phone:document.querySelectorAll("input")[3].value,
-
-email:document.querySelectorAll("input")[5].value,
-
-staff:document.getElementById("staffMember").value,
-
-savedBy:currentUser,
-
-savedOn:new Date()
-
-};
-
-let id=currentIntakeID;
-
-if(!id){
-
-id=Date.now().toString();
-
-currentIntakeID=id;
+return;
 
 }
 
-await db.collection("intakes").doc(id).set(data);
+let intake={};
 
-currentIntakeID=id;
+document.querySelectorAll("input, textarea").forEach(el=>{
 
-alert("✅ Intake Saved Successfully");
+if(el.type==="checkbox"){
+
+intake[el.id]=el.checked;
+
+}else{
+
+intake[el.id]=el.value;
+
+}
+
+});
+
+intake.updatedBy=window.opener.currentUser;
+
+intake.updatedOn=new Date().toLocaleString();
+
+await window.opener.db
+.collection("intakes")
+.doc(caseNumber)
+.set(intake);
+
+alert("Intake saved successfully.");
 
 }
 
@@ -1063,32 +1064,49 @@ alert(err.message);
 
 async function loadIntake(){
 
-let id=prompt("Enter Intake ID");
+const caseNumber=prompt("Enter Case Number");
 
-if(!id) return;
+if(!caseNumber) return;
 
-let doc=await db.collection("intakes").doc(id).get();
+const doc=await window.opener.db
+.collection("intakes")
+.doc(caseNumber)
+.get();
 
 if(!doc.exists){
-alert("Intake Not Found");
+
+alert("No intake found.");
+
 return;
+
 }
 
-let d=doc.data();
+const data=doc.data();
 
-currentIntakeID=id;
+document.querySelectorAll("input, textarea").forEach(el=>{
 
-document.querySelector('input[type="date"]').value=d.date||"";
+if(data[el.id]!==undefined){
 
-document.querySelectorAll("input")[1].value=d.name||"";
+if(el.type==="checkbox"){
 
-document.querySelectorAll("input")[3].value=d.phone||"";
+el.checked=data[el.id];
 
-document.querySelectorAll("input")[5].value=d.email||"";
+}else{
 
-document.getElementById("staffMember").value=d.staff||"";
+el.value=data[el.id];
 
-alert("Intake Loaded");
+}
+
+}
+
+});
+
+alert(
+"Loaded\n\nLast Updated By: "+
+data.updatedBy+
+"\n\n"+
+data.updatedOn
+);
 
 }
 //======================================
