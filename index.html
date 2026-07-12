@@ -348,7 +348,7 @@ if(type==="intake"){ content=`
 
 <b>Has the Constable posted a Notice to Vacate?</b><br>
 
-<label><input id="writNo" type="checkbox"> name="vacate"> Yes</label>
+<label><input id="constableYes" type="checkbox"> Yes</label>
 
 <label style="margin-left:20px;">
 <input id="constableNo" type="checkbox"> name="vacate"> No
@@ -713,6 +713,86 @@ Save / Print
 </button>
 
 </center>
+
+<script>
+
+function saveIntake(){
+
+    let data={};
+
+    document.querySelectorAll("input,textarea").forEach(function(el){
+
+        if(!el.id) return;
+
+        if(el.type==="checkbox"){
+
+            data[el.id]=el.checked;
+
+        }else{
+
+            data[el.id]=el.value;
+
+        }
+
+    });
+
+    if(!data.caseNumber){
+
+        alert("Enter the Case Number first.");
+
+        return;
+
+    }
+
+    localStorage.setItem("Intake_"+data.caseNumber,JSON.stringify(data));
+
+    alert("Intake Saved.");
+
+}
+
+
+
+function loadIntake(){
+
+    let caseNumber=prompt("Enter Case Number");
+
+    if(!caseNumber) return;
+
+    let saved=localStorage.getItem("Intake_"+caseNumber);
+
+    if(saved==null){
+
+        alert("No Intake Found.");
+
+        return;
+
+    }
+
+    saved=JSON.parse(saved);
+
+    Object.keys(saved).forEach(function(key){
+
+        let el=document.getElementById(key);
+
+        if(!el) return;
+
+        if(el.type==="checkbox"){
+
+            el.checked=saved[key];
+
+        }else{
+
+            el.value=saved[key];
+
+        }
+
+    });
+
+    alert("Intake Loaded.");
+
+}
+
+</script>
 
 </body>
 
