@@ -351,7 +351,7 @@ if(type==="intake"){ content=`
 <label><input id="vacateYes" type="radio" name="vacate"> Yes</label>
 
 <label style="margin-left:20px;">
-<input id="constableYes" type="checkbox"> No
+<input id="vacateNo" type="radio" name="vacate"> No
 </label>
 
 <br><br>
@@ -455,6 +455,8 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 <button type="button" onclick="saveIntake()">💾 Save Intake</button>
 
 <button type="button" onclick="loadIntake()">📂 Open Saved Intake</button>
+
+<button type="button" onclick="searchIntakes()">🔍 Find Client</button>
 
 <button type="button" onclick="window.print()">🖨 Save / Print</button>
 
@@ -1007,89 +1009,103 @@ function render(rows){
   tbody.innerHTML=html;
 }
 //======================================
-// SAVE INTAKE
+// SAVE ENTIRE INTAKE TO FIREBASE
 //======================================
 
 async function saveIntake(){
 
 try{
 
-const data={
+const data={};
 
-date:document.querySelector('input[type="date"]').value,
+document.querySelectorAll("input, textarea").forEach(el=>{
 
-name:document.querySelectorAll("input")[1].value,
+    if(!el.id) return;
 
-phone:document.querySelectorAll("input")[3].value,
+    if(el.type==="checkbox" || el.type==="radio"){
 
-email:document.querySelectorAll("input")[5].value,
+        data[el.id]=el.checked;
 
-staff:document.getElementById("staffMember").value,
+    }else{
 
-savedBy:currentUser,
+        data[el.id]=el.value;
 
-savedOn:new Date()
+    }
 
-};
+});
 
-let id=currentIntakeID;
+if(!data.caseNumber){
 
-if(!id){
+    alert("Enter the Case Number first.");
 
-id=Date.now().toString();
-
-currentIntakeID=id;
+    return;
 
 }
 
-await db.collection("intakes").doc(id).set(data);
+data.savedBy=currentUser;
+data.savedOn=firebase.firestore.FieldValue.serverTimestamp();
 
-currentIntakeID=id;
+await db.collection("intakes").doc(data.caseNumber).set(data);
 
-alert("✅ Intake Saved Successfully");
+alert("✅ Intake Saved");
 
-}
-
-catch(err){
+}catch(err){
 
 alert(err.message);
 
 }
-
 }
+
+
 //======================================
-// LOAD INTAKE
+// LOAD ENTIRE INTAKE
 //======================================
 
 async function loadIntake(){
 
-let id=prompt("Enter Intake ID");
+try{
 
-if(!id) return;
+let caseNumber=prompt("Enter Case Number");
 
-let doc=await db.collection("intakes").doc(id).get();
+if(!caseNumber) return;
+
+const doc=await db.collection("intakes").doc(caseNumber).get();
 
 if(!doc.exists){
-alert("Intake Not Found");
-return;
+
+    alert("No Intake Found");
+
+    return;
+
 }
 
-let d=doc.data();
+const data=doc.data();
 
-currentIntakeID=id;
+Object.keys(data).forEach(key=>{
 
-document.querySelector('input[type="date"]').value=d.date||"";
+    const el=document.getElementById(key);
 
-document.querySelectorAll("input")[1].value=d.name||"";
+    if(!el) return;
 
-document.querySelectorAll("input")[3].value=d.phone||"";
+    if(el.type==="checkbox" || el.type==="radio"){
 
-document.querySelectorAll("input")[5].value=d.email||"";
+        el.checked=data[key];
 
-document.getElementById("staffMember").value=d.staff||"";
+    }else{
 
-alert("Intake Loaded");
+        el.value=data[key];
 
+    }
+
+});
+
+alert("✅ Intake Loaded");
+
+}catch(err){
+
+alert(err.message);
+
+}
 }
 //======================================
 // SEARCH SAVED CLIENTS
@@ -1097,33 +1113,40 @@ alert("Intake Loaded");
 
 async function searchIntakes(){
 
-let name=prompt("Client Name");
+try{
+
+let name=prompt("Enter Client Name");
 
 if(!name) return;
 
-let snap=await db.collection("intakes")
-.where("name",">=",name)
-.where("name","<=",name+"\uf8ff")
+const snap=await db.collection("intakes")
+.where("clientName",">=",name)
+.where("clientName","<=",name+"\uf8ff")
 .get();
 
-let results="";
+if(snap.empty){
 
-snap.forEach(doc=>{
+    alert("No Clients Found");
 
-results+=doc.id+" - "+doc.data().name+"\n";
-
-});
-
-if(results==""){
-
-alert("No Clients Found");
-
-return;
+    return;
 
 }
 
-alert(results);
+let list="";
 
+snap.forEach(doc=>{
+
+    list+=doc.id+" - "+doc.data().clientName+"\n";
+
+});
+
+alert(list);
+
+}catch(err){
+
+alert(err.message);
+
+}
 }
 </script>
 </body>
