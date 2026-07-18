@@ -738,6 +738,10 @@ firebase.initializeApp(firebaseConfig);
 
 const db=firebase.firestore();
   
+console.log("Firebase Loaded:", firebase.apps.length);
+
+console.log("Firestore:", db);
+  
 async function saveIntake(){
 
 try{
