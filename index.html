@@ -671,6 +671,7 @@ w.document.write(`
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"><\/script>
 
 <style>
 body{
@@ -717,7 +718,7 @@ alert("Reached Firebase");
   measurementId:"G-G4CLMSC19F"
 };
 
-if(firebase.apps.length===0){
+if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
