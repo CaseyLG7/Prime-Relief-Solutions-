@@ -669,38 +669,29 @@ w.document.write(`
 <head>
 <title>Prime Relief Solutions - Intake Form</title>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script> 
-  
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"><\/script>
+
 <style>
 body{
-    font-family:Arial;
-    padding:25px;
-    background:white;
-    color:#000;
+font-family:Arial;
+padding:25px;
+background:white;
+color:#000;
 }
-
-input,
-textarea{
-    border:1px solid #999;
-    padding:5px;
-    font-size:14px;
+input,textarea{
+border:1px solid #999;
+padding:5px;
+font-size:14px;
 }
-
 button{
-    padding:10px 20px;
-    margin:10px 5px;
-    cursor:pointer;
-    font-size:15px;
-    border:none;
-    border-radius:6px;
-    background:#BFA13A;
-    color:white;
-}
-
-button:hover{
-    opacity:.9;
+padding:10px 20px;
+margin:10px 5px;
+cursor:pointer;
+border:none;
+border-radius:6px;
+background:#BFA13A;
+color:white;
 }
 </style>
 
@@ -710,162 +701,29 @@ button:hover{
 
 ${content}
 
-<br><br>
-
-
 <script>
 
-//=========================
-// FIREBASE FOR POPUP
-//=========================
-
 const firebaseConfig={
-
-apiKey:"AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
-
-authDomain:"prsolutions-lead-management.firebaseapp.com",
-
-projectId:"prsolutions-lead-management",
-
-storageBucket:"prsolutions-lead-management.firebasestorage.app",
-
-messagingSenderId:"354105448091",
-
-appId:"1:354105448091:web:faca5ab067608a7fbb983e",
+apiKey:"YOUR_API_KEY",
+authDomain:"YOUR_AUTH_DOMAIN",
+projectId:"YOUR_PROJECT_ID",
+storageBucket:"YOUR_STORAGE_BUCKET",
+messagingSenderId:"YOUR_SENDER_ID",
+appId:"YOUR_APP_ID"
 };
 
+if(firebase.apps.length===0){
 firebase.initializeApp(firebaseConfig);
+}
 
 const db=firebase.firestore();
-  
-console.log("Firebase Loaded:", firebase.apps.length);
 
-console.log("Firestore:", db);
-  
-async function saveIntake(){
+async function saveIntake(){}
 
-try{
+async function loadIntake(){}
 
-let data={};
+async function searchIntakes(){}
 
-document.querySelectorAll("input,textarea").forEach(el=>{
-
-if(!el.id) return;
-
-if(el.type==="checkbox" || el.type==="radio"){
-
-data[el.id]=el.checked;
-
-}else{
-
-data[el.id]=el.value;
-
-}
-
-});
-
-if(!data.caseNumber){
-
-alert("Enter Case Number.");
-
-return;
-
-}
-
-data.updated=new Date().toISOString();
-
-await db.collection("intakes").doc(data.caseNumber).set(data);
-
-alert("✅ Intake Saved To Cloud");
-
-}catch(err){
-
-alert(err.message);
-
-}
-
-}  
-  
-async function loadIntake(){
-
-try{
-
-let caseNumber=prompt("Enter Case Number");
-
-if(!caseNumber) return;
-
-const doc=await db.collection("intakes").doc(caseNumber).get();
-
-if(!doc.exists){
-
-alert("No Intake Found");
-
-return;
-
-}
-
-const data=doc.data();
-
-Object.keys(data).forEach(key=>{
-
-const el=document.getElementById(key);
-
-if(!el) return;
-
-if(el.type==="checkbox" || el.type==="radio"){
-
-el.checked=data[key];
-
-}else{
-
-el.value=data[key];
-
-}
-
-});
-
-alert("✅ Intake Loaded");
-
-}catch(err){
-
-alert(err.message);
-
-}
-
-}
-  
-async function searchIntakes(){
-
-let name=prompt("Client Name");
-
-if(!name) return;
-
-const snap=await db.collection("intakes")
-.orderBy("clientName")
-.startAt(name)
-.endAt(name+"\uf8ff")
-.get();
-
-if(snap.empty){
-
-alert("No Clients Found");
-
-return;
-
-}
-
-let results="";
-
-snap.forEach(doc=>{
-
-results+=doc.id+" - "+doc.data().clientName+"\n";
-
-});
-
-alert(results);
-
-}
-  
 <\/script>
 
 </body>
