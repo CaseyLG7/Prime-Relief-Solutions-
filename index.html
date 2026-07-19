@@ -703,22 +703,21 @@ ${content}
 
 <script>
 
-  apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
-  authDomain: "prsolutions-lead-management.firebaseapp.com",
-  projectId: "prsolutions-lead-management",
-  storageBucket: "prsolutions-lead-management.firebasestorage.app",
-  messagingSenderId: "354105448091",
-  appId: "1:354105448091:web:faca5ab067608a7fbb983e",
-  measurementId: "G-G4CLMSC19F"
-}
+ const firebaseConfig = {
+  apiKey:"YOUR_API_KEY",
+  authDomain:"prsolutions-lead-management.firebaseapp.com",
+  projectId:"prsolutions-lead-management",
+  storageBucket:"prsolutions-lead-management.firebasestorage.app",
+  messagingSenderId:"354105448091",
+  appId:"1:354105448091:web:faca5ab067608a7fbb983e",
+  measurementId:"G-G4CLMSC19F"
+};
 
 if(firebase.apps.length===0){
-firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
 }
 
 const db=firebase.firestore();
-
-alert("Popup script loaded");
 
 async function saveIntake(){
 
