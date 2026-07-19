@@ -718,12 +718,134 @@ firebase.initializeApp(firebaseConfig);
 
 const db=firebase.firestore();
 
-async function saveIntake(){}
+async function saveIntake(){
 
-async function loadIntake(){}
+    try{
 
-async function searchIntakes(){}
+        let data={};
 
+        document.querySelectorAll("input, textarea").forEach(el=>{
+
+            if(!el.id) return;
+
+            if(el.type==="checkbox" || el.type==="radio"){
+                data[el.id]=el.checked;
+            }else{
+                data[el.id]=el.value;
+            }
+
+        });
+
+        if(!data.caseNumber){
+            alert("Enter the Case Number first.");
+            return;
+        }
+
+        data.updated=new Date().toISOString();
+
+        await db.collection("intakes").doc(data.caseNumber).set(data);
+
+        alert("✅ Intake Saved");
+
+    }catch(err){
+
+        alert(err.message);
+
+    }
+
+}
+
+async function loadIntake(){
+
+    try{
+
+        let caseNumber=prompt("Enter Case Number");
+
+        if(!caseNumber) return;
+
+        const doc=await db.collection("intakes").doc(caseNumber).get();
+
+        if(!doc.exists){
+
+            alert("No Intake Found");
+
+            return;
+
+        }
+
+        const data=doc.data();
+
+        Object.keys(data).forEach(key=>{
+
+            const el=document.getElementById(key);
+
+            if(!el) return;
+
+            if(el.type==="checkbox" || el.type==="radio"){
+                el.checked=data[key];
+            }else{
+                el.value=data[key];
+            }
+
+        });
+
+        alert("✅ Intake Loaded");
+
+    }catch(err){
+
+        alert(err.message);
+
+    }
+
+}
+
+async function searchIntakes(){
+
+    try{
+
+        let name=prompt("Enter Client Name");
+
+        if(!name) return;
+
+        const snap=await db.collection("intakes").get();
+
+        if(snap.empty){
+
+            alert("No Clients Found");
+
+            return;
+
+        }
+
+        let results="";
+
+        snap.forEach(doc=>{
+
+            const d=doc.data();
+
+            if(
+                d.clientName &&
+                d.clientName.toLowerCase().includes(name.toLowerCase())
+            ){
+                results += doc.id + " - " + d.clientName + "\n";
+            }
+
+        });
+
+        if(results===""){
+            alert("No Clients Found");
+            return;
+        }
+
+        alert(results);
+
+    }catch(err){
+
+        alert(err.message);
+
+    }
+
+}
 <\/script>
 
 </body>
