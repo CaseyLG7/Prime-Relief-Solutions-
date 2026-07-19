@@ -736,7 +736,7 @@ async function saveIntake(){
                 data[el.id]=el.value;
             }
 
-        });
+        }
 
         if(!data.caseNumber){
             alert("Enter the Case Number first.");
@@ -789,7 +789,7 @@ async function loadIntake(){
                 el.value=data[key];
             }
 
-        });
+        }
 
         alert("✅ Intake Loaded");
 
@@ -832,7 +832,7 @@ async function searchIntakes(){
                 results += doc.id + " - " + d.clientName + "\n";
             }
 
-        });
+        }
 
         if(results===""){
             alert("No Clients Found");
