@@ -718,11 +718,21 @@ alert("Reached Firebase");
   measurementId:"G-G4CLMSC19F"
 };
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+try {
 
-const db = firebase.firestore();
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    const db = firebase.firestore();
+
+    alert("Firebase initialized successfully");
+
+} catch (err) {
+
+    alert("Firebase Init Error:\n" + err.message);
+
+}
 
 async function saveIntake(){
 
@@ -871,7 +881,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 const auth = firebase.auth();
 //========================
 // Intake Variables
