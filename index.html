@@ -661,7 +661,6 @@ Email: help@prsolution.org
 </p>
 </div>`;}
   
-alert("2");
 let w = window.open("", "_blank");
 
 w.document.open();
@@ -706,10 +705,6 @@ ${content}
 
 <script>
 
-alert("Popup JS Started");
-alert(typeof firebase);
-alert("Reached Firebase");
-
  const firebaseConfig = {
   apiKey:"AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
   authDomain:"prsolutions-lead-management.firebaseapp.com",
@@ -725,8 +720,7 @@ try {
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-
-    const db = firebase.firestore();
+const db = firebase.firestore();
 window.saveIntake = saveIntake;
 window.loadIntake = loadIntake;
 window.searchIntakes = searchIntakes;
