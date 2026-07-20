@@ -725,7 +725,11 @@ try {
     }
 
     const db = firebase.firestore();
+window.saveIntake = saveIntake;
+window.loadIntake = loadIntake;
+window.searchIntakes = searchIntakes;
 
+alert("Functions Registered");
     alert("Firebase initialized successfully");
 
 } catch (err) {
@@ -882,11 +886,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-window.saveIntake = saveIntake;
-window.loadIntake = loadIntake;
-window.searchIntakes = searchIntakes;
-
-alert("Functions Registered");
 const auth = firebase.auth();
 //========================
 // Intake Variables
