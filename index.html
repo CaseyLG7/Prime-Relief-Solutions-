@@ -720,9 +720,6 @@ try {
         firebase.initializeApp(firebaseConfig);
     }
 const db = firebase.firestore();
-window.saveIntake = saveIntake;
-window.loadIntake = loadIntake;
-window.searchIntakes = searchIntakes;
 
 alert("Functions Registered");
     alert("Firebase initialized successfully");
@@ -846,7 +843,10 @@ async function searchIntakes(){
             }
 
         }
-
+   window.saveIntake = saveIntake;
+   window.loadIntake = loadIntake;
+   window.searchIntakes = searchIntakes;
+   
         if(results===""){
             alert("No Clients Found");
             return;
