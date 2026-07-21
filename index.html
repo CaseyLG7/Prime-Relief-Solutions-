@@ -996,51 +996,41 @@ alert(err.message);
 // LOAD ENTIRE INTAKE
 //======================================
 
-async function loadIntake(doc){
+async function loadIntake(formDoc){
 
-try{
+    try{
 
-let caseNumber=prompt("Enter Case Number");
+        let caseNumber = prompt("Enter Case Number");
+        if(!caseNumber) return;
 
-if(!caseNumber) return;
+        const snap = await db.collection("intakes").doc(caseNumber).get();
 
-const doc=await db.collection("intakes").doc(caseNumber).get();
+        if(!snap.exists){
+            alert("No Intake Found");
+            return;
+        }
 
-if(!doc.exists){
+        const data = snap.data();
 
-    alert("No Intake Found");
+        Object.keys(data).forEach(key=>{
 
-    return;
+            const el = formDoc.getElementById(key);
 
-}
+            if(!el) return;
 
-const data=doc.data();
+            if(el.type==="checkbox" || el.type==="radio"){
+                el.checked = data[key];
+            }else{
+                el.value = data[key];
+            }
 
-Object.keys(data).forEach(key=>{
+        });
 
-    const el=doc.getElementById(key);
+        alert("✅ Intake Loaded");
 
-    if(!el) return;
-
-    if(el.type==="checkbox" || el.type==="radio"){
-
-        el.checked=data[key];
-
-    }else{
-
-        el.value=data[key];
-
+    }catch(err){
+        alert(err.message);
     }
-
-});
-
-alert("✅ Intake Loaded");
-
-}catch(err){
-
-alert(err.message);
-
-}
 }
 //======================================
 // SEARCH SAVED CLIENTS
