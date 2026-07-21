@@ -745,10 +745,7 @@ alert("Functions Registered");
 async function saveIntake(){
 
     try{
-       if(!firebase.auth().currentUser){
-alert("Waiting for Firebase Login...");
-return;
-}
+      
         let data={};
 
         document.querySelectorAll("input, textarea").forEach(el=>{
@@ -858,10 +855,7 @@ caseNumber=caseNumber.trim();
 async function searchIntakes(){
 
     try{
-       if(!firebase.auth().currentUser){
-alert("Waiting for Firebase Login...");
-return;
-}
+    
         let name=prompt("Enter Client Name");
 
         if(!name) return;
