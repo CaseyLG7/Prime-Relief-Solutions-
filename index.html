@@ -719,82 +719,18 @@ Save / Print
 <script>
 
 function saveIntake(){
-
-    let data={};
-
-    document.querySelectorAll("input,textarea").forEach(function(el){
-
-        if(!el.id) return;
-
-        if(el.type==="checkbox"){
-
-            data[el.id]=el.checked;
-
-        }else{
-
-            data[el.id]=el.value;
-
-        }
-
-    });
-
-    if(!data.caseNumber){
-
-        alert("Enter the Case Number first.");
-
-        return;
-
-    }
-
-    localStorage.setItem("Intake_"+data.caseNumber,JSON.stringify(data));
-
-    alert("Intake Saved.");
-
+    window.opener.saveIntake();
 }
-
-
 
 function loadIntake(){
-
-    let caseNumber=prompt("Enter Case Number");
-
-    if(!caseNumber) return;
-
-    let saved=localStorage.getItem("Intake_"+caseNumber);
-
-    if(saved==null){
-
-        alert("No Intake Found.");
-
-        return;
-
-    }
-
-    saved=JSON.parse(saved);
-
-    Object.keys(saved).forEach(function(key){
-
-        let el=document.getElementById(key);
-
-        if(!el) return;
-
-        if(el.type==="checkbox"){
-
-            el.checked=saved[key];
-
-        }else{
-
-            el.value=saved[key];
-
-        }
-
-    });
-
-    alert("Intake Loaded.");
-
+    window.opener.loadIntake();
 }
 
-<\/script>
+function searchIntakes(){
+    window.opener.searchIntakes();
+}
+
+</script>
 
 </body>
 
