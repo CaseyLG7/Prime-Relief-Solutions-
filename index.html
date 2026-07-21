@@ -778,8 +778,6 @@ if(!data.caseNumber){
             return;
         }
 
-        data.updated=new Date().toISOString();
-
        data.updatedBy = firebase.auth().currentUser
     ? firebase.auth().currentUser.email
     : "Unknown";
