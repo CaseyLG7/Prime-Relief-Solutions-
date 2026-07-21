@@ -863,10 +863,7 @@ async function searchIntakes(){
 
         if(!name) return;
 
-       const snap = await db.collection("intakes")
-       .where("clientName",">=",name)
-       .where("clientName","<=",name+"\uf8ff")
-       .get();
+       const snap = await db.collection("intakes").get();
 
         if(snap.empty){
 
