@@ -718,12 +718,16 @@ try{
 
 if(firebase.apps.length===0){
 
-firebase.initializeApp(firebaseConfig);
+const app =
+firebase.apps.length
+? firebase.app()
+: firebase.initializeApp(firebaseConfig);
+
+const db=app.firestore();
 
 }
 
 const db=firebase.firestore();
-await firebase.auth().authStateReady?.();
 
 firebase.auth().onAuthStateChanged(user=>{
 
@@ -795,10 +799,21 @@ await db.collection("intakes")
 async function loadIntake(){
 
     try{
-       if(!firebase.auth().currentUser){
-alert("Waiting for Firebase Login...");
-return;
-}
+    const auth = firebase.auth();
+
+auth.onAuthStateChanged(function(user){
+
+    if(user){
+
+        console.log("Logged in:",user.email);
+
+    }else{
+
+        console.log("Not logged in");
+
+    }
+
+});
        let caseNumber=prompt("Enter Case Number");
 
 if(!caseNumber)return;
@@ -887,9 +902,6 @@ return;
             }
 
         }
-   window.saveIntake = saveIntake;
-   window.loadIntake = loadIntake;
-   window.searchIntakes = searchIntakes;
    
         if(results===""){
             alert("No Clients Found");
@@ -925,7 +937,9 @@ el.value=data[key];
 }
 
 });
-
+   window.saveIntake = saveIntake;
+   window.loadIntake = loadIntake;
+   window.searchIntakes = searchIntakes;
 }
 
     }catch(err){
@@ -944,7 +958,6 @@ el.value=data[key];
 
 w.document.close();
 
-return;
 }
 
 const firebaseConfig = {
@@ -953,7 +966,12 @@ const firebaseConfig = {
   projectId: "prsolutions-lead-management"
 };
 
-firebase.initializeApp(firebaseConfig);
+const app =
+firebase.apps.length
+? firebase.app()
+: firebase.initializeApp(firebaseConfig);
+
+const db=app.firestore();
 const db = firebase.firestore();
 const auth = firebase.auth();
 //========================
