@@ -721,17 +721,20 @@ ${content}
 try{
 
 if(firebase.apps.length===0){
-
-const app =
-firebase.apps.length
-? firebase.app()
-: firebase.initializeApp(firebaseConfig);
-
-const db=app.firestore();
-
+    firebase.initializeApp(firebaseConfig);
 }
 
-const db=firebase.firestore();
+const db = firebase.firestore();
+
+try{
+
+    alert("Firebase initialized successfully");
+
+}catch(err){
+
+    alert(err.message);
+
+}
 
 alert("Functions Registered");
     alert("Firebase initialized successfully");
