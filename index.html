@@ -719,17 +719,16 @@ Save / Print
 <script>
 
 function saveIntake(){
-    window.opener.saveIntake();
+    window.opener.saveIntake(document);
 }
 
 function loadIntake(){
-    window.opener.loadIntake();
+    window.opener.loadIntake(document);
 }
 
 function searchIntakes(){
     window.opener.searchIntakes();
 }
-
 <\/script>
 
 </body>
