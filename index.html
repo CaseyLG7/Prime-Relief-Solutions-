@@ -772,6 +772,9 @@ return;
         }
 
        data.caseNumber=data.caseNumber.trim();
+       
+data.updated =
+firebase.firestore.FieldValue.serverTimestamp();
 
 if(!data.caseNumber){
             alert("Enter the Case Number first.");
@@ -781,8 +784,6 @@ if(!data.caseNumber){
        data.updatedBy = firebase.auth().currentUser
     ? firebase.auth().currentUser.email
     : "Unknown";
-
-data.updated = firebase.firestore.FieldValue.serverTimestamp();
 
 await db.collection("intakes")
     .doc(data.caseNumber)
