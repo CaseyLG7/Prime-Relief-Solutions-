@@ -948,14 +948,13 @@ function render(rows){
 // SAVE ENTIRE INTAKE TO FIREBASE
 //======================================
 
-async function saveIntake(){
+async function saveIntake(doc){
 
 try{
 
 const data={};
 
-document.querySelectorAll("input, textarea").forEach(el=>{
-
+doc.querySelectorAll("input, textarea").forEach(el=>{
     if(!el.id) return;
 
     if(el.type==="checkbox" || el.type==="radio"){
@@ -997,7 +996,7 @@ alert(err.message);
 // LOAD ENTIRE INTAKE
 //======================================
 
-async function loadIntake(){
+async function loadIntake(doc){
 
 try{
 
@@ -1019,7 +1018,7 @@ const data=doc.data();
 
 Object.keys(data).forEach(key=>{
 
-    const el=document.getElementById(key);
+    const el=doc.getElementById(key);
 
     if(!el) return;
 
