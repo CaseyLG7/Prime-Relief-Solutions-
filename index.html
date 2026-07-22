@@ -718,8 +718,16 @@ Save / Print
 
 <script>
 
-function saveIntake(){
-    window.opener.saveIntake(document);
+async function saveIntake(){
+
+    const ok = await window.opener.saveIntake(document);
+
+    if(ok){
+        alert("✅ Intake Saved");
+    }else{
+        alert("Save Failed");
+    }
+
 }
 
 async function loadIntake(){
