@@ -969,45 +969,39 @@ async function saveIntake(doc){
 
 try{
 
-const data={};
+    const data = {};
 
-doc.querySelectorAll("input, textarea").forEach(el=>{
-    if(!el.id) return;
+    doc.querySelectorAll("input, textarea").forEach(el=>{
 
-    if(el.type==="checkbox" || el.type==="radio"){
+        if(!el.id) return;
 
-        data[el.id]=el.checked;
+        if(el.type==="checkbox" || el.type==="radio"){
+            data[el.id] = el.checked;
+        }else{
+            data[el.id] = el.value;
+        }
 
-    }else{
+    });
 
-        data[el.id]=el.value;
-
+    if(!data.caseNumber){
+        return false;
     }
 
-});
+    data.savedBy = currentUser;
+    data.savedOn = firebase.firestore.FieldValue.serverTimestamp();
 
-if(!data.caseNumber){
+    await db.collection("intakes").doc(data.caseNumber).set(data);
 
-    alert("Enter the Case Number first.");
-
-    return;
-
-}
-
-data.savedBy=currentUser;
-data.savedOn=firebase.firestore.FieldValue.serverTimestamp();
-
-await db.collection("intakes").doc(data.caseNumber).set(data);
-
-alert("✅ Intake Saved");
+    return true;
 
 }catch(err){
 
-alert(err.message);
+    console.error(err);
+    return false;
 
 }
-}
 
+}
 
 //======================================
 // LOAD ENTIRE INTAKE
