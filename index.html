@@ -996,23 +996,15 @@ alert(err.message);
 //======================================
 // LOAD ENTIRE INTAKE
 //======================================
-alert("loadIntake started");
-async function loadIntake(formDoc){
+async function loadIntake(formDoc, caseNumber){
 
 try{
-
-    let caseNumber = prompt("Enter Case Number");
-
-    if(!caseNumber) return;
 
     const intakeDoc = await db.collection("intakes").doc(caseNumber).get();
 
     if(!intakeDoc.exists){
-
         alert("No Intake Found");
-
         return;
-
     }
 
     const data = intakeDoc.data();
@@ -1024,13 +1016,9 @@ try{
         if(!el) return;
 
         if(el.type==="checkbox" || el.type==="radio"){
-
             el.checked = data[key];
-
         }else{
-
             el.value = data[key];
-
         }
 
     });
