@@ -722,11 +722,19 @@ function saveIntake(){
     window.opener.saveIntake(document);
 }
 
-function loadIntake(){
+async function loadIntake(){
+
     const caseNumber = prompt("Enter Case Number");
     if(!caseNumber) return;
 
-    window.opener.loadIntake(document, caseNumber);
+    const ok = await window.opener.loadIntake(document, caseNumber);
+
+    if(ok){
+        alert("✅ Intake Loaded");
+    }else{
+        alert("No Intake Found");
+    }
+
 }
 function searchIntakes(){
     window.opener.searchIntakes();
@@ -1003,7 +1011,7 @@ try{
     const intakeDoc = await db.collection("intakes").doc(caseNumber).get();
 
     if(!intakeDoc.exists){
-        alert("No Intake Found");
+     return false;
         return;
     }
 
@@ -1023,12 +1031,10 @@ try{
 
     });
 
-    alert("✅ Intake Loaded");
-
 }catch(err){
 
-    alert(err.message);
-
+    console.error(err);
+return false;
 }
 
 }
