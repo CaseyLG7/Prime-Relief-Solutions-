@@ -744,8 +744,21 @@ async function loadIntake(){
     }
 
 }
-function searchIntakes(){
-    window.opener.searchIntakes();
+async function searchIntakes(){
+
+    const name = prompt("Enter Client Name");
+    if(!name) return;
+
+    const result = await window.opener.searchIntakes(name);
+
+    if(result){
+        const caseNumber = result.split(" - ")[0];
+        window.opener.loadIntake(document, caseNumber);
+        alert("✅ Intake Loaded");
+    }else{
+        alert("No Clients Found");
+    }
+
 }
 <\/script>
 
@@ -1046,42 +1059,31 @@ try{
 // SEARCH SAVED CLIENTS
 //======================================
 
-async function searchIntakes(){
+async function searchIntakes(name){
 
 try{
 
-let name=prompt("Enter Client Name");
+    const snap = await db.collection("intakes")
+    .where("clientName", ">=", name)
+    .where("clientName", "<=", name + "\uf8ff")
+    .limit(1)
+    .get();
 
-if(!name) return;
+    if(snap.empty){
+        return null;
+    }
 
-const snap=await db.collection("intakes")
-.where("clientName",">=",name)
-.where("clientName","<=",name+"\uf8ff")
-.get();
+    const doc = snap.docs[0];
 
-if(snap.empty){
-
-    alert("No Clients Found");
-
-    return;
-
-}
-
-let list="";
-
-snap.forEach(doc=>{
-
-    list+=doc.id+" - "+doc.data().clientName+"\n";
-
-});
-
-alert(list);
+    return doc.id + " - " + doc.data().clientName;
 
 }catch(err){
 
-alert(err.message);
+    console.error(err);
+    return null;
 
 }
+
 }
 </script>
 </body>
