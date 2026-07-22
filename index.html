@@ -997,39 +997,50 @@ alert(err.message);
 
 async function loadIntake(formDoc){
 
-    try{
+try{
 
-        let caseNumber = prompt("Enter Case Number");
-        if(!caseNumber) return;
+    let caseNumber = prompt("Enter Case Number");
 
-        const snap = await db.collection("intakes").doc(caseNumber).get();
+    if(!caseNumber) return;
 
-        if(!snap.exists){
-            alert("No Intake Found");
-            return;
+    const intakeDoc = await db.collection("intakes").doc(caseNumber).get();
+
+    if(!intakeDoc.exists){
+
+        alert("No Intake Found");
+
+        return;
+
+    }
+
+    const data = intakeDoc.data();
+
+    Object.keys(data).forEach(key=>{
+
+        const el = formDoc.getElementById(key);
+
+        if(!el) return;
+
+        if(el.type==="checkbox" || el.type==="radio"){
+
+            el.checked = data[key];
+
+        }else{
+
+            el.value = data[key];
+
         }
 
-        const data = snap.data();
+    });
 
-        Object.keys(data).forEach(key=>{
+    alert("✅ Intake Loaded");
 
-            const el = formDoc.getElementById(key);
+}catch(err){
 
-            if(!el) return;
+    alert(err.message);
 
-            if(el.type==="checkbox" || el.type==="radio"){
-                el.checked = data[key];
-            }else{
-                el.value = data[key];
-            }
+}
 
-        });
-
-        alert("✅ Intake Loaded");
-
-    }catch(err){
-        alert(err.message);
-    }
 }
 //======================================
 // SEARCH SAVED CLIENTS
