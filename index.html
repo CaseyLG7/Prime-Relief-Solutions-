@@ -723,9 +723,11 @@ function saveIntake(){
 }
 
 function loadIntake(){
-    window.opener.loadIntake(document);
-}
+    const caseNumber = prompt("Enter Case Number");
+    if(!caseNumber) return;
 
+    window.opener.loadIntake(document, caseNumber);
+}
 function searchIntakes(){
     window.opener.searchIntakes();
 }
