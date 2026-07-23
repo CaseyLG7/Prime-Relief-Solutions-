@@ -754,6 +754,28 @@ The client is responsible for reviewing, signing and filing all documents unless
 
 }
   
+if(type==="authorization"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("authClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("authCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("authDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("authStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+    },200);
+
+}
+  
   if(type==="limitedScope"){ content=`
 <div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
 
@@ -811,6 +833,71 @@ LIMITED SCOPE DISCLOSURE
 
 <button onclick="window.print()">
 🖨 Print Disclosure
+</button>
+
+</center>
+
+</div>
+`;}
+  
+if(type==="authorization"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">
+PRIME RELIEF SOLUTIONS
+</h2>
+
+<h3 style="text-align:center;">
+AUTHORIZATION TO PREPARE DOCUMENTS
+</h3>
+
+<hr><br>
+
+<p>
+I authorize Prime Relief Solutions to prepare legal documents using the information I provide regarding my eviction appeal.
+</p>
+
+<p>
+I certify the information I provide is true and correct to the best of my knowledge.
+</p>
+
+<p>
+I understand I am responsible for reviewing all documents before signing and filing them.
+</p>
+
+<br>
+
+<b>Client Name</b><br>
+<input id="authClientName" style="width:350px;" readonly>
+
+<br><br>
+
+<b>Case Number</b><br>
+<input id="authCaseNumber" style="width:220px;" readonly>
+
+<br><br>
+
+<b>Date</b><br>
+<input id="authDate" type="date" style="width:220px;" readonly>
+
+<br><br>
+
+<b>Client Signature</b>
+
+<hr>
+
+<br><br>
+
+<b>Staff Member</b><br>
+
+<input id="authStaff" style="width:300px;" readonly>
+
+<br><br>
+
+<center>
+
+<button onclick="window.print()">
+🖨 Print Authorization
 </button>
 
 </center>
