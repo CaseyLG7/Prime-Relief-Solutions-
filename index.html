@@ -656,14 +656,15 @@ if(type==="serviceAgreement"){ content=`
 <hr><br>
 
 <b>Client Name:</b><br>
-<input id="saClientName" style="width:350px;"><br><br>
+<input id="saClientName" style="width:350px;" readonly>
 
 <b>Case Number:</b><br>
-<input id="saCaseNumber" style="width:220px;"><br><br>
+<input id="saCaseNumber" style="width:220px;" readonly>
 
 <b>Date:</b><br>
-<input id="saDate" type="date" style="width:220px;"><br><br>
-
+<input id="saDate" type="date" style="width:220px;" readonly>
+<b>Staff Member</b><br>
+<input id="saStaff" style="width:300px;" readonly><br><br>
 <p>
 Prime Relief Solutions is a Legal Document Preparation business.
 </p>
@@ -727,6 +728,89 @@ The client is responsible for reviewing, signing and filing all documents unless
 
 <button onclick="window.print()">
 🖨 Print Agreement
+</button>
+
+</center>
+
+</div>
+`;}
+  
+  if(type==="limitedScope"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("lsClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("lsCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("lsDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+    },200);
+
+}
+  
+  if(type==="limitedScope"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">
+PRIME RELIEF SOLUTIONS
+</h2>
+
+<h3 style="text-align:center;">
+LIMITED SCOPE DISCLOSURE
+</h3>
+
+<hr><br>
+
+<p>I understand:</p>
+
+<label><input type="checkbox" checked> Prime Relief Solutions is not a law firm.</label><br>
+
+<label><input type="checkbox" checked> No attorney-client relationship exists.</label><br>
+
+<label><input type="checkbox" checked> No legal advice has been provided.</label><br>
+
+<label><input type="checkbox" checked> My documents are prepared only from the information I provide.</label><br>
+
+<label><input type="checkbox" checked> I am responsible for reviewing all paperwork before signing.</label><br>
+
+<label><input type="checkbox" checked> Court decisions are made solely by the court.</label>
+
+<br><br>
+
+<b>Client Name</b><br>
+
+<input id="lsClientName" style="width:350px;" readonly>
+
+<br><br>
+
+<b>Case Number</b><br>
+
+<input id="lsCaseNumber" style="width:220px;" readonly>
+
+<br><br>
+
+<b>Date</b><br>
+
+<input id="lsDate" type="date" style="width:220px;" readonly>
+
+<br><br>
+
+<b>Client Signature</b>
+
+<hr>
+
+<br>
+
+<center>
+
+<button onclick="window.print()">
+🖨 Print Disclosure
 </button>
 
 </center>
@@ -872,6 +956,28 @@ async function searchIntakes(){
 `);
 
 w.document.close();
+
+if(type==="serviceAgreement"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("saClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("saCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("saDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("saStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+    },200);
+
+}
 
 return;
 }
