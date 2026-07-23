@@ -108,6 +108,23 @@
     <button class="doc-btn btn-intake" onclick="openDoc('intake')">Intake</button>
     <button class="doc-btn btn-appeal" onclick="openDoc('appeal')">Appeal</button>
     <button class="doc-btn btn-checklist" onclick="openDoc('checklist')">Checklist</button>
+    <div style="width:100%;margin-top:8px;"></div>
+
+<button class="doc-btn btn-service" onclick="openDoc('serviceAgreement')">
+Service Agreement
+</button>
+
+<button class="doc-btn btn-nonattorney" onclick="openDoc('limitedScope')">
+Disclosure
+</button>
+
+<button class="doc-btn btn-workflow" onclick="openDoc('authorization')">
+Authorization
+</button>
+
+<button class="doc-btn btn-checklist" onclick="openDoc('invoice')">
+Invoice
+</button>
     <button class="doc-btn btn-workflow" onclick="openDoc('completion')">Completion Letter</button>
     <button class="clear-btn" style="margin-left:auto;" onclick="clearView()">Clear View</button>
     <button onclick="toggleDark()">🌙</button>
@@ -629,7 +646,94 @@ if(type==="checklist"){ content=`<div style="${style}">
 </li>
 </ul>
 </div>`;}
+  
+if(type==="serviceAgreement"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
 
+<h2 style="text-align:center;color:#BFA13A;">PRIME RELIEF SOLUTIONS</h2>
+<h3 style="text-align:center;">LEGAL DOCUMENT PREPARATION SERVICE AGREEMENT</h3>
+
+<hr><br>
+
+<b>Client Name:</b><br>
+<input id="saClientName" style="width:350px;"><br><br>
+
+<b>Case Number:</b><br>
+<input id="saCaseNumber" style="width:220px;"><br><br>
+
+<b>Date:</b><br>
+<input id="saDate" type="date" style="width:220px;"><br><br>
+
+<p>
+Prime Relief Solutions is a Legal Document Preparation business.
+</p>
+
+<p>
+We agree to prepare legal documents using only the information you provide.
+</p>
+
+<b>Our services may include:</b><br><br>
+
+<label><input id="saNoticeAppeal" type="checkbox"> Notice of Appeal</label><br>
+<label><input id="saInability" type="checkbox"> Statement of Inability to Pay Court Costs</label><br>
+<label><input id="saAppealBond" type="checkbox"> Appeal Bond Documents</label><br>
+<label><input id="saOtherDocs" type="checkbox"> Other Document Preparation</label>
+
+<br><br>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">
+IMPORTANT DISCLOSURE
+</h3>
+
+<ul>
+
+<li>We are NOT attorneys.</li>
+
+<li>We do not give legal advice.</li>
+
+<li>We do not represent clients in court.</li>
+
+<li>We do not tell clients what legal decisions to make.</li>
+
+<li>We do not guarantee any court outcome.</li>
+
+</ul>
+
+<p>
+The client is responsible for reviewing, signing and filing all documents unless separate filing assistance is purchased.
+</p>
+
+<br><br>
+
+<b>Client Signature</b>
+
+<hr>
+
+<br>
+
+<b>Date</b>
+
+<hr>
+
+<br>
+
+<b>Staff Member</b><br>
+
+<input id="saStaff" style="width:300px;">
+
+<br><br>
+
+<center>
+
+<button onclick="window.print()">
+🖨 Print Agreement
+</button>
+
+</center>
+
+</div>
+`;}
+  
 if(type==="completion"){ content=`<div>
 <h2>Prime Relief Solutions</h2>
 <h3>LETTER OF SERVICE COMPLETION</h3>
