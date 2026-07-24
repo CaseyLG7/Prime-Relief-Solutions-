@@ -1025,6 +1025,47 @@ if(type==="serviceAgreement"){
 
 }
 
+if(type==="limitedScope"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("lsClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("lsCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("lsDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+    },200);
+
+}
+
+if(type==="authorization"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("authClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("authCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("authDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("authStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+    },200);
+
+}
+
 return;
 }
 
