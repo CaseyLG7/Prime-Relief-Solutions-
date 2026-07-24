@@ -949,8 +949,7 @@ w.document.open();
 w.document.write(`
 <html>
 <head>
-<title>Prime Relief Solutions - Intake Form</title>
-
+<title>Prime Relief Solutions</title>
 <style>
 body{
     font-family:Arial;
@@ -1050,6 +1049,32 @@ async function searchIntakes(){
 `);
 
 w.document.close();
+  if(type==="intake")
+    w.document.title="Prime Relief Solutions - Intake";
+
+if(type==="script")
+    w.document.title="Prime Relief Solutions - Call Script";
+
+if(type==="appeal")
+    w.document.title="Prime Relief Solutions - Appeal Information";
+
+if(type==="checklist")
+    w.document.title="Prime Relief Solutions - Checklist";
+
+if(type==="completion")
+    w.document.title="Prime Relief Solutions - Completion Letter";
+
+if(type==="serviceAgreement")
+    w.document.title="Prime Relief Solutions - Service Agreement";
+
+if(type==="limitedScope")
+    w.document.title="Prime Relief Solutions - Limited Scope Disclosure";
+
+if(type==="authorization")
+    w.document.title="Prime Relief Solutions - Authorization";
+
+if(type==="invoice")
+    w.document.title="Prime Relief Solutions - Invoice";
 
 if(type==="serviceAgreement"){
 
