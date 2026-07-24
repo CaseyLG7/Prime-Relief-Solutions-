@@ -864,6 +864,84 @@ I understand I am responsible for reviewing all documents before signing and fil
 </div>
 `;}
   
+if(type==="invoice"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">
+PRIME RELIEF SOLUTIONS
+</h2>
+
+<h3 style="text-align:center;">
+INVOICE / RECEIPT
+</h3>
+
+<hr><br>
+
+<b>Invoice #</b><br>
+<input id="invNumber" style="width:220px;" readonly>
+
+<br><br>
+
+<b>Date</b><br>
+<input id="invDate" type="date" style="width:220px;" readonly>
+
+<br><br>
+
+<b>Client</b><br>
+<input id="invClient" style="width:350px;" readonly>
+
+<br><br>
+
+<b>Case Number</b><br>
+<input id="invCase" style="width:250px;" readonly>
+
+<br><br>
+
+<b>Service</b><br>
+<input id="invService" style="width:500px;" readonly>
+
+<br><br>
+
+<b>Amount</b><br>
+<input id="invAmount" style="width:120px;" readonly>
+
+<br><br>
+
+<b>Paid By</b><br>
+
+<label><input id="invCash" type="checkbox" disabled> Cash</label><br>
+
+<label><input id="invCard" type="checkbox" disabled> Credit / Debit</label><br>
+
+<label><input id="invCashApp" type="checkbox" disabled> Cash App</label><br>
+
+<label><input id="invZelle" type="checkbox" disabled> Zelle</label>
+
+<br><br>
+
+<b>Balance Due</b><br>
+
+<input id="invBalance" style="width:120px;" readonly>
+
+<br><br>
+
+<b>Received By</b><br>
+
+<input id="invStaff" style="width:300px;" readonly>
+
+<br><br>
+
+<center>
+
+<button onclick="window.print()">
+🖨 Print Invoice
+</button>
+
+</center>
+
+</div>
+`;}
+  
 if(type==="completion"){ content=`<div>
 <h2>Prime Relief Solutions</h2>
 <h3>LETTER OF SERVICE COMPLETION</h3>
@@ -1065,7 +1143,51 @@ if(type==="authorization"){
     },200);
 
 }
+if(type==="invoice"){
 
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("invNumber").value =
+            "INV-" + Date.now();
+
+        d.getElementById("invDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("invClient").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("invCase").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("invService").value =
+            document.getElementById("serviceSelected")?.value || "";
+
+        d.getElementById("invAmount").value =
+            document.getElementById("serviceFee")?.value || "$190.00";
+
+        d.getElementById("invBalance").value = "$0.00";
+
+        d.getElementById("invStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+        d.getElementById("invCash").checked =
+            document.getElementById("payCash")?.checked || false;
+
+        d.getElementById("invCard").checked =
+            document.getElementById("payCard")?.checked || false;
+
+        d.getElementById("invCashApp").checked =
+            document.getElementById("payCashApp")?.checked || false;
+
+        d.getElementById("invZelle").checked =
+            document.getElementById("payZelle")?.checked || false;
+
+    },200);
+
+}
+  
 return;
 }
 
