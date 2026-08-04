@@ -177,7 +177,15 @@ let content="";
 const style="font-size:16px; line-height:1.6; white-space:pre-wrap;";
 const formInput='style="width:100%;max-width:520px;padding:8px;margin:5px 0 12px 0;border:1px solid #999;border-radius:5px;display:block;"';
 const smallInput='style="width:150px;padding:6px;margin:5px 0 12px 0;border:1px solid #999;border-radius:5px;display:block;"';
-
+  
+if(type==="inability"){
+    window.open(
+        "Statement of Inability to Afford Payment Form.pdf",
+        "_blank"
+    );
+    return;
+}
+  
 if(type==="script"){ content=`<div style="${style}">
 <ul>
 <li><strong>Thank you for calling Prime Relief Solutions, this is [Your Name]. How may I help you?</strong></li>
