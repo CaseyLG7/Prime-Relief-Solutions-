@@ -1427,9 +1427,12 @@ db.collection("cases").get().then(snapshot=>{
     processChunk();
   };
 
-  reader.readAsText(file);
-}
+ reader.readAsText(file);
 
+    });
+
+}
+                                  
 function cycle(btn,id){
   const states=["Open","Contacted","Processing","Closed"];
   let next=(states.indexOf(btn.innerText)+1)%states.length;
