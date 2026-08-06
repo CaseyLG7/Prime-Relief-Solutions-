@@ -1350,7 +1350,9 @@ function applyFilters(){
 }
 
 function upload(){
-
+  
+if(!confirm("This will replace all existing cases. Continue?")) return;
+  
     load();
   
   const file=document.getElementById("file").files[0];
