@@ -1284,7 +1284,27 @@ function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sen
 function logout(){ auth.signOut(); }
 
 auth.onAuthStateChanged(user=>{
-  if(user){ currentUser=user.email; loginOverlay.style.display="none"; load(); }
+
+    if(user){
+
+        currentUser=user.email;
+
+        loginOverlay.style.display="none";
+
+        allData=[];
+        existingCases.clear();
+        rowOrder=[];
+
+        load();
+
+    }else{
+
+        loginOverlay.style.display="flex";
+
+    }
+
+});
+  
   else { loginOverlay.style.display="flex"; }
 });
 
