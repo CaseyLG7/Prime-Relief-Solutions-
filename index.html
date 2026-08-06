@@ -1351,72 +1351,116 @@ function applyFilters(){
 
 function upload(){
 
-    load();
-  
-  const file=document.getElementById("file").files[0];
-  if(!file) return alert("Choose file");
+    const file=document.getElementById("file").files[0];
+    if(!file) return alert("Choose file");
 
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const lines=e.target.result.split("\n").filter(l=>l.trim());
-    const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
+    if(!confirm("Replace the current case list with this new file?")) return;
 
-    let i=1, chunk=200, added=0, skipped=0, temp=[];
+    db.collection("cases").get().then(snapshot=>{
 
-    function processChunk(){
-      let end=Math.min(i+chunk, lines.length);
+        const batch=db.batch();
 
-      for(; i<end; i++){
-        let values=lines[i].split("\t");
-        let row={};
-        headers.forEach((h,idx)=> row[h]=values[idx]?.replace(/"/g,"").trim());
+        snapshot.forEach(doc=>{
+            batch.delete(doc.ref);
+        });
 
-        let caseNum=row["Case Number"];
-        if(!caseNum) continue;
+        batch.commit().then(()=>{
 
-        let amount=Number(row["Claim Amount"]||0);
-        let zip=row["Defendant Addr Zip"]||"";
+            existingCases.clear();
 
-        let addressParts=[
-          row["Defendant Addr Line 1"]||"",
-          row["Defendant Addr City"]||"",
-          zip
-        ].filter(Boolean);
+            const reader=new FileReader();
 
-        let lead="Cold",cls="row-cold";
-        if(amount>1000){lead="Hot";cls="row-hot";}
-        else if(amount>500){lead="Warm";cls="row-warm";}
+            reader.onload=e=>{
 
-        let record={
-          caseNumber:caseNum,
-          name:row["Defendant Name"]||"",
-          address:addressParts.join(", "),
-          amount,
-          hearing:row["Next Hearing Date"]||"",
-          zip,
-          lead,cls,
-          status:"Open",
-          updatedBy:currentUser
-        };
+                const lines=e.target.result.split("\n").filter(l=>l.trim());
+                const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
 
-        temp.push(record);
+                let i=1;
+                let chunk=200;
+                let added=0;
+                let temp=[];
 
-        if(!existingCases.has(caseNum)){
-          db.collection("cases").doc(caseNum).set(record);
-          added++;
-        } else skipped++;
-      }
+                function processChunk(){
 
-      render(temp);
+                    let end=Math.min(i+chunk,lines.length);
 
-      if(i<lines.length){ setTimeout(processChunk,0); }
-      else { alert(`Upload Complete\nAdded: ${added}\nSkipped: ${skipped}`); }
-    }
+                    for(;i<end;i++){
 
-    processChunk();
-  };
+                        let values=lines[i].split("\t");
+                        let row={};
 
-  reader.readAsText(file);
+                        headers.forEach((h,idx)=>{
+                            row[h]=values[idx]?.replace(/"/g,"").trim();
+                        });
+
+                        let caseNum=row["Case Number"];
+                        if(!caseNum) continue;
+
+                        let amount=Number(row["Claim Amount"]||0);
+                        let zip=row["Defendant Addr Zip"]||"";
+
+                        let address=[
+                            row["Defendant Addr Line 1"]||"",
+                            row["Defendant Addr City"]||"",
+                            zip
+                        ].filter(Boolean).join(", ");
+
+                        let lead="Cold";
+                        let cls="row-cold";
+
+                        if(amount>1000){
+                            lead="Hot";
+                            cls="row-hot";
+                        }else if(amount>500){
+                            lead="Warm";
+                            cls="row-warm";
+                        }
+
+                        const record={
+                            caseNumber:caseNum,
+                            name:row["Defendant Name"]||"",
+                            address,
+                            amount,
+                            hearing:row["Next Hearing Date"]||"",
+                            zip,
+                            lead,
+                            cls,
+                            status:"Open",
+                            updatedBy:currentUser
+                        };
+
+                        temp.push(record);
+
+                        db.collection("cases").doc(caseNum).set(record);
+
+                        added++;
+
+                    }
+
+                    render(temp);
+
+                    if(i<lines.length){
+
+                        setTimeout(processChunk,0);
+
+                    }else{
+
+                        alert("Upload Complete\nAdded: "+added);
+
+                    }
+
+                }
+
+                processChunk();
+
+            };
+
+            reader.readAsText(file);
+
+        });
+
+    });
+
 }
 
 function cycle(btn,id){
