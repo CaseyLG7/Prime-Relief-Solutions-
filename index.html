@@ -1533,6 +1533,182 @@ try{
 }
 
 }
+  
+async function showIntakePicker(formDoc){
+
+    const snap = await db.collection("intakes")
+        .orderBy("savedOn","desc")
+        .get();
+
+    let html="";
+
+    snap.forEach(doc=>{
+
+        const d=doc.data();
+
+        let date="";
+
+        if(d.savedOn){
+            date=d.savedOn.toDate().toLocaleDateString();
+        }
+
+        html+=`
+        <tr
+            onclick="selectCase('${doc.id}')"
+            style="cursor:pointer;"
+        >
+            <td>${d.clientName || ""}</td>
+            <td>${doc.id}</td>
+            <td>${date}</td>
+        </tr>
+        `;
+
+    });
+
+    const picker=window.open("","picker","width=900,height=650");
+
+    picker.document.write(`
+
+<html>
+
+<head>
+
+<style>
+
+body{
+
+font-family:Arial;
+
+padding:20px;
+
+}
+
+input{
+
+width:100%;
+
+padding:10px;
+
+margin-bottom:15px;
+
+font-size:15px;
+
+}
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+th{
+
+background:#BFA13A;
+
+color:white;
+
+padding:10px;
+
+}
+
+td{
+
+padding:10px;
+
+border:1px solid #ddd;
+
+}
+
+tr:hover{
+
+background:#f5f5f5;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Saved Client Intakes</h2>
+
+<input
+id="search"
+placeholder="Search Client or Case Number..."
+onkeyup="filterTable()">
+
+<table id="tbl">
+
+<thead>
+
+<tr>
+
+<th>Client Name</th>
+
+<th>Case Number</th>
+
+<th>Date Saved</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${html}
+
+</tbody>
+
+</table>
+
+<script>
+
+function filterTable(){
+
+const text=document
+.getElementById("search")
+.value
+.toLowerCase();
+
+const rows=document.querySelectorAll("#tbl tbody tr");
+
+rows.forEach(r=>{
+
+r.style.display=
+r.innerText.toLowerCase().includes(text)
+?
+""
+:
+"none";
+
+});
+
+}
+
+async function selectCase(caseNumber){
+
+await window.opener.loadIntake(
+window.opener.document,
+caseNumber
+);
+
+window.close();
+
+}
+
+</script>
+
+</body>
+
+</html>
+
+`);
+
+}
+
 //======================================
 // SEARCH SAVED CLIENTS
 //======================================
