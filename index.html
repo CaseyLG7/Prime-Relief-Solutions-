@@ -1440,16 +1440,24 @@ function cycle(btn,id){
 }
 
 function clearView(){
-  if(confirm("Are you sure you want to clear the view?")){
+
+    if(!confirm("Are you sure you want to clear the view?")) return;
+
+    if(unsubscribeCases){
+        unsubscribeCases();
+        unsubscribeCases = null;
+    }
+
+    allData = [];
+    tbody.innerHTML = "";
+
     searchName.value="";
     searchZip.value="";
     minAmt.value="";
     maxAmt.value="";
     searchDate.value="";
-    render([]);
-  }
 }
-
+  
 function render(rows){
   let html="";
 
