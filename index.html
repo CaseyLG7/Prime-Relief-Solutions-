@@ -1289,26 +1289,43 @@ auth.onAuthStateChanged(user=>{
 });
 
 function load(){
-  db.collection("cases").onSnapshot(snap=>{
-    existingCases.clear();
-    allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
 
-    if(rowOrder.length){
-      allData.sort((a,b)=>{
-        let ai=rowOrder.indexOf(a.caseNumber);
-        let bi=rowOrder.indexOf(b.caseNumber);
-
-        if(ai === -1) ai = 999999;
-        if(bi === -1) bi = 999999;
-
-        return ai - bi;
-      });
+    if(unsubscribeCases){
+        unsubscribeCases();
     }
 
-    render(allData);
-  });
-}
+    unsubscribeCases = db.collection("cases").onSnapshot(snap=>{
 
+        existingCases.clear();
+
+        allData = snap.docs.map(d=>{
+            let r=d.data();
+            existingCases.add(r.caseNumber);
+            return r;
+        });
+
+        if(rowOrder.length){
+
+            allData.sort((a,b)=>{
+
+                let ai=rowOrder.indexOf(a.caseNumber);
+                let bi=rowOrder.indexOf(b.caseNumber);
+
+                if(ai==-1) ai=999999;
+                if(bi==-1) bi=999999;
+
+                return ai-bi;
+
+            });
+
+        }
+
+        render(allData);
+
+    });
+
+}
+  
 function debounceFilter(){
   clearTimeout(debounceTimer);
   debounceTimer=setTimeout(()=>requestAnimationFrame(applyFilters),250);
