@@ -1713,32 +1713,6 @@ window.close();
 // SEARCH SAVED CLIENTS
 //======================================
 
-async function searchIntakes(name){
-
-try{
-
-    const snap = await db.collection("intakes")
-    .where("clientName", ">=", name)
-    .where("clientName", "<=", name + "\uf8ff")
-    .limit(1)
-    .get();
-
-    if(snap.empty){
-        return null;
-    }
-
-    const doc = snap.docs[0];
-
-    return doc.id + " - " + doc.data().clientName;
-
-}catch(err){
-
-    console.error(err);
-    return null;
-
-}
-
-}
 </script>
 </body>
 </html>
