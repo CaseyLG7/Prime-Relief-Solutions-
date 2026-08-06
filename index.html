@@ -1443,12 +1443,13 @@ function upload(){
 
                         setTimeout(processChunk,0);
 
-                    }else{
+                   }else{
 
-                        alert("Upload Complete\nAdded: "+added);
+    load();   // Reload the new case list from Firebase
 
-                    }
+    alert("Upload Complete\nAdded: "+added);
 
+}
                 }
 
                 processChunk();
