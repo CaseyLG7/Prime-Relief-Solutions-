@@ -1357,7 +1357,16 @@ if(!confirm("This will replace all existing cases. Continue?")) return;
   
   const file=document.getElementById("file").files[0];
   if(!file) return alert("Choose file");
+db.collection("cases").get().then(snapshot=>{
+  
+    const batch = db.batch();
 
+    snapshot.forEach(doc=>{
+        batch.delete(doc.ref);
+    });
+
+    batch.commit().then(()=>{
+      
   const reader=new FileReader();
   reader.onload=e=>{
     const lines=e.target.result.split("\n").filter(l=>l.trim());
