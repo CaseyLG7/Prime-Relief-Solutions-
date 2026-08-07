@@ -1431,7 +1431,19 @@ if(savedUpload.length){
 
 }else{
 
-    render(allData);
+   if(displayedCases.length){
+
+    const ids = displayedCases.map(c => c.caseNumber);
+
+    render(
+        allData.filter(c => ids.includes(c.caseNumber))
+    );
+
+}else{
+
+    render([]);
+
+}
 
 }
     if(rowOrder.length){
