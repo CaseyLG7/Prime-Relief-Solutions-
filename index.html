@@ -165,7 +165,41 @@ Statement of Inability
 </thead>
 <tbody id="tbody"></tbody>
 </table>
+  
+<!-- ============================= -->
+<!-- SAVED INTAKES POPUP -->
+<!-- ============================= -->
 
+<div id="savedIntakesModal" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Saved Client Intakes</h2>
+
+        <input
+            id="intakeSearch"
+            type="text"
+            placeholder="Search Name, Case, Address or Phone..."
+            onkeyup="filterSavedIntakes()"
+            style="
+                width:100%;
+                padding:10px;
+                margin-bottom:15px;
+                font-size:15px;
+            ">
+
+        <div id="savedIntakesList"></div>
+
+        <br>
+
+        <button onclick="closeSavedIntakes()">
+            Close
+        </button>
+
+    </div>
+
+</div>
+  
 <script>
 
 function toggleDark(){
