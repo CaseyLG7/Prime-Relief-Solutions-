@@ -1199,12 +1199,17 @@ Save / Print
 
 async function saveIntake(){
 
-    const ok = await window.opener.saveIntake(document);
+    const ok =
+        await window.opener.saveIntake(document);
 
     if(ok){
-        alert("✅ Intake Saved");
+
+        alert("✅ Intake Saved Successfully");
+
     }else{
-        alert("Save Failed");
+
+        alert("❌ Save Failed");
+
     }
 
 }
