@@ -1604,6 +1604,7 @@ function clearView(){
 }
 
 function render(rows){
+displayedCases = rows;  
   let html="";
 
   rowOrder = rows.map(r=>r.caseNumber);
