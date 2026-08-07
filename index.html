@@ -608,7 +608,13 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 
 <button type="button" onclick="saveIntake()">💾 Save Intake</button>
 
-<button type="button" onclick="loadIntake()">📂 Open Saved Intake</button>
+<button
+    type="button"
+    onclick="window.opener.showSavedIntakes(document)">
+
+    📂 Open Saved Intake
+
+</button>
 
 <button type="button" onclick="searchIntakes()">🔍 Find Client</button>
 
