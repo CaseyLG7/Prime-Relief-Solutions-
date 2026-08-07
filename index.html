@@ -1215,20 +1215,6 @@ async function saveIntake(){
 
 }
 
-async function loadIntake(){
-
-    const caseNumber = prompt("Enter Case Number");
-    if(!caseNumber) return;
-
-    const ok = await window.opener.loadIntake(document, caseNumber);
-
-    if(ok){
-        alert("✅ Intake Loaded");
-    }else{
-        alert("No Intake Found");
-    }
-
-}
 async function searchIntakes(){
 
     const name = prompt("Enter Client Name");
