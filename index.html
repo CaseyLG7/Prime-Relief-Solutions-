@@ -1234,20 +1234,83 @@ async function loadIntakeByID(intakeID){
 
 async function searchIntakes(){
 
-    const name = prompt("Enter Client Name");
-    if(!name) return;
+    const search =
+        prompt(
+            "Search Client, Case Number, Address or Phone"
+        );
 
-    const result = await window.opener.searchIntakes(name);
+    if(!search) return;
 
-    if(result){
-        const caseNumber = result.split(" - ")[0];
-        window.opener.loadIntake(document, caseNumber);
+    const results =
+        await window.opener.searchIntakes(search);
+
+    if(!results || !results.length){
+
+        alert("No Saved Intakes Found.");
+
+        return;
+    }
+
+    if(results.length === 1){
+
+        const ok =
+            await window.opener.loadIntake(
+                document,
+                results[0].id
+            );
+
+        if(ok){
+
+            alert("✅ Intake Loaded");
+
+        }
+
+        return;
+    }
+
+    let message =
+        "Saved Intakes Found:\n\n";
+
+    results.forEach((r,index)=>{
+
+        message +=
+            `${index + 1}. ` +
+            `${r.clientName || "Unnamed Client"} ` +
+            `| ${r.caseNumber || "No Case #"}\n`;
+
+    });
+
+    const choice =
+        prompt(
+            message +
+            "\nEnter the number to open:"
+        );
+
+    const index =
+        Number(choice) - 1;
+
+    if(
+        Number.isNaN(index) ||
+        !results[index]
+    ){
+
+        return;
+    }
+
+    const ok =
+        await window.opener.loadIntake(
+            document,
+            results[index].id
+        );
+
+    if(ok){
+
         alert("✅ Intake Loaded");
-    }else{
-        alert("No Clients Found");
+
     }
 
 }
+
 <\/script>
 
 </body>
