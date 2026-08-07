@@ -1380,10 +1380,23 @@ function upload(){
 
         temp.push(record);
 
-        if(!existingCases.has(caseNum)){
-          db.collection("cases").doc(caseNum).set(record);
-          added++;
-        } else skipped++;
+      if(!existingCases.has(caseNum)){
+
+    existingCases.add(caseNum);
+
+    db.collection("cases")
+      .doc(caseNum)
+      .set(record,{merge:true});
+
+    allData.push(record);
+
+    added++;
+
+}else{
+
+    skipped++;
+
+}
       }
 
       render(temp);
