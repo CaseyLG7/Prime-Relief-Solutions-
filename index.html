@@ -1231,6 +1231,136 @@ async function searchIntakes(){
     }
 
 }
+let currentIntakeWindow=null;
+let savedIntakes=[];
+
+async function showSavedIntakes(formDoc){
+
+    currentIntakeWindow=formDoc;
+
+    const snap=await db
+        .collection("intakes")
+        .orderBy("clientName")
+        .get();
+
+    savedIntakes=[];
+
+    snap.forEach(doc=>{
+
+        savedIntakes.push({
+
+            id:doc.id,
+
+            ...doc.data()
+
+        });
+
+    });
+
+    renderSavedIntakes(savedIntakes);
+
+    document.getElementById("savedIntakesModal").style.display="block";
+
+}
+
+function renderSavedIntakes(list){
+
+    let html="";
+
+    list.forEach(c=>{
+
+        html+=`
+
+        <div class="savedCard">
+
+            <div class="savedInfo">
+
+                <b>${c.clientName || "Unnamed Client"}</b><br>
+
+                Case:
+                ${c.caseNumber || c.id}<br>
+
+                ${c.propertyAddress || ""}<br>
+
+                ${c.phone || ""}
+
+            </div>
+
+            <button
+
+                class="savedOpen"
+
+                onclick="openSavedIntake('${c.id}')">
+
+                Open
+
+            </button>
+
+        </div>
+
+        `;
+
+    });
+
+    document.getElementById("savedIntakesList").innerHTML=html;
+
+}
+
+function filterSavedIntakes(){
+
+    const search=document
+        .getElementById("intakeSearch")
+        .value
+        .toLowerCase();
+
+    const filtered=savedIntakes.filter(c=>{
+
+        return(
+
+            (c.clientName||"")
+            .toLowerCase()
+            .includes(search)
+
+            ||
+
+            (c.caseNumber||"")
+            .toLowerCase()
+            .includes(search)
+
+            ||
+
+            (c.propertyAddress||"")
+            .toLowerCase()
+            .includes(search)
+
+            ||
+
+            (c.phone||"")
+            .toLowerCase()
+            .includes(search)
+
+        );
+
+    });
+
+    renderSavedIntakes(filtered);
+
+}
+
+async function openSavedIntake(caseNumber){
+
+    await loadIntake(currentIntakeWindow,caseNumber);
+
+    closeSavedIntakes();
+
+}
+
+function closeSavedIntakes(){
+
+    document.getElementById("savedIntakesModal").style.display="none";
+
+}
+
 <\/script>
 
 </body>
