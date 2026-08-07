@@ -1291,7 +1291,22 @@ function load(){
   db.collection("cases").onSnapshot(snap=>{
     existingCases.clear();
     allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
+const savedUpload =
+    JSON.parse(localStorage.getItem("lastUpload") || "[]");
 
+if(savedUpload.length){
+
+    render(
+        allData.filter(c =>
+            savedUpload.includes(c.caseNumber)
+        )
+    );
+
+}else{
+
+    render(allData);
+
+}
     if(rowOrder.length){
       allData.sort((a,b)=>{
         let ai=rowOrder.indexOf(a.caseNumber);
