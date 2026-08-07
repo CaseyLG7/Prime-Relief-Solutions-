@@ -1755,42 +1755,77 @@ async function saveIntake(doc){
 //======================================
 // LOAD ENTIRE INTAKE
 //======================================
-async function loadIntake(formDoc, caseNumber){
+  
+// ======================================
+// LOAD INTAKE
+// ======================================
 
-try{
+async function loadIntake(formDoc, intakeID){
 
-    const intakeDoc = await db.collection("intakes").doc(caseNumber).get();
+    try{
 
-    if(!intakeDoc.exists){
+        const intakeDoc = await db
+            .collection("intakes")
+            .doc(intakeID)
+            .get();
+
+        if(!intakeDoc.exists){
+
+            alert("Saved intake could not be found.");
+
+            return false;
+        }
+
+        const data = intakeDoc.data();
+
+        currentIntakeID = intakeID;
+
+        Object.keys(data).forEach(key=>{
+
+            const el = formDoc.getElementById(key);
+
+            if(!el) return;
+
+            if(
+                el.type === "checkbox" ||
+                el.type === "radio"
+            ){
+
+                el.checked = data[key] === true;
+
+            }else{
+
+                el.value = data[key] ?? "";
+
+            }
+
+        });
+
+        try{
+
+            localStorage.setItem(
+                "lastIntakeID",
+                intakeID
+            );
+
+        }catch(e){}
+
+        return true;
+
+    }catch(err){
+
+        console.error("LOAD INTAKE ERROR:", err);
+
+        alert(
+            "Unable to load intake.\n\n" +
+            err.message
+        );
+
         return false;
     }
 
-    const data = intakeDoc.data();
-
-    Object.keys(data).forEach(key=>{
-
-        const el = formDoc.getElementById(key);
-
-        if(!el) return;
-
-        if(el.type==="checkbox" || el.type==="radio"){
-            el.checked = data[key];
-        }else{
-            el.value = data[key];
-        }
-
-    });
-
-    return true;
-
-}catch(err){
-
-    console.error(err);
-    return false;
-
 }
-
-}
+  
 //======================================
 // SEARCH SAVED CLIENTS
 //======================================
