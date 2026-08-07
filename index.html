@@ -1439,14 +1439,23 @@ function cycle(btn,id){
 }
 
 function clearView(){
-  if(confirm("Are you sure you want to clear the view?")){
+
+    if(!confirm("Clear the current uploaded file?")) return;
+
+    // Clear filters
     searchName.value="";
     searchZip.value="";
     minAmt.value="";
     maxAmt.value="";
     searchDate.value="";
-    render([]);
-  }
+
+    // Clear uploaded file
+    document.getElementById("file").value="";
+
+    // Clear current screen only
+    rowOrder=[];
+    tbody.innerHTML="";
+
 }
 
 function render(rows){
