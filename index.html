@@ -1830,32 +1830,82 @@ async function loadIntake(formDoc, intakeID){
 // SEARCH SAVED CLIENTS
 //======================================
 
-async function searchIntakes(name){
+// ======================================
+// SEARCH SAVED INTAKES
+// ======================================
 
-try{
+async function searchIntakes(searchText){
 
-    const snap = await db.collection("intakes")
-    .where("clientName", ">=", name)
-    .where("clientName", "<=", name + "\uf8ff")
-    .limit(1)
-    .get();
+    try{
 
-    if(snap.empty){
-        return null;
+        const search =
+            (searchText || "")
+            .trim()
+            .toLowerCase();
+
+        if(!search){
+
+            return [];
+        }
+
+        const snap = await db
+            .collection("intakes")
+            .get();
+
+        const results = [];
+
+        snap.forEach(doc=>{
+
+            const d = doc.data();
+
+            const clientName =
+                (d.clientName || "").toLowerCase();
+
+            const caseNumber =
+                (d.caseNumber || "").toLowerCase();
+
+            const address =
+                (d.propertyAddress || "").toLowerCase();
+
+            const phone =
+                (d.phone || "").toLowerCase();
+
+            if(
+
+                clientName.includes(search) ||
+
+                caseNumber.includes(search) ||
+
+                address.includes(search) ||
+
+                phone.includes(search)
+
+            ){
+
+                results.push({
+
+                    id: doc.id,
+
+                    ...d
+
+                });
+
+            }
+
+        });
+
+        return results;
+
+    }catch(err){
+
+        console.error("SEARCH INTAKES ERROR:", err);
+
+        return [];
+
     }
 
-    const doc = snap.docs[0];
-
-    return doc.id + " - " + doc.data().clientName;
-
-}catch(err){
-
-    console.error(err);
-    return null;
-
 }
-
-}
+  
 let currentIntakeWindow=null;
 let savedIntakes=[];
 
