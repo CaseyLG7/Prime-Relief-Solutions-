@@ -1408,7 +1408,10 @@ alert(`Upload Complete
 Added: ${added}
 Skipped: ${skipped}`); }
     }
-
+localStorage.setItem(
+    "lastUpload",
+    JSON.stringify(temp.map(x=>x.caseNumber))
+);
     processChunk();
   };
 
