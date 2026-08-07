@@ -1403,7 +1403,8 @@ let allData=[];
 let existingCases=new Set();
 let debounceTimer;
 let rowOrder=[];
-
+let displayedCases = [];
+  
 function login(){ auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message)); }
 function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sendPasswordResetEmail(email.value).then(()=>alert("Reset email sent")); }
 function logout(){ auth.signOut(); }
