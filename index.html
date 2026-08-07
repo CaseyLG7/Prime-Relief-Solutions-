@@ -1646,44 +1646,112 @@ displayedCases = rows;
 // SAVE ENTIRE INTAKE TO FIREBASE
 //======================================
 
+// ======================================
+// SAVE INTAKE - CASE NUMBER OPTIONAL
+// ======================================
+
 async function saveIntake(doc){
 
-try{
+    try{
 
-    const data = {};
+        const data = {};
 
-    doc.querySelectorAll("input, textarea").forEach(el=>{
+        doc.querySelectorAll("input, textarea, select").forEach(el=>{
 
-        if(!el.id) return;
+            if(!el.id) return;
 
-        if(el.type==="checkbox" || el.type==="radio"){
-            data[el.id] = el.checked;
-        }else{
-            data[el.id] = el.value;
-        }
+            if(el.type === "checkbox" || el.type === "radio"){
 
-    });
+                data[el.id] = el.checked;
 
-    if(!data.caseNumber){
+            }else{
+
+                data[el.id] = el.value || "";
+
+            }
+
+        });
+
+        // --------------------------------
+        // CREATE UNIQUE INTAKE ID
+        // --------------------------------
+
+        const intakeID =
+            currentIntakeID ||
+            "INT-" +
+            Date.now() +
+            "-" +
+            Math.random().toString(36).substring(2,8).toUpperCase();
+
+        data.intakeID = intakeID;
+
+        // --------------------------------
+        // CASE NUMBER IS OPTIONAL
+        // --------------------------------
+
+        data.caseNumber = data.caseNumber || "";
+
+        // --------------------------------
+        // SAVE CLIENT INFORMATION
+        // --------------------------------
+
+        data.clientName = data.clientName || "";
+        data.phone = data.phone || "";
+        data.clientEmail = data.clientEmail || "";
+        data.propertyAddress = data.propertyAddress || "";
+
+        // --------------------------------
+        // STAFF / TIMESTAMP
+        // --------------------------------
+
+        data.savedBy = currentUser || "";
+
+        data.savedOn =
+            firebase.firestore.FieldValue.serverTimestamp();
+
+        data.updatedOn =
+            firebase.firestore.FieldValue.serverTimestamp();
+
+        // --------------------------------
+        // SAVE TO FIREBASE
+        // --------------------------------
+
+        await db
+            .collection("intakes")
+            .doc(intakeID)
+            .set(data, { merge:true });
+
+        // --------------------------------
+        // REMEMBER CURRENT INTAKE
+        // --------------------------------
+
+        currentIntakeID = intakeID;
+
+        try{
+
+            localStorage.setItem(
+                "lastIntakeID",
+                intakeID
+            );
+
+        }catch(e){}
+
+        return true;
+
+    }catch(err){
+
+        console.error("SAVE INTAKE ERROR:", err);
+
+        alert(
+            "Unable to save intake.\n\n" +
+            err.message
+        );
+
         return false;
     }
 
-    data.savedBy = currentUser;
-    data.savedOn = firebase.firestore.FieldValue.serverTimestamp();
-
-    await db.collection("intakes").doc(data.caseNumber).set(data);
-
-    return true;
-
-}catch(err){
-
-    console.error(err);
-    return false;
-
 }
-
-}
-
+  
 //======================================
 // LOAD ENTIRE INTAKE
 //======================================
