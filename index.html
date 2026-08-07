@@ -1437,15 +1437,26 @@ function cycle(btn,id){
   },0);
 }
 
-function clearView(){
-  if(confirm("Are you sure you want to clear the view?")){
-    searchName.value="";
-    searchZip.value="";
-    minAmt.value="";
-    maxAmt.value="";
-    searchDate.value="";
+async function clearView(){
+
+    if(!confirm("Delete ALL uploaded case files from Firebase?"))
+        return;
+
+    const snap = await db.collection("cases").get();
+
+    const batch = db.batch();
+
+    snap.forEach(doc=>batch.delete(doc.ref));
+
+    await batch.commit();
+
+    existingCases.clear();
+    allData=[];
+    rowOrder=[];
+
     render([]);
-  }
+
+}
 }
 
 function render(rows){
