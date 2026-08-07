@@ -1401,7 +1401,11 @@ function upload(){
       render(temp);
 
       if(i<lines.length){ setTimeout(processChunk,0); }
-      else { alert(`Upload Complete\nAdded: ${added}\nSkipped: ${skipped}`); }
+      else { load();
+
+alert(`Upload Complete
+Added: ${added}
+Skipped: ${skipped}`);
     }
 
     processChunk();
