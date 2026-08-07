@@ -1214,20 +1214,24 @@ async function saveIntake(){
 
 }
 
-async function loadIntake(){
+async function loadIntakeByID(intakeID){
 
-    const caseNumber = prompt("Enter Case Number");
-    if(!caseNumber) return;
+    if(!intakeID) return;
 
-    const ok = await window.opener.loadIntake(document, caseNumber);
+    const ok =
+        await window.opener.loadIntake(
+            document,
+            intakeID
+        );
 
     if(ok){
+
         alert("✅ Intake Loaded");
-    }else{
-        alert("No Intake Found");
+
     }
 
 }
+
 async function searchIntakes(){
 
     const name = prompt("Enter Client Name");
