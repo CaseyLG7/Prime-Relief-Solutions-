@@ -1870,46 +1870,80 @@ try{
 }
 
 }
-
+  
 //======================================
-// LOAD ENTIRE INTAKE
+// LOAD ENTIRE SAVED INTAKE
 //======================================
-async function loadIntake(formDoc, caseNumber){
 
-try{
+async function loadIntake(formDoc, intakeID){
 
-    const intakeDoc = await db.collection("intakes").doc(caseNumber).get();
+    try{
 
-    if(!intakeDoc.exists){
-        return false;
-    }
+        const intakeDoc =
+            await db
+                .collection("intakes")
+                .doc(intakeID)
+                .get();
 
-    const data = intakeDoc.data();
+        if(!intakeDoc.exists){
 
-    Object.keys(data).forEach(key=>{
+            console.error(
+                "Saved intake not found:",
+                intakeID
+            );
 
-        const el = formDoc.getElementById(key);
+            return false;
 
-        if(!el) return;
-
-        if(el.type==="checkbox" || el.type==="radio"){
-            el.checked = data[key];
-        }else{
-            el.value = data[key];
         }
 
-    });
+        const data = intakeDoc.data();
 
-    return true;
 
-}catch(err){
+        Object.keys(data).forEach(key => {
 
-    console.error(err);
-    return false;
+            const el =
+                formDoc.getElementById(key);
+
+            if(!el){
+
+                return;
+
+            }
+
+
+            if(
+                el.type === "checkbox" ||
+                el.type === "radio"
+            ){
+
+                el.checked = !!data[key];
+
+            }else{
+
+                el.value =
+                    data[key] ?? "";
+
+            }
+
+        });
+
+
+        return true;
+
+
+    }catch(err){
+
+        console.error(
+            "LOAD INTAKE ERROR:",
+            err
+        );
+
+        return false;
+
+    }
 
 }
-
-}
+  
 //======================================
 // SEARCH SAVED CLIENTS
 //======================================
