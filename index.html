@@ -1940,54 +1940,24 @@ try{
 }
 
 }
-let currentIntakeWindow=null;
-let savedIntakes=[];
-
-async function showSavedIntakes(formDoc){
-
-    currentIntakeWindow=formDoc;
-
-    const snap=await db
-        .collection("intakes")
-        .orderBy("clientName")
-        .get();
-
-    savedIntakes=[];
-
-    snap.forEach(doc=>{
-
-        savedIntakes.push({
-
-            id:doc.id,
-
-            ...doc.data()
-
-        });
-
-    });
-
-    renderSavedIntakes(savedIntakes);
-
-    document.getElementById("savedIntakesModal").style.display="block";
-
-}
-
-  // ==========================================
-// SAVED INTAKE CRM WINDOW
-// ==========================================
+//======================================
+// SAVED INTAKE CRM
+//======================================
 
 let currentIntakeWindow = null;
 let savedIntakes = [];
 
-// ==========================================
+
+//======================================
 // OPEN SAVED INTAKES
-// ==========================================
+//======================================
 
 async function showSavedIntakes(formDoc){
 
     currentIntakeWindow = formDoc;
 
-    const modal = document.getElementById("savedIntakesModal");
+    const modal =
+        document.getElementById("savedIntakesModal");
 
     if(!modal){
 
@@ -1998,25 +1968,32 @@ async function showSavedIntakes(formDoc){
 
     modal.style.display = "block";
 
-    const searchBox = document.getElementById("intakeSearch");
+    const searchBox =
+        document.getElementById("intakeSearch");
 
     if(searchBox){
+
         searchBox.value = "";
+
     }
 
     try{
 
-        const snap = await db
-            .collection("intakes")
-            .get();
+        const snap =
+            await db
+                .collection("intakes")
+                .get();
 
         savedIntakes = [];
 
         snap.forEach(doc => {
 
             savedIntakes.push({
+
                 id: doc.id,
+
                 ...doc.data()
+
             });
 
         });
@@ -2032,42 +2009,55 @@ async function showSavedIntakes(formDoc){
 
         renderSavedIntakes(savedIntakes);
 
-    }catch(error){
+    }catch(err){
 
         console.error(
-            "Saved Intake Load Error:",
-            error
+            "Saved Intake Error:",
+            err
         );
 
         alert(
             "Unable to load saved intakes.\n\n" +
-            error.message
+            err.message
         );
 
     }
 
 }
 
-// ==========================================
+
+//======================================
 // DISPLAY SAVED INTAKES
-// ==========================================
+//======================================
 
 function renderSavedIntakes(list){
 
     const container =
-        document.getElementById("savedIntakesList");
+        document.getElementById(
+            "savedIntakesList"
+        );
 
-    if(!container) return;
+    if(!container){
+
+        return;
+
+    }
 
     if(!list.length){
 
         container.innerHTML = `
+
             <div style="
                 text-align:center;
                 padding:35px;
                 color:#777;
             ">
-                <div style="font-size:35px;">📂</div>
+
+                <div style="
+                    font-size:35px;
+                ">
+                    📂
+                </div>
 
                 <strong>
                     No Saved Intakes Found
@@ -2079,81 +2069,67 @@ function renderSavedIntakes(list){
                 ">
                     Save an intake to see it here.
                 </div>
+
             </div>
+
         `;
 
         return;
+
     }
 
     let html = "";
 
-    list.forEach(intake => {
-
-        const name =
-            escapeHTML(
-                intake.clientName ||
-                "Unnamed Client"
-            );
-
-        const caseNumber =
-            escapeHTML(
-                intake.caseNumber ||
-                "No Case Number"
-            );
-
-        const address =
-            escapeHTML(
-                intake.propertyAddress ||
-                "No Property Address"
-            );
-
-        const phone =
-            escapeHTML(
-                intake.phone ||
-                "No Phone"
-            );
+    list.forEach(c => {
 
         html += `
+
             <div class="savedCard">
 
                 <div class="savedInfo">
 
-                    <div style="
-                        font-size:17px;
-                        font-weight:bold;
-                        color:#111827;
-                        margin-bottom:4px;
-                    ">
-                        ${name}
-                    </div>
+                    <b>
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
 
-                    <div>
-                        <strong>Case:</strong>
-                        ${caseNumber}
-                    </div>
+                    <br>
 
-                    <div>
-                        <strong>Address:</strong>
-                        ${address}
-                    </div>
+                    Case:
+                    ${escapeHTML(
+                        c.caseNumber ||
+                        "No Case Number"
+                    )}
 
-                    <div>
-                        <strong>Phone:</strong>
-                        ${phone}
-                    </div>
+                    <br>
+
+                    ${escapeHTML(
+                        c.propertyAddress ||
+                        ""
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.phone ||
+                        ""
+                    )}
 
                 </div>
 
                 <button
                     type="button"
                     class="savedOpen"
-                    onclick="openSavedIntake('${intake.id}')">
+                    onclick="openSavedIntake('${c.id}')">
 
                     Open
 
                 </button>
 
             </div>
+
         `;
 
     });
@@ -2162,16 +2138,23 @@ function renderSavedIntakes(list){
 
 }
 
-// ==========================================
+
+//======================================
 // INSTANT SEARCH
-// ==========================================
+//======================================
 
 function filterSavedIntakes(){
 
     const searchBox =
-        document.getElementById("intakeSearch");
+        document.getElementById(
+            "intakeSearch"
+        );
 
-    if(!searchBox) return;
+    if(!searchBox){
+
+        return;
+
+    }
 
     const search =
         searchBox.value
@@ -2179,33 +2162,40 @@ function filterSavedIntakes(){
             .toLowerCase();
 
     const filtered =
-        savedIntakes.filter(intake => {
-
-            const name =
-                String(
-                    intake.clientName || ""
-                ).toLowerCase();
-
-            const caseNumber =
-                String(
-                    intake.caseNumber || ""
-                ).toLowerCase();
-
-            const address =
-                String(
-                    intake.propertyAddress || ""
-                ).toLowerCase();
-
-            const phone =
-                String(
-                    intake.phone || ""
-                ).toLowerCase();
+        savedIntakes.filter(c => {
 
             return (
-                name.includes(search) ||
-                caseNumber.includes(search) ||
-                address.includes(search) ||
-                phone.includes(search)
+
+                String(
+                    c.clientName || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+                ||
+
+                String(
+                    c.caseNumber || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+                ||
+
+                String(
+                    c.propertyAddress || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+                ||
+
+                String(
+                    c.phone || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
             );
 
         });
@@ -2214,9 +2204,10 @@ function filterSavedIntakes(){
 
 }
 
-// ==========================================
-// OPEN ONE SAVED INTAKE
-// ==========================================
+
+//======================================
+// OPEN SELECTED INTAKE
+//======================================
 
 async function openSavedIntake(intakeID){
 
@@ -2227,6 +2218,7 @@ async function openSavedIntake(intakeID){
         );
 
         return;
+
     }
 
     const ok =
@@ -2239,14 +2231,20 @@ async function openSavedIntake(intakeID){
 
         closeSavedIntakes();
 
+    }else{
+
+        alert(
+            "Unable to load this saved intake."
+        );
+
     }
 
 }
 
 
-// ==========================================
+//======================================
 // CLOSE SAVED INTAKES
-// ==========================================
+//======================================
 
 function closeSavedIntakes(){
 
@@ -2263,6 +2261,21 @@ function closeSavedIntakes(){
 
 }
 
+
+//======================================
+// SAFE HTML
+//======================================
+
+function escapeHTML(value){
+
+    return String(value || "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
 
 // ==========================================
 // SAFE HTML DISPLAY
