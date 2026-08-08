@@ -1254,22 +1254,107 @@ async function loadIntake(){
     }
 
 }
-async function searchIntakes(){
 
-    const name = prompt("Enter Client Name");
-    if(!name) return;
+// ==========================================
+// SEARCH SAVED INTAKES
+// ==========================================
 
-    const result = await window.opener.searchIntakes(name);
+async function searchIntakes(searchText){
 
-    if(result){
-        const caseNumber = result.split(" - ")[0];
-        window.opener.loadIntake(document, caseNumber);
-        alert("✅ Intake Loaded");
-    }else{
-        alert("No Clients Found");
+    try{
+
+        const search =
+            String(searchText || "")
+                .trim()
+                .toLowerCase();
+
+        const snap = await db
+            .collection("intakes")
+            .get();
+
+        const results = [];
+
+        snap.forEach(doc => {
+
+            const data = doc.data();
+
+            const clientName =
+                String(data.clientName || "")
+                    .toLowerCase();
+
+            const caseNumber =
+                String(data.caseNumber || "")
+                    .toLowerCase();
+
+            const address =
+                String(data.propertyAddress || "")
+                    .toLowerCase();
+
+            const phone =
+                String(data.phone || "")
+                    .toLowerCase();
+
+            /*
+             * Empty search = show everything.
+             */
+
+            if(
+                search === "" ||
+
+                clientName.includes(search) ||
+
+                caseNumber.includes(search) ||
+
+                address.includes(search) ||
+
+                phone.includes(search)
+            ){
+
+                results.push({
+
+                    id: doc.id,
+
+                    ...data
+
+                });
+
+            }
+
+        });
+
+        /*
+         * Sort alphabetically by client name.
+         */
+
+        results.sort((a,b)=>{
+
+            return String(a.clientName || "")
+                .localeCompare(
+                    String(b.clientName || "")
+                );
+
+        });
+
+        return results;
+
+    }catch(error){
+
+        console.error(
+            "SEARCH INTAKES ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to search saved intakes.\n\n" +
+            error.message
+        );
+
+        return [];
+
     }
 
 }
+
 <\/script>
 
 /* ==========================================
