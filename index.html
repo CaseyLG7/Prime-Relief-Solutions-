@@ -1972,6 +1972,313 @@ async function showSavedIntakes(formDoc){
 
 }
 
+  // ==========================================
+// SAVED INTAKE CRM WINDOW
+// ==========================================
+
+let currentIntakeWindow = null;
+let savedIntakes = [];
+
+// ==========================================
+// OPEN SAVED INTAKES
+// ==========================================
+
+async function showSavedIntakes(formDoc){
+
+    currentIntakeWindow = formDoc;
+
+    const modal = document.getElementById("savedIntakesModal");
+
+    if(!modal){
+
+        alert("Saved Intake window was not found.");
+
+        return;
+    }
+
+    modal.style.display = "block";
+
+    const searchBox = document.getElementById("intakeSearch");
+
+    if(searchBox){
+        searchBox.value = "";
+    }
+
+    try{
+
+        const snap = await db
+            .collection("intakes")
+            .get();
+
+        savedIntakes = [];
+
+        snap.forEach(doc => {
+
+            savedIntakes.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+        savedIntakes.sort((a,b) => {
+
+            return String(a.clientName || "")
+                .localeCompare(
+                    String(b.clientName || "")
+                );
+
+        });
+
+        renderSavedIntakes(savedIntakes);
+
+    }catch(error){
+
+        console.error(
+            "Saved Intake Load Error:",
+            error
+        );
+
+        alert(
+            "Unable to load saved intakes.\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+// ==========================================
+// DISPLAY SAVED INTAKES
+// ==========================================
+
+function renderSavedIntakes(list){
+
+    const container =
+        document.getElementById("savedIntakesList");
+
+    if(!container) return;
+
+    if(!list.length){
+
+        container.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+            ">
+                <div style="font-size:35px;">📂</div>
+
+                <strong>
+                    No Saved Intakes Found
+                </strong>
+
+                <div style="
+                    margin-top:6px;
+                    font-size:13px;
+                ">
+                    Save an intake to see it here.
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    let html = "";
+
+    list.forEach(intake => {
+
+        const name =
+            escapeHTML(
+                intake.clientName ||
+                "Unnamed Client"
+            );
+
+        const caseNumber =
+            escapeHTML(
+                intake.caseNumber ||
+                "No Case Number"
+            );
+
+        const address =
+            escapeHTML(
+                intake.propertyAddress ||
+                "No Property Address"
+            );
+
+        const phone =
+            escapeHTML(
+                intake.phone ||
+                "No Phone"
+            );
+
+        html += `
+            <div class="savedCard">
+
+                <div class="savedInfo">
+
+                    <div style="
+                        font-size:17px;
+                        font-weight:bold;
+                        color:#111827;
+                        margin-bottom:4px;
+                    ">
+                        ${name}
+                    </div>
+
+                    <div>
+                        <strong>Case:</strong>
+                        ${caseNumber}
+                    </div>
+
+                    <div>
+                        <strong>Address:</strong>
+                        ${address}
+                    </div>
+
+                    <div>
+                        <strong>Phone:</strong>
+                        ${phone}
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="savedOpen"
+                    onclick="openSavedIntake('${intake.id}')">
+
+                    Open
+
+                </button>
+
+            </div>
+        `;
+
+    });
+
+    container.innerHTML = html;
+
+}
+
+// ==========================================
+// INSTANT SEARCH
+// ==========================================
+
+function filterSavedIntakes(){
+
+    const searchBox =
+        document.getElementById("intakeSearch");
+
+    if(!searchBox) return;
+
+    const search =
+        searchBox.value
+            .trim()
+            .toLowerCase();
+
+    const filtered =
+        savedIntakes.filter(intake => {
+
+            const name =
+                String(
+                    intake.clientName || ""
+                ).toLowerCase();
+
+            const caseNumber =
+                String(
+                    intake.caseNumber || ""
+                ).toLowerCase();
+
+            const address =
+                String(
+                    intake.propertyAddress || ""
+                ).toLowerCase();
+
+            const phone =
+                String(
+                    intake.phone || ""
+                ).toLowerCase();
+
+            return (
+                name.includes(search) ||
+                caseNumber.includes(search) ||
+                address.includes(search) ||
+                phone.includes(search)
+            );
+
+        });
+
+    renderSavedIntakes(filtered);
+
+}
+
+// ==========================================
+// OPEN ONE SAVED INTAKE
+// ==========================================
+
+async function openSavedIntake(intakeID){
+
+    if(!currentIntakeWindow){
+
+        alert(
+            "The Intake window is no longer available."
+        );
+
+        return;
+    }
+
+    const ok =
+        await loadIntake(
+            currentIntakeWindow,
+            intakeID
+        );
+
+    if(ok){
+
+        closeSavedIntakes();
+
+    }
+
+}
+
+
+// ==========================================
+// CLOSE SAVED INTAKES
+// ==========================================
+
+function closeSavedIntakes(){
+
+    const modal =
+        document.getElementById(
+            "savedIntakesModal"
+        );
+
+    if(modal){
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+
+// ==========================================
+// SAFE HTML DISPLAY
+// ==========================================
+
+function escapeHTML(value){
+
+    return String(value || "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+  
 function renderSavedIntakes(list){
 
     let html="";
