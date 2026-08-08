@@ -1230,46 +1230,35 @@ Save / Print
 
 async function saveIntake(){
 
-    const ok = await window.opener.saveIntake(document);
+    const ok =
+        await window.opener.saveIntake(document);
 
     if(ok){
+
         alert("✅ Intake Saved");
+
     }else{
-        alert("Save Failed");
+
+        alert(
+            "Save Failed.\n\n" +
+            "A Case Number is required to save this intake."
+        );
+
     }
 
 }
 
-async function loadIntake(){
 
-    const caseNumber = prompt("Enter Case Number");
-    if(!caseNumber) return;
+//======================================
+// OPEN SAVED INTAKE CRM
+//======================================
 
-    const ok = await window.opener.loadIntake(document, caseNumber);
+function openSavedIntakes(){
 
-    if(ok){
-        alert("✅ Intake Loaded");
-    }else{
-        alert("No Intake Found");
-    }
+    window.opener.showSavedIntakes(document);
 
 }
-async function searchIntakes(){
 
-    const name = prompt("Enter Client Name");
-    if(!name) return;
-
-    const result = await window.opener.searchIntakes(name);
-
-    if(result){
-        const caseNumber = result.split(" - ")[0];
-        window.opener.loadIntake(document, caseNumber);
-        alert("✅ Intake Loaded");
-    }else{
-        alert("No Clients Found");
-    }
-
-}
 <\/script>
 
 /* ==========================================
