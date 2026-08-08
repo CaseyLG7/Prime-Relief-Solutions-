@@ -1253,7 +1253,7 @@ async function saveIntake(){
 
         alert(
             "Save Failed.\n\n" +
-            "A Case Number is required to save this intake."
+            "A Case Number is required."
         );
 
     }
@@ -1261,13 +1261,24 @@ async function saveIntake(){
 }
 
 
-//======================================
+// ======================================
 // OPEN SAVED INTAKE CRM
-//======================================
+// ======================================
 
 function openSavedIntakes(){
 
     window.opener.showSavedIntakes(document);
+
+}
+
+
+// ======================================
+// PRINT
+// ======================================
+
+function printIntake(){
+
+    window.print();
 
 }
 
