@@ -1242,27 +1242,73 @@ Save / Print
 
 async function saveIntake(){
 
-    const ok =
-        await window.opener.saveIntake(document);
+    try{
 
-    if(ok){
+        if(!window.opener){
 
-        alert("✅ Intake Saved");
+            alert("Unable to connect to the main application.");
 
-    }else{
+            return;
+
+        }
+
+        const ok =
+            await window.opener.saveIntake(document);
+
+        if(ok){
+
+            alert("✅ Intake Saved Successfully");
+
+        }else{
+
+            alert(
+                "Save Failed.\n\n" +
+                "Please make sure the Case Number is filled in."
+            );
+
+        }
+
+    }catch(error){
+
+        console.error("SAVE INTAKE ERROR:", error);
 
         alert(
-            "Save Failed.\n\n" +
-            "A Case Number is required."
+            "Save Intake Error:\n\n" +
+            error.message
         );
 
     }
 
 }
 
+
 function openSavedIntakes(){
 
-    window.opener.showSavedIntakes(document);
+    try{
+
+        if(!window.opener){
+
+            alert("Unable to connect to the main application.");
+
+            return;
+
+        }
+
+        window.opener.showSavedIntakes(document);
+
+    }catch(error){
+
+        console.error(
+            "OPEN SAVED INTAKES ERROR:",
+            error
+        );
+
+        alert(
+            "Open Saved Intake Error:\n\n" +
+            error.message
+        );
+
+    }
 
 }
 
@@ -1363,6 +1409,7 @@ if(type==="authorization"){
     },200);
 
 }
+  
 if(type==="invoice"){
 
     setTimeout(()=>{
