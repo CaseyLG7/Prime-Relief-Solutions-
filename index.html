@@ -1267,34 +1267,17 @@ async function intakeSaveButton(){
 
 }
 
-
 function intakeOpenSavedButton(){
 
     try{
 
-        if(!window.opener || window.opener.closed){
-
-            alert("Main application window is not available.");
-
-            return;
-
-        }
-
         window.opener.showSavedIntakes(document);
-
-        window.opener.focus();
 
     }catch(error){
 
-        console.error(
-            "OPEN SAVED INTAKES ERROR:",
-            error
-        );
+        console.error("OPEN SAVED INTAKES ERROR:", error);
 
-        alert(
-            "Open Saved Intake Error: " +
-            error.message
-        );
+        alert("Open Saved Intake Error: " + error.message);
 
     }
 
