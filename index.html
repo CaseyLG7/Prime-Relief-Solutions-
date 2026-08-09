@@ -1240,73 +1240,45 @@ Save / Print
 
 <script>
 
-async function saveIntake(){
+async function intakeSaveButton(){
 
     try{
 
-        if(!window.opener){
-
-            alert("Unable to connect to the main application.");
-
-            return;
-
-        }
-
-        const ok =
+        const result =
             await window.opener.saveIntake(document);
 
-        if(ok){
+        if(result === true){
 
-            alert("✅ Intake Saved Successfully");
+            alert("Intake Saved Successfully");
 
         }else{
 
-            alert(
-                "Save Failed.\n\n" +
-                "Please make sure the Case Number is filled in."
-            );
+            alert("Save Failed - Case Number is required.");
 
         }
 
     }catch(error){
 
-        console.error("SAVE INTAKE ERROR:", error);
+        console.error("INTAKE SAVE ERROR:", error);
 
-        alert(
-            "Save Intake Error:\n\n" +
-            error.message
-        );
+        alert("Save Intake Error: " + error.message);
 
     }
 
 }
 
 
-function openSavedIntakes(){
+function intakeOpenSavedButton(){
 
     try{
-
-        if(!window.opener){
-
-            alert("Unable to connect to the main application.");
-
-            return;
-
-        }
 
         window.opener.showSavedIntakes(document);
 
     }catch(error){
 
-        console.error(
-            "OPEN SAVED INTAKES ERROR:",
-            error
-        );
+        console.error("OPEN SAVED INTAKES ERROR:", error);
 
-        alert(
-            "Open Saved Intake Error:\n\n" +
-            error.message
-        );
+        alert("Open Saved Intake Error: " + error.message);
 
     }
 
