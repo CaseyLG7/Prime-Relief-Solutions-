@@ -1734,7 +1734,7 @@ try{
 
 }
   
-//======================================
+ //======================================
 // LOAD ENTIRE SAVED INTAKE
 //======================================
 
@@ -1756,11 +1756,9 @@ async function loadIntake(formDoc, intakeID){
             );
 
             return false;
-
         }
 
         const data = intakeDoc.data();
-
 
         Object.keys(data).forEach(key => {
 
@@ -1768,11 +1766,8 @@ async function loadIntake(formDoc, intakeID){
                 formDoc.getElementById(key);
 
             if(!el){
-
                 return;
-
             }
-
 
             if(
                 el.type === "checkbox" ||
@@ -1783,16 +1778,15 @@ async function loadIntake(formDoc, intakeID){
 
             }else{
 
-                el.value =
-                    data[key] ?? "";
+                el.value = data[key] ?? "";
 
             }
 
         });
 
+        currentIntakeID = intakeID;
 
         return true;
-
 
     }catch(err){
 
@@ -1801,10 +1795,13 @@ async function loadIntake(formDoc, intakeID){
             err
         );
 
+        alert(
+            "Unable to load saved intake.\n\n" +
+            err.message
+        );
+
         return false;
-
     }
-
 }
   
 //======================================
