@@ -1171,270 +1171,595 @@ Email: help@prsolution.org
 
 let w = window.open("", "_blank");
 
+if(!w){
+  alert("Please allow pop-ups for this website so the Intake window can open.");
+  return;
+}
+
 w.document.open();
 
 w.document.write(`
+<!DOCTYPE html>
 <html>
 <head>
-<title>Prime Relief Solutions</title>
+
+<title>Prime Relief Solutions - Intake Form</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"><\/script>
+
 <style>
+
 body{
-    font-family:Arial;
-    padding:30px;
-    background:#f4f0df;
-    color:#000;
+  font-family:Arial;
+  padding:25px;
+  background:white;
+  color:#000;
 }
 
 input,
 textarea{
-    border:1px solid #999;
-    padding:5px;
-    font-size:14px;
+  border:1px solid #999;
+  padding:5px;
+  font-size:14px;
 }
 
 button{
-    padding:10px 20px;
-    margin:10px 5px;
-    cursor:pointer;
-    font-size:15px;
-    border:none;
-    border-radius:6px;
-    background:#BFA13A;
-    color:white;
+  padding:10px 20px;
+  margin:10px 5px;
+  cursor:pointer;
+  border:none;
+  border-radius:6px;
+  background:#BFA13A;
+  color:white;
 }
 
 button:hover{
-    opacity:.9;
+  opacity:.85;
 }
+
+@media print{
+
+  button{
+    display:none !important;
+  }
+
+}
+
 </style>
 
 </head>
 
 <body>
 
-<div style="
-text-align:center;
-padding-bottom:18px;
-margin-bottom:25px;
-border-bottom:3px solid #BFA13A;
-">
-
-<img src="Prime Relief.PNG" style="height:95px;"><br>
-
-<div style="font-size:15px;color:#666;">
-Professional LDP Eviction Support
-</div>
-
-</div>
-
 ${content}
-
-<br><br>
-
-<center>
-
-<button onclick="window.print()">
-Save / Print
-</button>
-
-</center>
 
 <script>
 
-async function intakeSaveButton(){
+const firebaseConfig = {
+  apiKey:"AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
+  authDomain:"prsolutions-lead-management.firebaseapp.com",
+  projectId:"prsolutions-lead-management",
+  storageBucket:"prsolutions-lead-management.firebasestorage.app",
+  messagingSenderId:"354105448091",
+  appId:"1:354105448091:web:faca5ab067608a7fbb983e",
+  measurementId:"G-G4CLMSC19F"
+};
 
-    try{
+let intakeFirebaseReady = false;
+let intakeDB = null;
+let intakeAuth = null;
 
-        const result =
-            await window.opener.saveIntake(document);
+try{
 
-        if(result === true){
+  if(!firebase.apps.length){
+    firebase.initializeApp(firebaseConfig);
+  }
 
-            alert("Intake Saved Successfully");
+  intakeDB = firebase.firestore();
+  intakeAuth = firebase.auth();
 
-        }else{
+  intakeFirebaseReady = true;
 
-            alert("Save Failed - Case Number is required.");
+}catch(err){
 
-        }
-
-    }catch(error){
-
-        console.error("INTAKE SAVE ERROR:", error);
-
-        alert("Save Intake Error: " + error.message);
-
-    }
+  console.error("Firebase initialization error:",err);
+  alert("Firebase initialization error:\\n" + err.message);
 
 }
 
-function openSavedIntakes(){
 
-    const modal =
-        document.getElementById("savedIntakesModal");
+/* ==========================================
+   GET CURRENT LOGGED-IN USER
+========================================== */
 
-    if(!modal){
+function getIntakeUser(){
 
-        alert("Saved Intake window was not found.");
+  if(!intakeAuth){
+    return null;
+  }
 
-        return;
+  return intakeAuth.currentUser || null;
+
+}
+
+
+/* ==========================================
+   SAVE INTAKE
+========================================== */
+
+async function saveIntake(){
+
+  try{
+
+    if(!intakeFirebaseReady || !intakeDB){
+
+      alert("Firebase is not ready yet. Please wait a moment and try again.");
+      return;
 
     }
 
-    modal.style.display = "block";
+    const user = getIntakeUser();
 
-    window.opener.showSavedIntakesForIntakeWindow(
-        document
+    if(!user){
+
+      alert("You are not logged into Firebase. Please close this Intake window and log in again.");
+      return;
+
+    }
+
+    const caseNumberElement =
+      document.getElementById("caseNumber");
+
+    if(!caseNumberElement){
+
+      alert("Case Number field was not found.");
+      return;
+
+    }
+
+    const caseNumber =
+      caseNumberElement.value.trim();
+
+    if(!caseNumber){
+
+      alert("Enter the Case Number first.");
+      caseNumberElement.focus();
+      return;
+
+    }
+
+    const data = {};
+
+    document
+      .querySelectorAll("input, textarea")
+      .forEach(el => {
+
+        if(!el.id){
+          return;
+        }
+
+        if(el.type === "checkbox"){
+
+          data[el.id] = el.checked;
+
+        }else if(el.type === "radio"){
+
+          data[el.id] = el.checked;
+
+        }else{
+
+          data[el.id] = el.value;
+
+        }
+
+      });
+
+
+    data.caseNumber = caseNumber;
+
+    data.updatedBy = user.email || "Unknown";
+
+    data.updated =
+      firebase.firestore.FieldValue.serverTimestamp();
+
+
+    await intakeDB
+      .collection("intakes")
+      .doc(caseNumber)
+      .set(data,{merge:true});
+
+
+    alert("✅ Intake Saved Successfully");
+
+  }catch(err){
+
+    console.error("Save Intake Error:",err);
+
+    alert(
+      "Unable to save intake.\\n\\n" +
+      err.message
     );
+
+  }
+
+}
+
+
+/* ==========================================
+   LOAD SAVED INTAKE
+========================================== */
+
+async function loadIntake(){
+
+  try{
+
+    if(!intakeFirebaseReady || !intakeDB){
+
+      alert("Firebase is not ready yet. Please wait a moment and try again.");
+      return;
+
+    }
+
+    const user = getIntakeUser();
+
+    if(!user){
+
+      alert("You are not logged into Firebase. Please close this Intake window and log in again.");
+      return;
+
+    }
+
+    let caseNumber =
+      prompt("Enter the Case Number to open:");
+
+    if(caseNumber === null){
+      return;
+    }
+
+    caseNumber = caseNumber.trim();
+
+    if(!caseNumber){
+
+      alert("Please enter a Case Number.");
+      return;
+
+    }
+
+
+    const doc = await intakeDB
+      .collection("intakes")
+      .doc(caseNumber)
+      .get();
+
+
+    if(!doc.exists){
+
+      alert(
+        "No saved Intake was found for Case Number:\\n\\n" +
+        caseNumber
+      );
+
+      return;
+
+    }
+
+
+    const data = doc.data();
+
+
+    Object.keys(data).forEach(key => {
+
+      const el =
+        document.getElementById(key);
+
+      if(!el){
+        return;
+      }
+
+
+      if(el.type === "checkbox" ||
+         el.type === "radio"){
+
+        el.checked = data[key] === true;
+
+      }else{
+
+        if(
+          data[key] !== null &&
+          data[key] !== undefined
+        ){
+
+          if(
+            typeof data[key] === "object" &&
+            data[key].toDate
+          ){
+
+            const date =
+              data[key].toDate();
+
+            el.value =
+              date.toISOString().split("T")[0];
+
+          }else{
+
+            el.value = data[key];
+
+          }
+
+        }
+
+      }
+
+    });
+
+
+    alert("✅ Intake Loaded Successfully");
+
+
+  }catch(err){
+
+    console.error("Load Intake Error:",err);
+
+    alert(
+      "Unable to load intake.\\n\\n" +
+      err.message
+    );
+
+  }
+
+}
+
+
+/* ==========================================
+   SEARCH CLIENT
+========================================== */
+
+async function searchIntakes(){
+
+  try{
+
+    if(!intakeFirebaseReady || !intakeDB){
+
+      alert("Firebase is not ready yet. Please wait a moment and try again.");
+      return;
+
+    }
+
+    const user = getIntakeUser();
+
+    if(!user){
+
+      alert("You are not logged into Firebase. Please close this Intake window and log in again.");
+      return;
+
+    }
+
+
+    let name =
+      prompt("Enter the Client Name:");
+
+    if(name === null){
+      return;
+    }
+
+    name = name.trim();
+
+    if(!name){
+
+      alert("Please enter a Client Name.");
+      return;
+
+    }
+
+
+    const snap = await intakeDB
+      .collection("intakes")
+      .where(
+        "clientName",
+        ">=",
+        name
+      )
+      .where(
+        "clientName",
+        "<=",
+        name + "\\uf8ff"
+      )
+      .get();
+
+
+    if(snap.empty){
+
+      alert(
+        "No Clients Found for:\\n\\n" +
+        name
+      );
+
+      return;
+
+    }
+
+
+    let results = "";
+
+
+    snap.forEach(doc => {
+
+      const d = doc.data();
+
+      results +=
+        "Case: " +
+        doc.id +
+        "\\n" +
+        "Name: " +
+        (d.clientName || "") +
+        "\\n" +
+        "Phone: " +
+        (d.phone || "") +
+        "\\n\\n";
+
+    });
+
+
+    const selected =
+      prompt(
+        results +
+        "\\nEnter the Case Number to open:"
+      );
+
+
+    if(selected === null){
+      return;
+    }
+
+
+    const selectedCase =
+      selected.trim();
+
+
+    if(!selectedCase){
+
+      alert("Please enter a Case Number.");
+      return;
+
+    }
+
+
+    const doc =
+      await intakeDB
+        .collection("intakes")
+        .doc(selectedCase)
+        .get();
+
+
+    if(!doc.exists){
+
+      alert(
+        "No Intake Found for Case Number:\\n\\n" +
+        selectedCase
+      );
+
+      return;
+
+    }
+
+
+    const data = doc.data();
+
+
+    Object.keys(data).forEach(key => {
+
+      const el =
+        document.getElementById(key);
+
+      if(!el){
+        return;
+      }
+
+
+      if(el.type === "checkbox" ||
+         el.type === "radio"){
+
+        el.checked = data[key] === true;
+
+      }else{
+
+        if(
+          data[key] !== null &&
+          data[key] !== undefined
+        ){
+
+          if(
+            typeof data[key] === "object" &&
+            data[key].toDate
+          ){
+
+            const date =
+              data[key].toDate();
+
+            el.value =
+              date.toISOString().split("T")[0];
+
+          }else{
+
+            el.value = data[key];
+
+          }
+
+        }
+
+      }
+
+    });
+
+
+    alert("✅ Client Intake Loaded");
+
+
+  }catch(err){
+
+    console.error("Search Client Error:",err);
+
+    alert(
+      "Unable to search clients.\\n\\n" +
+      err.message
+    );
+
+  }
+
+}
+
+
+/* ==========================================
+   MAKE FUNCTIONS AVAILABLE TO BUTTONS
+========================================== */
+
+window.saveIntake = saveIntake;
+window.loadIntake = loadIntake;
+window.searchIntakes = searchIntakes;
+
+
+/* ==========================================
+   CHECK FIREBASE LOGIN
+========================================== */
+
+if(intakeAuth){
+
+  intakeAuth.onAuthStateChanged(user => {
+
+    if(user){
+
+      console.log(
+        "Intake Firebase user:",
+        user.email
+      );
+
+    }else{
+
+      console.warn(
+        "No Firebase user detected in Intake window."
+      );
+
+    }
+
+  });
 
 }
 
 <\/script>
 
 </body>
-
 </html>
 `);
-  
+
 w.document.close();
-  if(type==="intake")
-    w.document.title="Prime Relief Solutions - Intake";
 
-if(type==="script")
-    w.document.title="Prime Relief Solutions - Call Script";
-
-if(type==="appeal")
-    w.document.title="Prime Relief Solutions - Appeal Information";
-
-if(type==="checklist")
-    w.document.title="Prime Relief Solutions - Checklist";
-
-if(type==="completion")
-    w.document.title="Prime Relief Solutions - Completion Letter";
-
-if(type==="serviceAgreement")
-    w.document.title="Prime Relief Solutions - Service Agreement";
-
-if(type==="limitedScope")
-    w.document.title="Prime Relief Solutions - Limited Scope Disclosure";
-
-if(type==="authorization")
-    w.document.title="Prime Relief Solutions - Authorization";
-
-if(type==="invoice")
-    w.document.title="Prime Relief Solutions - Invoice";
-
-if(type==="serviceAgreement"){
-
-    setTimeout(()=>{
-
-        const d = w.document;
-
-        d.getElementById("saClientName").value =
-            document.getElementById("clientName")?.value || "";
-
-        d.getElementById("saCaseNumber").value =
-            document.getElementById("caseNumber")?.value || "";
-
-        d.getElementById("saDate").value =
-            document.getElementById("intakeDate")?.value || "";
-
-        d.getElementById("saStaff").value =
-            document.getElementById("staffMember")?.value || "";
-
-    },200);
-
-}
-
-if(type==="limitedScope"){
-
-    setTimeout(()=>{
-
-        const d = w.document;
-
-        d.getElementById("lsClientName").value =
-            document.getElementById("clientName")?.value || "";
-
-        d.getElementById("lsCaseNumber").value =
-            document.getElementById("caseNumber")?.value || "";
-
-        d.getElementById("lsDate").value =
-            document.getElementById("intakeDate")?.value || "";
-
-    },200);
-
-}
-
-if(type==="authorization"){
-
-    setTimeout(()=>{
-
-        const d = w.document;
-
-        d.getElementById("authClientName").value =
-            document.getElementById("clientName")?.value || "";
-
-        d.getElementById("authCaseNumber").value =
-            document.getElementById("caseNumber")?.value || "";
-
-        d.getElementById("authDate").value =
-            document.getElementById("intakeDate")?.value || "";
-
-        d.getElementById("authStaff").value =
-            document.getElementById("staffMember")?.value || "";
-
-    },200);
-
-}
-  
-if(type==="invoice"){
-
-    setTimeout(()=>{
-
-        const d = w.document;
-
-        d.getElementById("invNumber").value =
-            "INV-" + Date.now();
-
-        d.getElementById("invDate").value =
-            document.getElementById("intakeDate")?.value || "";
-
-        d.getElementById("invClient").value =
-            document.getElementById("clientName")?.value || "";
-
-        d.getElementById("invCase").value =
-            document.getElementById("caseNumber")?.value || "";
-
-        d.getElementById("invService").value =
-            document.getElementById("serviceSelected")?.value || "";
-
-        d.getElementById("invAmount").value =
-            document.getElementById("serviceFee")?.value || "$190.00";
-
-        d.getElementById("invBalance").value = "$0.00";
-
-        d.getElementById("invStaff").value =
-            document.getElementById("staffMember")?.value || "";
-
-        d.getElementById("invCash").checked =
-            document.getElementById("payCash")?.checked || false;
-
-        d.getElementById("invCard").checked =
-            document.getElementById("payCard")?.checked || false;
-
-        d.getElementById("invCashApp").checked =
-            document.getElementById("payCashApp")?.checked || false;
-
-        d.getElementById("invZelle").checked =
-            document.getElementById("payZelle")?.checked || false;
-
-    },200);
-
-}
-  
 return;
 }
-
+  
 const firebaseConfig = {
   apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
   authDomain: "prsolutions-lead-management.firebaseapp.com",
