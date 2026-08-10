@@ -1240,34 +1240,34 @@ Save / Print
 
 <script>
 
-async function intakeSaveButton(){
+async function saveIntake(){
 
-    try{
+    const ok =
+        await window.opener.saveIntake(document);
 
-        const result =
-            await window.opener.saveIntake(document);
+    if(ok){
 
-        if(result === true){
+        alert("✅ Intake Saved");
 
-            alert("Intake Saved Successfully");
+    }else{
 
-        }else{
-
-            alert("Save Failed - Case Number is required.");
-
-        }
-
-    }catch(error){
-
-        console.error("INTAKE SAVE ERROR:", error);
-
-        alert("Save Intake Error: " + error.message);
+        alert(
+            "Save Failed.\n\n" +
+            "A Case Number is required."
+        );
 
     }
 
 }
 
-function openSavedIntakes(){
+
+// ==========================================
+// OPEN SAVED INTAKES INSIDE INTAKE WINDOW
+// ==========================================
+
+let savedIntakes = [];
+
+async function openSavedIntakes(){
 
     const modal =
         document.getElementById("savedIntakesModal");
@@ -1282,9 +1282,286 @@ function openSavedIntakes(){
 
     modal.style.display = "block";
 
-    window.opener.showSavedIntakesForIntakeWindow(
-        document
-    );
+    const searchBox =
+        document.getElementById("intakeSearch");
+
+    if(searchBox){
+
+        searchBox.value = "";
+
+    }
+
+    try{
+
+        const snap =
+            await window.opener.db
+                .collection("intakes")
+                .get();
+
+        savedIntakes = [];
+
+        snap.forEach(doc => {
+
+            savedIntakes.push({
+
+                id: doc.id,
+
+                ...doc.data()
+
+            });
+
+        });
+
+        savedIntakes.sort((a,b) => {
+
+            return String(a.clientName || "")
+                .localeCompare(
+                    String(b.clientName || "")
+                );
+
+        });
+
+        renderSavedIntakes(savedIntakes);
+
+    }catch(err){
+
+        console.error(
+            "Saved Intake Error:",
+            err
+        );
+
+        alert(
+            "Unable to load saved intakes.\n\n" +
+            err.message
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// DISPLAY SAVED INTAKES
+// ==========================================
+
+function renderSavedIntakes(list){
+
+    const container =
+        document.getElementById(
+            "savedIntakesList"
+        );
+
+    if(!container){
+
+        return;
+
+    }
+
+    if(!list.length){
+
+        container.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+            ">
+                <div style="font-size:35px;">📂</div>
+
+                <strong>
+                    No Saved Intakes Found
+                </strong>
+
+                <div style="
+                    margin-top:6px;
+                    font-size:13px;
+                ">
+                    Save an intake to see it here.
+                </div>
+            </div>
+        `;
+
+        return;
+
+    }
+
+    let html = "";
+
+    list.forEach(c => {
+
+        html += `
+
+            <div class="savedCard">
+
+                <div class="savedInfo">
+
+                    <b>
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
+
+                    <br>
+
+                    Case:
+                    ${escapeHTML(
+                        c.caseNumber ||
+                        c.id
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.propertyAddress ||
+                        ""
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.phone ||
+                        ""
+                    )}
+
+                </div>
+
+                <button
+                    type="button"
+                    class="savedOpen"
+                    onclick="openSavedIntake('${c.id}')">
+
+                    Open
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+    container.innerHTML = html;
+
+}
+
+
+// ==========================================
+// SEARCH SAVED INTAKES
+// ==========================================
+
+function filterSavedIntakes(){
+
+    const searchBox =
+        document.getElementById(
+            "intakeSearch"
+        );
+
+    if(!searchBox){
+
+        return;
+
+    }
+
+    const search =
+        searchBox.value
+            .trim()
+            .toLowerCase();
+
+    const filtered =
+        savedIntakes.filter(c => {
+
+            return (
+
+                String(c.clientName || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(c.caseNumber || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(c.propertyAddress || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                String(c.phone || "")
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+        });
+
+    renderSavedIntakes(filtered);
+
+}
+
+
+// ==========================================
+// OPEN SELECTED SAVED INTAKE
+// ==========================================
+
+async function openSavedIntake(intakeID){
+
+    const ok =
+        await window.opener.loadIntake(
+            document,
+            intakeID
+        );
+
+    if(ok){
+
+        closeSavedIntakes();
+
+    }else{
+
+        alert(
+            "Unable to load this saved intake."
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// CLOSE SAVED INTAKES
+// ==========================================
+
+function closeSavedIntakes(){
+
+    const modal =
+        document.getElementById(
+            "savedIntakesModal"
+        );
+
+    if(modal){
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+
+// ==========================================
+// SAFE HTML
+// ==========================================
+
+function escapeHTML(value){
+
+    return String(value || "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 
 }
 
