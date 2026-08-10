@@ -1267,35 +1267,24 @@ async function intakeSaveButton(){
 
 }
 
-function intakeOpenSavedButton(){
+function openSavedIntakes(){
 
-    try{
+    const modal =
+        document.getElementById("savedIntakesModal");
 
-        if(!window.opener || window.opener.closed){
+    if(!modal){
 
-            alert("Main application window is not available.");
+        alert("Saved Intake window was not found.");
 
-            return;
-
-        }
-
-        window.opener.showSavedIntakes(document);
-
-        window.opener.focus();
-
-    }catch(error){
-
-        console.error(
-            "OPEN SAVED INTAKES ERROR:",
-            error
-        );
-
-        alert(
-            "Open Saved Intake Error: " +
-            error.message
-        );
+        return;
 
     }
+
+    modal.style.display = "block";
+
+    window.opener.showSavedIntakesForIntakeWindow(
+        document
+    );
 
 }
 
