@@ -1924,8 +1924,179 @@ async function showSavedIntakes(formDoc){
     }
 
 }
+  
+async function showSavedIntakesForIntakeWindow(formDoc){
 
+    currentIntakeWindow = formDoc;
 
+    const modal =
+        formDoc.getElementById("savedIntakesModal");
+
+    if(!modal){
+
+        alert("Saved Intake window was not found.");
+
+        return;
+
+    }
+
+    modal.style.display = "block";
+    modal.style.zIndex = "999999";
+
+    const searchBox =
+        formDoc.getElementById("intakeSearch");
+
+    if(searchBox){
+
+        searchBox.value = "";
+
+    }
+
+    try{
+
+        const snap =
+            await db
+                .collection("intakes")
+                .get();
+
+        savedIntakes = [];
+
+        snap.forEach(doc => {
+
+            savedIntakes.push({
+
+                id: doc.id,
+
+                ...doc.data()
+
+            });
+
+        });
+
+        savedIntakes.sort((a,b) => {
+
+            return String(a.clientName || "")
+                .localeCompare(
+                    String(b.clientName || "")
+                );
+
+        });
+
+        renderSavedIntakesForIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
+
+    }catch(err){
+
+        console.error(
+            "Saved Intake Error:",
+            err
+        );
+
+        alert(
+            "Unable to load saved intakes.\n\n" +
+            err.message
+        );
+
+    }
+
+}
+  
+function renderSavedIntakesForIntakeWindow(formDoc,list){
+
+    const container =
+        formDoc.getElementById("savedIntakesList");
+
+    if(!container) return;
+
+    if(!list.length){
+
+        container.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+            ">
+                <div style="font-size:35px;">📂</div>
+
+                <strong>
+                    No Saved Intakes Found
+                </strong>
+
+                <div style="
+                    margin-top:6px;
+                    font-size:13px;
+                ">
+                    Save an intake to see it here.
+                </div>
+            </div>
+        `;
+
+        return;
+
+    }
+
+    let html = "";
+
+    list.forEach(c => {
+
+        html += `
+
+            <div class="savedCard">
+
+                <div class="savedInfo">
+
+                    <b>
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
+
+                    <br>
+
+                    Case:
+                    ${escapeHTML(
+                        c.caseNumber ||
+                        "No Case Number"
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.propertyAddress ||
+                        ""
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.phone ||
+                        ""
+                    )}
+
+                </div>
+
+                <button
+                    type="button"
+                    class="savedOpen"
+                    onclick="openSavedIntake('${c.id}')">
+
+                    Open
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+    container.innerHTML = html;
+
+}
+  
 //======================================
 // DISPLAY SAVED INTAKES
 //======================================
