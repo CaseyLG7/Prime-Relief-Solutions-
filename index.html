@@ -1267,7 +1267,7 @@ async function intakeSaveButton(){
 
 }
 
-async function openSavedIntakes(){
+function openSavedIntakes(){
 
     const modal =
         document.getElementById("savedIntakesModal");
@@ -1277,61 +1277,11 @@ async function openSavedIntakes(){
         alert("Saved Intake window was not found.");
 
         return;
-
     }
 
     modal.style.display = "block";
 
-    const snap =
-        await window.opener.db
-            .collection("intakes")
-            .get();
-
-    const list =
-        document.getElementById("savedIntakesList");
-
-    if(!list) return;
-
-    let html = "";
-
-    snap.forEach(doc => {
-
-        const c = doc.data();
-
-        html += `
-            <div class="savedCard">
-
-                <div class="savedInfo">
-
-                    <b>${c.clientName || "Unnamed Client"}</b><br>
-
-                    Case: ${c.caseNumber || doc.id}<br>
-
-                    ${c.propertyAddress || ""}<br>
-
-                    ${c.phone || ""}
-
-                </div>
-
-                <button
-                    type="button"
-                    class="savedOpen"
-                    onclick="window.opener.loadIntake(document,'${doc.id}').then(ok => {
-                        if(ok) closeSavedIntakes();
-                    })">
-
-                    Open
-
-                </button>
-
-            </div>
-        `;
-
-    });
-
-    list.innerHTML =
-        html ||
-        "<div style='padding:30px;text-align:center;'>No Saved Intakes Found</div>";
+    window.opener.showSavedIntakes(document);
 
 }
 }
