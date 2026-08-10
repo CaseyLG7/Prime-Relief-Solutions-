@@ -372,6 +372,7 @@ COMMON CLIENT QUESTIONS
 • Q: Will you tell me what I should do?
   A: We can explain the document preparation process and court procedures, but we cannot provide legal advice or recommend legal strategies.
 </div>`;}
+  
 if(type==="intake"){ content=`
 <div style="font-family:Arial;font-size:15px;max-width:900px;margin:auto;">
 
@@ -388,9 +389,6 @@ if(type==="intake"){ content=`
 
 <b>Full Name:</b><br>
 <input id="clientName" style="width:350px;"><br><br>
-
-<b>Case Number:</b><br>
-<input id="caseNumber" style="width:220px;"><br><br>
 
 <b>Date of Birth:</b><br>
 <input id="dob" type="date" style="width:220px;"><br><br>
@@ -418,11 +416,9 @@ if(type==="intake"){ content=`
 <input id="city" style="width:220px;">
 
 <b style="margin-left:30px;">State:</b>
-
 <input id="state" value="TX" style="width:70px;">
 
 <b style="margin-left:30px;">ZIP:</b>
-
 <input id="zip" style="width:100px;">
 
 <br><br>
@@ -440,11 +436,9 @@ if(type==="intake"){ content=`
 <h3 style="background:#BFA13A;color:white;padding:8px;">LANDLORD INFORMATION</h3>
 
 <b>Landlord / Property Management:</b><br>
-
 <input id="landlord" style="width:420px;"><br><br>
 
 <b>Attorney (if known):</b><br>
-
 <input id="attorney" style="width:420px;"><br><br>
 
 <hr>
@@ -452,19 +446,18 @@ if(type==="intake"){ content=`
 <h3 style="background:#BFA13A;color:white;padding:8px;">COURT INFORMATION</h3>
 
 <b>County:</b><br>
-
 <input id="county" style="width:220px;"><br><br>
 
 <b>Justice Court Precinct:</b><br>
-
 <input id="precinct" style="width:220px;"><br><br>
 
-<b>Judgment Date:</b><br>
+<b>Case Number:</b><br>
+<input id="caseNumber" style="width:220px;"><br><br>
 
+<b>Judgment Date:</b><br>
 <input id="judgmentDate" type="date" style="width:220px;"><br><br>
 
 <b>Upcoming Court Date:</b><br>
-
 <input id="courtDate" type="date" style="width:220px;"><br><br>
 
 <h3 style="background:#BFA13A;color:white;padding:8px;">APPEAL INFORMATION</h3>
@@ -481,7 +474,9 @@ if(type==="intake"){ content=`
 
 <b>Has the client already filed a Notice of Appeal?</b><br>
 
-<label><input id="noticeYes" type="radio" name="noticeAppeal"> Yes</label>
+<label>
+<input id="noticeYes" type="radio" name="noticeAppeal"> Yes
+</label>
 
 <label style="margin-left:20px;">
 <input id="noticeNo" type="radio" name="noticeAppeal"> No
@@ -491,7 +486,9 @@ if(type==="intake"){ content=`
 
 <b>Has a Writ of Possession been issued?</b><br>
 
-<label><input id="writYes" type="radio" name="writ"> Yes</label>
+<label>
+<input id="writYes" type="radio" name="writ"> Yes
+</label>
 
 <label style="margin-left:20px;">
 <input id="writNo" type="radio" name="writ"> No
@@ -501,7 +498,9 @@ if(type==="intake"){ content=`
 
 <b>Has the Constable posted a Notice to Vacate?</b><br>
 
-<label><input id="vacateYes" type="radio" name="vacate"> Yes</label>
+<label>
+<input id="vacateYes" type="radio" name="vacate"> Yes
+</label>
 
 <label style="margin-left:20px;">
 <input id="vacateNo" type="radio" name="vacate"> No
@@ -515,15 +514,25 @@ if(type==="intake"){ content=`
 
 <b>Service Selected:</b><br>
 
-<input id="serviceSelected" value="Texas Eviction Appeal Document Preparation" style="width:420px;"><br><br>
+<input
+id="serviceSelected"
+value="Texas Eviction Appeal Document Preparation"
+style="width:420px;"
+><br><br>
 
 <b>Service Fee:</b><br>
 
-<input id="serviceFee" value="$190.00" style="width:120px;"><br><br>
+<input
+id="serviceFee"
+value="$190.00"
+style="width:120px;"
+><br><br>
 
 <b>Payment Method</b><br><br>
 
-<label><input id="payCash" type="checkbox"> Cash</label>
+<label>
+<input id="payCash" type="checkbox"> Cash
+</label>
 
 <label style="margin-left:15px;">
 <input id="payCard" type="checkbox"> Credit / Debit
@@ -544,15 +553,10 @@ if(type==="intake"){ content=`
 <h3 style="background:#BFA13A;color:white;padding:8px;">DOCUMENT CHECKLIST</h3>
 
 <label><input id="docPetition" type="checkbox"> Eviction Petition</label><br>
-
 <label><input id="docJudgment" type="checkbox"> Judgment</label><br>
-
 <label><input id="docLease" type="checkbox"> Lease Agreement</label><br>
-
 <label><input id="docID" type="checkbox"> Driver License / ID</label><br>
-
 <label><input id="docCourt" type="checkbox"> Court Documents</label><br>
-
 <label><input id="docOther" type="checkbox"> Other</label>
 
 <br><br>
@@ -605,30 +609,27 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 
 <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
 
-<button type="button" onclick="intakeSaveButton()">💾 Save Intake</button>
-
-<button
-    type="button"
-    onclick="intakeOpenSavedButton()"
-    style="
-        background:#BFA13A;
-        color:white;
-        border:none;
-        padding:10px 18px;
-        border-radius:5px;
-        cursor:pointer;
-        font-weight:bold;
-        margin-right:8px;
-    ">
-    📂 Open Saved Intake
+<button type="button" onclick="window.saveIntake()">
+💾 Save Intake
 </button>
 
-<button type="button" onclick="window.print()">🖨 Save / Print</button>
+<button type="button" onclick="window.loadIntake()">
+📂 Open Saved Intake
+</button>
+
+<button type="button" onclick="window.searchIntakes()">
+🔍 Find Client
+</button>
+
+<button type="button" onclick="window.print()">
+🖨 Save / Print
+</button>
 
 </div>
 
 </div>`;
 }
+  
 if(type==="appeal"){ content=`<div style="${style}">
 
 <b>TEXAS EVICTION APPEAL INFORMATION</b>
