@@ -1878,8 +1878,10 @@ async function showSavedIntakes(formDoc){
     modal.style.zIndex = "999999";
   
     const searchBox =
-        document.getElementById("intakeSearch");
-
+    formDoc.getElementById(
+        "intakeSearch"
+    );
+  
     if(searchBox){
 
         searchBox.value = "";
