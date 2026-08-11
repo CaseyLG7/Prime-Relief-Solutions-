@@ -1248,83 +1248,175 @@ Save / Print
 
 <script>
 
-async function intakeSaveButton(){
+(function(){
 
-    try{
+    const saveButton =
+        document.getElementById("saveIntakeButton");
 
-        if(!window.opener || window.opener.closed){
+    const openButton =
+        document.getElementById("openSavedIntakeButton");
 
-            alert("Main Prime Relief Solutions window is not available.");
+    const printButton =
+        document.getElementById("printIntakeButton");
 
-            return;
 
-        }
+    /* ================================
+       SAVE INTAKE
+    ================================= */
 
-        const result =
-            await window.opener.saveIntake(document);
+    if(saveButton){
 
-        if(result === true){
+        saveButton.addEventListener("click", async function(){
 
-            alert("✅ Intake Saved Successfully");
+            try{
 
-        }else{
+                if(
+                    !window.opener ||
+                    window.opener.closed
+                ){
 
-            alert(
-                "❌ Intake was NOT saved.\n\n" +
-                "Please make sure a Case Number is entered."
-            );
+                    alert(
+                        "The main Prime Relief Solutions window is not available."
+                    );
 
-        }
+                    return;
 
-    }catch(error){
+                }
 
-        console.error(
-            "INTAKE SAVE ERROR:",
-            error
-        );
+                if(
+                    typeof window.opener.saveIntake !==
+                    "function"
+                ){
 
-        alert(
-            "Save Intake Error:\n\n" +
-            error.message
+                    alert(
+                        "Save Intake function is not available."
+                    );
+
+                    return;
+
+                }
+
+                const result =
+                    await window.opener.saveIntake(
+                        document
+                    );
+
+                if(result === true){
+
+                    alert(
+                        "✅ Intake Saved Successfully"
+                    );
+
+                }else{
+
+                    alert(
+                        "❌ Intake was NOT saved.\n\n" +
+                        "Please enter the Case Number."
+                    );
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    "SAVE INTAKE ERROR:",
+                    error
+                );
+
+                alert(
+                    "Save Intake Error:\n\n" +
+                    error.message
+                );
+
+            }
+
+        });
+
+    }
+
+
+    /* ================================
+       OPEN SAVED INTAKE
+    ================================= */
+
+    if(openButton){
+
+        openButton.addEventListener(
+            "click",
+            async function(){
+
+                try{
+
+                    if(
+                        !window.opener ||
+                        window.opener.closed
+                    ){
+
+                        alert(
+                            "The main Prime Relief Solutions window is not available."
+                        );
+
+                        return;
+
+                    }
+
+                    if(
+                        typeof window.opener
+                            .showSavedIntakesForIntakeWindow
+                        !== "function"
+                    ){
+
+                        alert(
+                            "Saved Intake function is not available."
+                        );
+
+                        return;
+
+                    }
+
+                    await window.opener
+                        .showSavedIntakesForIntakeWindow(
+                            document
+                        );
+
+                }catch(error){
+
+                    console.error(
+                        "OPEN SAVED INTAKE ERROR:",
+                        error
+                    );
+
+                    alert(
+                        "Open Saved Intake Error:\n\n" +
+                        error.message
+                    );
+
+                }
+
+            }
         );
 
     }
 
-}
 
-function openSavedIntakes(){
+    /* ================================
+       SAVE / PRINT
+    ================================= */
 
-    try{
+    if(printButton){
 
-        if(!window.opener || window.opener.closed){
+        printButton.addEventListener(
+            "click",
+            function(){
 
-            alert(
-                "Main Prime Relief Solutions window is not available."
-            );
+                window.print();
 
-            return;
-
-        }
-
-        window.opener.showSavedIntakesForIntakeWindow(
-            document
-        );
-
-    }catch(error){
-
-        console.error(
-            "OPEN SAVED INTAKES ERROR:",
-            error
-        );
-
-        alert(
-            "Open Saved Intake Error:\n\n" +
-            error.message
+            }
         );
 
     }
 
-}
+})();
 
 <\/script>
 
