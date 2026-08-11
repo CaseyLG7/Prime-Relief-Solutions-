@@ -1269,22 +1269,144 @@ async function intakeSaveButton(){
 
 function openSavedIntakes(){
 
-    const modal =
-        document.getElementById("savedIntakesModal");
+    try{
 
-    if(!modal){
+        /*
+         * The Saved Intake modal exists on the main app,
+         * but this Intake form is running in a separate
+         * browser window.
+         *
+         * Create the modal INSIDE this Intake window.
+         */
 
-        alert("Saved Intake window was not found.");
+        let modal =
+            document.getElementById("savedIntakesModal");
 
-        return;
+        if(!modal){
+
+            modal = document.createElement("div");
+
+            modal.id = "savedIntakesModal";
+
+            modal.style.position = "fixed";
+            modal.style.top = "0";
+            modal.style.left = "0";
+            modal.style.width = "100%";
+            modal.style.height = "100%";
+            modal.style.background = "rgba(0,0,0,0.55)";
+            modal.style.zIndex = "999999";
+            modal.style.display = "block";
+            modal.style.overflow = "auto";
+
+            modal.innerHTML = `
+
+                <div style="
+                    background:white;
+                    width:90%;
+                    max-width:750px;
+                    margin:50px auto;
+                    padding:25px;
+                    border-radius:12px;
+                    box-shadow:0 10px 40px rgba(0,0,0,0.35);
+                    font-family:Arial;
+                ">
+
+                    <h2 style="
+                        margin-top:0;
+                        text-align:center;
+                        color:#BFA13A;
+                    ">
+                        Saved Client Intakes
+                    </h2>
+
+                    <input
+                        id="intakeSearch"
+                        type="text"
+                        placeholder="Search Name, Case, Address or Phone..."
+                        oninput="window.filterSavedIntakes()"
+                        style="
+                            width:100%;
+                            box-sizing:border-box;
+                            padding:10px;
+                            margin-bottom:15px;
+                            font-size:15px;
+                            border:1px solid #aaa;
+                            border-radius:6px;
+                        "
+                    >
+
+                    <div id="savedIntakesList"></div>
+
+                    <div style="
+                        text-align:center;
+                        margin-top:20px;
+                    ">
+
+                        <button
+                            type="button"
+                            onclick="window.closeSavedIntakes()"
+                            style="
+                                background:#6c757d;
+                                color:white;
+                                border:none;
+                                padding:10px 25px;
+                                border-radius:6px;
+                                cursor:pointer;
+                            ">
+                            Close
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `;
+
+            document.body.appendChild(modal);
+
+        }else{
+
+            modal.style.display = "block";
+
+        }
+
+        /*
+         * Tell the MAIN APP to retrieve the saved
+         * intake records and render them inside
+         * THIS Intake window.
+         */
+
+        if(
+            window.opener &&
+            !window.opener.closed &&
+            typeof window.opener.showSavedIntakesForIntakeWindow === "function"
+        ){
+
+            window.opener.showSavedIntakesForIntakeWindow(
+                document
+            );
+
+        }else{
+
+            alert(
+                "The main Prime Relief Solutions window is not available."
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "OPEN SAVED INTAKE ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to open Saved Intakes:\n\n" +
+            error.message
+        );
 
     }
-
-    modal.style.display = "block";
-
-    window.opener.showSavedIntakesForIntakeWindow(
-        document
-    );
 
 }
 
