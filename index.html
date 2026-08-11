@@ -2196,15 +2196,11 @@ function renderSavedIntakes(list){
 
 function filterSavedIntakes(){
 
-   const searchBox =
-    currentIntakeWindow.getElementById(
-        "intakeSearch"
-    );
+    const searchBox =
+        document.getElementById("intakeSearch");
 
     if(!searchBox){
-
         return;
-
     }
 
     const search =
@@ -2252,7 +2248,6 @@ function filterSavedIntakes(){
         });
 
     renderSavedIntakes(filtered);
-
 }
 
 
