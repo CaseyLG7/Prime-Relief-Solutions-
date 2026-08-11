@@ -1239,121 +1239,32 @@ Save / Print
 </center>
 
 <script>
-
 async function intakeSaveButton(){
-
     try{
-
-        const result =
-            await window.opener.saveIntake(document);
+        const result = await window.opener.saveIntake(document);
 
         if(result === true){
-
             alert("Intake Saved Successfully");
-
         }else{
-
             alert("Save Failed - Case Number is required.");
-
         }
 
     }catch(error){
-
         console.error("INTAKE SAVE ERROR:", error);
-
         alert("Save Intake Error: " + error.message);
-
     }
-
 }
 
 function openSavedIntakes(){
 
-    // The Saved Intake modal must be created inside
-    // the Intake window itself.
-    let modal = document.getElementById("savedIntakesModal");
-
-    // If it isn't there, create it in the Intake window.
-    if(!modal){
-
-        modal = document.createElement("div");
-
-        modal.id = "savedIntakesModal";
-        modal.className = "modal";
-
-        modal.innerHTML = `
-            <div class="modal-content" style="
-                background:#ffffff;
-                color:#111111;
-                width:700px;
-                max-width:90%;
-                margin:40px auto;
-                padding:20px;
-                border-radius:12px;
-                max-height:85vh;
-                overflow:auto;
-                box-sizing:border-box;
-            ">
-
-                <h2 style="
-                    color:#111111;
-                    margin-top:0;
-                ">
-                    Saved Client Intakes
-                </h2>
-
-                <input
-                    id="intakeSearch"
-                    type="text"
-                    placeholder="Search Name, Case, Address or Phone..."
-                    onkeyup="window.opener.filterSavedIntakesFromIntakeWindow(document)"
-                    style="
-                        width:100%;
-                        padding:10px;
-                        margin-bottom:15px;
-                        font-size:15px;
-                        color:#111111;
-                        background:#ffffff;
-                        border:1px solid #777;
-                        box-sizing:border-box;
-                    "
-                >
-
-                <div id="savedIntakesList"></div>
-
-                <br>
-
-                <button
-                    type="button"
-                    onclick="closeSavedIntakes()"
-                    style="
-                        background:#000000;
-                        color:#ffffff;
-                        padding:9px 18px;
-                        border:none;
-                        border-radius:6px;
-                        cursor:pointer;
-                    "
-                >
-                    Close
-                </button>
-
-            </div>
-        `;
-
-        document.body.appendChild(modal);
+    if(!window.opener){
+        alert("Main application window is not available.");
+        return;
     }
 
-    currentIntakeWindow = document;
-
-    modal.style.display = "block";
-
-    // Load the saved intakes from the MAIN app,
-    // but display them inside THIS Intake window.
-    window.opener.loadSavedIntakesIntoIntakeWindow(document);
+    window.opener.showSavedIntakesForIntakeWindow(document);
 }
-
-<\/script>
+</script>
 
 </body>
 
