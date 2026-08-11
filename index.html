@@ -1900,24 +1900,24 @@ async function showSavedIntakes(formDoc){
   
 async function showSavedIntakesForIntakeWindow(formDoc){
 
-    // Keep the Intake window as the document we will load data INTO
+    if(!formDoc){
+        alert("Intake window is not available.");
+        return;
+    }
+
     currentIntakeWindow = formDoc;
 
-    // The Saved Intake popup is located in the MAIN page
-    const modal = document.getElementById("savedIntakesModal");
+    const modal = formDoc.getElementById("savedIntakesModal");
 
     if(!modal){
-
         alert("Saved Intake window was not found.");
-
         return;
     }
 
     modal.style.display = "block";
     modal.style.zIndex = "999999";
 
-    const searchBox =
-        document.getElementById("intakeSearch");
+    const searchBox = formDoc.getElementById("intakeSearch");
 
     if(searchBox){
         searchBox.value = "";
@@ -1925,45 +1925,36 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
     try{
 
-        const snap =
-            await db
-                .collection("intakes")
-                .get();
+        const snap = await db.collection("intakes").get();
 
         savedIntakes = [];
 
         snap.forEach(doc => {
-
             savedIntakes.push({
                 id: doc.id,
                 ...doc.data()
             });
-
         });
 
-        savedIntakes.sort((a,b) => {
+        savedIntakes.sort((a,b) =>
+            String(a.clientName || "").localeCompare(
+                String(b.clientName || "")
+            )
+        );
 
-            return String(a.clientName || "")
-                .localeCompare(
-                    String(b.clientName || "")
-                );
-
-        });
-
-        renderSavedIntakes(savedIntakes);
+        renderSavedIntakesForIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
 
     }catch(err){
 
-        console.error(
-            "Saved Intake Error:",
-            err
-        );
+        console.error("Saved Intake Error:", err);
 
         alert(
             "Unable to load saved intakes.\n\n" +
             err.message
         );
-
     }
 }
 
