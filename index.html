@@ -1269,22 +1269,38 @@ async function intakeSaveButton(){
 
 function openSavedIntakes(){
 
-    const modal =
-        document.getElementById("savedIntakesModal");
+    try{
 
-    if(!modal){
+        if(!window.opener || window.opener.closed){
 
-        alert("Saved Intake window was not found.");
+            alert("The main Prime Relief Solutions window is not available.");
 
-        return;
+            return;
+
+        }
+
+        if(typeof window.opener.showSavedIntakesForIntakeWindow !== "function"){
+
+            alert("Saved Intake function is not available in the main app.");
+
+            return;
+
+        }
+
+        window.opener.showSavedIntakesForIntakeWindow(
+            window
+        );
+
+    }catch(error){
+
+        console.error("OPEN SAVED INTAKE ERROR:", error);
+
+        alert(
+            "Unable to open Saved Intakes:\n" +
+            error.message
+        );
 
     }
-
-    modal.style.display = "block";
-
-    window.opener.showSavedIntakesForIntakeWindow(
-        document
-    );
 
 }
 
