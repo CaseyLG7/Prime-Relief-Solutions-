@@ -1240,7 +1240,7 @@ Save / Print
 
 <script>
 
-async function saveIntake(){
+function openSavedIntakes(){
 
     try{
 
@@ -1248,27 +1248,34 @@ async function saveIntake(){
 
             alert("The main Prime Relief Solutions window is not available.");
 
-            return false;
+            return;
 
         }
 
-        const result =
-            await window.opener.saveIntake(document);
+        if(typeof window.opener.showSavedIntakesForIntakeWindow !== "function"){
 
-        return result === true;
+            alert("Saved Intake function is not available in the main app.");
+
+            return;
+
+        }
+
+        window.opener.showSavedIntakesForIntakeWindow(
+            window
+        );
 
     }catch(error){
 
-        console.error("INTAKE SAVE ERROR:", error);
+        console.error("OPEN SAVED INTAKE ERROR:", error);
 
-        alert("Save Intake Error: " + error.message);
-
-        return false;
+        alert(
+            "Unable to open Saved Intakes:\n" +
+            error.message
+        );
 
     }
 
 }
-
 
 async function loadIntake(){
 
