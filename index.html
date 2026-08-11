@@ -1285,11 +1285,9 @@ function openSavedIntakes(){
         }
 
         // Copy it into THIS Intake window
-        let modal =
-            document.getElementById(
-                "savedIntakesModal"
-            );
-
+       const modal =
+    formDoc.getElementById("savedIntakesModal");
+    
         if(!modal){
 
             modal = source.cloneNode(true);
