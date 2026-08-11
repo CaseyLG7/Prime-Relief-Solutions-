@@ -1924,29 +1924,27 @@ async function showSavedIntakes(formDoc){
   
 async function showSavedIntakesForIntakeWindow(formDoc){
 
+    // Keep the Intake window as the document we will load data INTO
     currentIntakeWindow = formDoc;
 
-    const modal =
-        formDoc.getElementById("savedIntakesModal");
+    // The Saved Intake popup is located in the MAIN page
+    const modal = document.getElementById("savedIntakesModal");
 
     if(!modal){
 
         alert("Saved Intake window was not found.");
 
         return;
-
     }
 
     modal.style.display = "block";
     modal.style.zIndex = "999999";
 
     const searchBox =
-        formDoc.getElementById("intakeSearch");
+        document.getElementById("intakeSearch");
 
     if(searchBox){
-
         searchBox.value = "";
-
     }
 
     try{
@@ -1961,11 +1959,8 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         snap.forEach(doc => {
 
             savedIntakes.push({
-
                 id: doc.id,
-
                 ...doc.data()
-
             });
 
         });
@@ -1979,10 +1974,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
         });
 
-        renderSavedIntakesForIntakeWindow(
-            formDoc,
-            savedIntakes
-        );
+        renderSavedIntakes(savedIntakes);
 
     }catch(err){
 
@@ -1997,7 +1989,6 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         );
 
     }
-
 }
   
 function renderSavedIntakesForIntakeWindow(formDoc,list){
