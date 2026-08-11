@@ -1269,18 +1269,13 @@ async function intakeSaveButton(){
 
 function openSavedIntakes(){
 
-    const modal =
-        document.getElementById("savedIntakesModal");
+    if(!window.opener){
 
-    if(!modal){
-
-        alert("Saved Intake window was not found.");
+        alert("Main window is not available.");
 
         return;
 
     }
-
-    modal.style.display = "block";
 
     window.opener.showSavedIntakesForIntakeWindow(
         document
