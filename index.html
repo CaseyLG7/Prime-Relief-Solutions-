@@ -2372,17 +2372,15 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 // DISPLAY SAVED INTAKES
 //======================================
 
-function renderSavedIntakes(list){
+function renderSavedIntakesForIntakeWindow(formDoc,list){
 
-   const container =
-    currentIntakeWindow.getElementById(
-        "savedIntakesList"
-    );
-  
+    const container =
+        formDoc.getElementById(
+            "savedIntakesList"
+        );
+
     if(!container){
-
         return;
-
     }
 
     if(!list.length){
@@ -2424,59 +2422,252 @@ function renderSavedIntakes(list){
 
     list.forEach(c => {
 
-        html += `
+        const card =
+            formDoc.createElement("div");
 
-            <div class="savedCard">
+        card.style.cssText = `
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            padding:14px;
+            margin-bottom:10px;
+            border:1px solid #ddd;
+            border-radius:8px;
+            background:#f8f8f8;
+        `;
 
-                <div class="savedInfo">
+        const info =
+            formDoc.createElement("div");
 
-                    <b>
-                        ${escapeHTML(
-                            c.clientName ||
-                            "Unnamed Client"
-                        )}
-                    </b>
+        info.style.flex="1";
 
-                    <br>
+        info.innerHTML = `
 
-                    Case:
-                    ${escapeHTML(
-                        c.caseNumber ||
-                        "No Case Number"
-                    )}
+            <b style="font-size:16px;">
+                ${escapeHTML(
+                    c.clientName ||
+                    "Unnamed Client"
+                )}
+            </b>
 
-                    <br>
+            <br>
 
-                    ${escapeHTML(
-                        c.propertyAddress ||
-                        ""
-                    )}
+            <span>
+                Case:
+                ${escapeHTML(
+                    c.caseNumber ||
+                    "No Case Number"
+                )}
+            </span>
 
-                    <br>
+            <br>
 
-                    ${escapeHTML(
-                        c.phone ||
-                        ""
-                    )}
+            <span>
+                ${escapeHTML(
+                    c.propertyAddress ||
+                    ""
+                )}
+            </span>
 
-                </div>
+            <br>
 
-                <button
-                    type="button"
-                    class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
-
-                    Open
-
-                </button>
-
-            </div>
+            <span>
+                ${escapeHTML(
+                    c.phone ||
+                    ""
+                )}
+            </span>
 
         `;
 
+        const button =
+            formDoc.createElement("button");
+
+        button.type="button";
+
+        button.textContent="Open";
+
+        button.style.cssText = `
+            background:#BFA13A;
+            color:white;
+            border:none;
+            padding:10px 18px;
+            border-radius:6px;
+            cursor:pointer;
+            font-weight:bold;
+        `;
+
+        button.onclick = async function(){
+
+            try{
+
+                const ok =
+                    await loadIntake(
+                        formDoc,
+                        c.id
+                    );
+
+                if(ok){
+
+                    const modal =
+                        formDoc.getElementById(
+                            "savedIntakesModal"
+                        );
+
+                    if(modal){
+                        modal.style.display="none";
+                    }
+
+                    alert(
+                        "✅ Saved Intake Loaded"
+                    );
+
+                }else{
+
+                    alert(
+                        "Unable to load this saved intake."
+                    );
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    "OPEN SAVED INTAKE ERROR:",
+                    error
+                );
+
+                alert(
+                    "Open Saved Intake Error:\n\n" +
+                    error.message
+                );
+
+            }
+
+        };
+
+        card.appendChild(info);
+
+        card.appendChild(button);
+
+        container.appendChild(card);
+
     });
 
-    container.innerHTML = html;
+    /*
+     * Replace the contents cleanly.
+     */
+    const cards = [];
+
+    list.forEach(c => {
+
+        const card =
+            formDoc.createElement("div");
+
+        card.style.cssText = `
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            padding:14px;
+            margin-bottom:10px;
+            border:1px solid #ddd;
+            border-radius:8px;
+            background:#f8f8f8;
+        `;
+
+        const info =
+            formDoc.createElement("div");
+
+        info.style.flex="1";
+
+        info.innerHTML = `
+            <b style="font-size:16px;">
+                ${escapeHTML(
+                    c.clientName ||
+                    "Unnamed Client"
+                )}
+            </b>
+
+            <br>
+
+            Case:
+            ${escapeHTML(
+                c.caseNumber ||
+                "No Case Number"
+            )}
+
+            <br>
+
+            ${escapeHTML(
+                c.propertyAddress ||
+                ""
+            )}
+
+            <br>
+
+            ${escapeHTML(
+                c.phone ||
+                ""
+            )}
+        `;
+
+        const button =
+            formDoc.createElement("button");
+
+        button.type="button";
+
+        button.textContent="Open";
+
+        button.style.cssText = `
+            background:#BFA13A;
+            color:white;
+            border:none;
+            padding:10px 18px;
+            border-radius:6px;
+            cursor:pointer;
+            font-weight:bold;
+        `;
+
+        button.onclick = async function(){
+
+            const ok =
+                await loadIntake(
+                    formDoc,
+                    c.id
+                );
+
+            if(ok){
+
+                const modal =
+                    formDoc.getElementById(
+                        "savedIntakesModal"
+                    );
+
+                if(modal){
+                    modal.style.display="none";
+                }
+
+                alert("✅ Saved Intake Loaded");
+
+            }
+
+        };
+
+        card.appendChild(info);
+
+        card.appendChild(button);
+
+        cards.push(card);
+
+    });
+
+    container.innerHTML="";
+
+    cards.forEach(card=>{
+        container.appendChild(card);
+    });
 
 }
 
