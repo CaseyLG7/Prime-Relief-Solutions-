@@ -1470,6 +1470,159 @@ let existingCases=new Set();
 let debounceTimer;
 let rowOrder=[];
 let displayedCases = [];
+
+  function showSavedIntakesForIntakeWindow(intakeWindow){
+
+    if(!intakeWindow || intakeWindow.closed){
+
+        alert("The Intake window is no longer available.");
+
+        return;
+
+    }
+
+    db.collection("intakes")
+        .orderBy("clientName")
+        .get()
+        .then(snap => {
+
+            if(snap.empty){
+
+                alert("No saved intakes found.");
+
+                return;
+
+            }
+
+            let oldPicker = document.getElementById("savedIntakePicker");
+
+            if(oldPicker){
+
+                oldPicker.remove();
+
+            }
+
+            const overlay = document.createElement("div");
+
+            overlay.id = "savedIntakePicker";
+
+            overlay.style.cssText = `
+                position:fixed;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                background:rgba(0,0,0,.65);
+                z-index:999999;
+                display:flex;
+                justify-content:center;
+                align-items:center;
+            `;
+
+            let options = "";
+
+            snap.forEach(doc => {
+
+                const data = doc.data();
+
+                const clientName =
+                    data.clientName || "Unnamed Client";
+
+                const caseNumber =
+                    data.caseNumber || doc.id;
+
+                const phone =
+                    data.phone || "";
+
+                options += `
+                    <div
+                        onclick="selectSavedIntake('${encodeURIComponent(doc.id)}')"
+                        style="
+                            background:white;
+                            padding:14px;
+                            margin:8px 0;
+                            border-radius:7px;
+                            cursor:pointer;
+                            border:1px solid #ccc;
+                        "
+                    >
+                        <b>${clientName}</b><br>
+                        Case: ${caseNumber}<br>
+                        ${phone ? "Phone: " + phone : ""}
+                    </div>
+                `;
+
+            });
+
+            overlay.innerHTML = `
+
+                <div style="
+                    background:white;
+                    width:90%;
+                    max-width:600px;
+                    max-height:80vh;
+                    overflow-y:auto;
+                    padding:20px;
+                    border-radius:10px;
+                    box-shadow:0 10px 30px rgba(0,0,0,.4);
+                ">
+
+                    <h2 style="
+                        margin-top:0;
+                        text-align:center;
+                        color:#BFA13A;
+                    ">
+                        📂 Saved Intakes
+                    </h2>
+
+                    <div id="savedIntakeList">
+                        ${options}
+                    </div>
+
+                    <div style="
+                        text-align:center;
+                        margin-top:15px;
+                    ">
+
+                        <button
+                            onclick="document.getElementById('savedIntakePicker').remove()"
+                            style="
+                                background:#777;
+                                color:white;
+                                border:none;
+                                padding:10px 20px;
+                                border-radius:6px;
+                                cursor:pointer;
+                            "
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            window.savedIntakeTargetWindow = intakeWindow;
+
+        })
+        .catch(error => {
+
+            console.error(
+                "SAVED INTAKE LIST ERROR:",
+                error
+            );
+
+            alert(
+                "Unable to load saved intakes:\n" +
+                error.message
+            );
+
+        });
+
+}
   
 function login(){ auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message)); }
 function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sendPasswordResetEmail(email.value).then(()=>alert("Reset email sent")); }
