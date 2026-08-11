@@ -1838,15 +1838,22 @@ let savedIntakes = [];
 // OPEN SAVED INTAKES
 //======================================
 
-async function showSavedIntakes(formDoc){
+async function showSavedIntakesForIntakeWindow(formDoc){
 
     currentIntakeWindow = formDoc;
 
     let modal =
         formDoc.getElementById("savedIntakesModal");
 
-    // Copy the existing modal from the main page
-    // into the Intake window if it is not already there.
+    /*
+       The Saved Intake modal normally lives on the
+       main application page.
+
+       The Intake form is opened in a separate window,
+       so copy the modal into that Intake window when
+       necessary.
+    */
+
     if(!modal){
 
         const source =
@@ -1854,7 +1861,9 @@ async function showSavedIntakes(formDoc){
 
         if(!source){
 
-            alert("Saved Intake window was not found.");
+            alert(
+                "The Saved Intake system could not be found on the main app page."
+            );
 
             return;
         }
@@ -1869,6 +1878,28 @@ async function showSavedIntakes(formDoc){
 
     modal.style.display = "block";
     modal.style.zIndex = "999999";
+
+    /*
+       Fix the Close button so it calls the
+       main application's close function.
+    */
+
+    const closeButton =
+        modal.querySelector("button");
+
+    if(closeButton){
+
+        closeButton.onclick = function(){
+
+            if(window.currentIntakeWindow){
+                window.currentIntakeWindow
+                    .getElementById("savedIntakesModal")
+                    .style.display = "none";
+            }
+
+        };
+
+    }
 
     const searchBox =
         formDoc.getElementById("intakeSearch");
@@ -1888,6 +1919,7 @@ async function showSavedIntakes(formDoc){
                 savedIntakes.filter(c => {
 
                     return (
+
                         String(c.clientName || "")
                             .toLowerCase()
                             .includes(search)
@@ -1909,11 +1941,15 @@ async function showSavedIntakes(formDoc){
                         String(c.phone || "")
                             .toLowerCase()
                             .includes(search)
+
                     );
 
                 });
 
-            renderSavedIntakes(filtered);
+            renderSavedIntakesForIntakeWindow(
+                formDoc,
+                filtered
+            );
 
         };
 
@@ -1931,8 +1967,11 @@ async function showSavedIntakes(formDoc){
         snap.forEach(doc => {
 
             savedIntakes.push({
+
                 id: doc.id,
+
                 ...doc.data()
+
             });
 
         });
@@ -1946,7 +1985,10 @@ async function showSavedIntakes(formDoc){
 
         });
 
-        renderSavedIntakes(savedIntakes);
+        renderSavedIntakesForIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
 
     }catch(err){
 
