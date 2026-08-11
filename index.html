@@ -2194,10 +2194,12 @@ async function openSavedIntake(intakeID){
 
 function closeSavedIntakes(){
 
-   const modal =
-    currentIntakeWindow.getElementById(
-        "savedIntakesModal"
-    );
+    if(!currentIntakeWindow) return;
+
+    const modal =
+        currentIntakeWindow.getElementById(
+            "savedIntakesModal"
+        );
 
     if(modal){
 
@@ -2206,7 +2208,6 @@ function closeSavedIntakes(){
     }
 
 }
-
 
 //======================================
 // SAFE HTML
