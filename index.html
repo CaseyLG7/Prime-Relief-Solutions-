@@ -1244,24 +1244,41 @@ async function intakeSaveButton(){
 
     try{
 
+        if(!window.opener || window.opener.closed){
+
+            alert("Main Prime Relief Solutions window is not available.");
+
+            return;
+
+        }
+
         const result =
             await window.opener.saveIntake(document);
 
         if(result === true){
 
-            alert("Intake Saved Successfully");
+            alert("✅ Intake Saved Successfully");
 
         }else{
 
-            alert("Save Failed - Case Number is required.");
+            alert(
+                "❌ Intake was NOT saved.\n\n" +
+                "Please make sure a Case Number is entered."
+            );
 
         }
 
     }catch(error){
 
-        console.error("INTAKE SAVE ERROR:", error);
+        console.error(
+            "INTAKE SAVE ERROR:",
+            error
+        );
 
-        alert("Save Intake Error: " + error.message);
+        alert(
+            "Save Intake Error:\n\n" +
+            error.message
+        );
 
     }
 
