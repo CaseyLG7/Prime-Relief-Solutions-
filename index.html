@@ -2091,15 +2091,11 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
 function renderSavedIntakes(list){
 
-   const container =
-    currentIntakeWindow.getElementById(
-        "savedIntakesList"
-    );
-  
+    const container =
+        document.getElementById("savedIntakesList");
+
     if(!container){
-
         return;
-
     }
 
     if(!list.length){
@@ -2112,9 +2108,7 @@ function renderSavedIntakes(list){
                 color:#777;
             ">
 
-                <div style="
-                    font-size:35px;
-                ">
+                <div style="font-size:35px;">
                     📂
                 </div>
 
@@ -2134,7 +2128,6 @@ function renderSavedIntakes(list){
         `;
 
         return;
-
     }
 
     let html = "";
@@ -2194,7 +2187,6 @@ function renderSavedIntakes(list){
     });
 
     container.innerHTML = html;
-
 }
 
 
