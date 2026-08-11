@@ -1926,46 +1926,19 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
     currentIntakeWindow = formDoc;
 
-    const modal =
-        formDoc.getElementById("savedIntakesModal");
-
-    if(!modal){
-
-        alert("Saved Intake window was not found.");
-
-        return;
-
-    }
-
-    modal.style.display = "block";
-    modal.style.zIndex = "999999";
-
-    const searchBox =
-        formDoc.getElementById("intakeSearch");
-
-    if(searchBox){
-
-        searchBox.value = "";
-
-    }
-
     try{
 
-        const snap =
-            await db
-                .collection("intakes")
-                .get();
+        const snap = await db
+            .collection("intakes")
+            .get();
 
         savedIntakes = [];
 
         snap.forEach(doc => {
 
             savedIntakes.push({
-
                 id: doc.id,
-
                 ...doc.data()
-
             });
 
         });
@@ -1978,6 +1951,184 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                 );
 
         });
+
+        /*
+         * Create the Saved Intake window INSIDE
+         * the separate Intake form window.
+         */
+
+        let modal =
+            formDoc.getElementById("savedIntakesModal");
+
+        if(!modal){
+
+            modal = formDoc.createElement("div");
+
+            modal.id = "savedIntakesModal";
+
+            modal.style.cssText = `
+                position:fixed;
+                top:0;
+                left:0;
+                width:100%;
+                height:100%;
+                background:rgba(0,0,0,.65);
+                z-index:999999;
+                display:flex;
+                justify-content:center;
+                align-items:flex-start;
+                overflow:auto;
+                padding:30px 0;
+                box-sizing:border-box;
+            `;
+
+            modal.innerHTML = `
+
+                <div style="
+                    background:white;
+                    width:700px;
+                    max-width:90%;
+                    max-height:85vh;
+                    overflow:auto;
+                    border-radius:12px;
+                    padding:20px;
+                    box-shadow:0 10px 40px rgba(0,0,0,.35);
+                    font-family:Arial;
+                    color:#000;
+                ">
+
+                    <h2 style="
+                        text-align:center;
+                        color:#BFA13A;
+                        margin-top:0;
+                    ">
+                        Saved Client Intakes
+                    </h2>
+
+                    <input
+                        id="intakeSearch"
+                        type="text"
+                        placeholder="Search Name, Case, Address or Phone..."
+                        style="
+                            width:100%;
+                            box-sizing:border-box;
+                            padding:10px;
+                            margin-bottom:15px;
+                            font-size:15px;
+                            border:1px solid #aaa;
+                            border-radius:6px;
+                        "
+                    >
+
+                    <div id="savedIntakesList"></div>
+
+                    <div style="
+                        text-align:center;
+                        margin-top:15px;
+                    ">
+
+                        <button
+                            id="closeSavedIntakesButton"
+                            type="button"
+                            style="
+                                background:#777;
+                                color:white;
+                                border:none;
+                                padding:10px 20px;
+                                border-radius:6px;
+                                cursor:pointer;
+                            "
+                        >
+                            Close
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+
+            formDoc.body.appendChild(modal);
+
+        }
+
+        modal.style.display = "flex";
+
+        const searchBox =
+            formDoc.getElementById("intakeSearch");
+
+        const closeButton =
+            formDoc.getElementById(
+                "closeSavedIntakesButton"
+            );
+
+        if(searchBox){
+
+            searchBox.value = "";
+
+            searchBox.oninput = function(){
+
+                const search =
+                    searchBox.value
+                        .trim()
+                        .toLowerCase();
+
+                const filtered =
+                    savedIntakes.filter(c => {
+
+                        return (
+
+                            String(
+                                c.clientName || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                            ||
+
+                            String(
+                                c.caseNumber || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                            ||
+
+                            String(
+                                c.propertyAddress || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                            ||
+
+                            String(
+                                c.phone || ""
+                            )
+                            .toLowerCase()
+                            .includes(search)
+
+                        );
+
+                    });
+
+                renderSavedIntakesForIntakeWindow(
+                    formDoc,
+                    filtered
+                );
+
+            };
+
+        }
+
+        if(closeButton){
+
+            closeButton.onclick = function(){
+
+                modal.style.display = "none";
+
+            };
+
+        }
 
         renderSavedIntakesForIntakeWindow(
             formDoc,
