@@ -1958,17 +1958,21 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
     try{
 
-        const snap = await db
-            .collection("intakes")
-            .get();
+        const snap =
+            await db
+                .collection("intakes")
+                .get();
 
         savedIntakes = [];
 
         snap.forEach(doc => {
 
             savedIntakes.push({
+
                 id: doc.id,
+
                 ...doc.data()
+
             });
 
         });
@@ -1983,32 +1987,33 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         });
 
         /*
-         * Create the Saved Intake window INSIDE
-         * the separate Intake form window.
+         * Create the Saved Intake window
+         * INSIDE the Intake form window.
          */
 
         let modal =
-            formDoc.getElementById("savedIntakesModal");
+            formDoc.getElementById(
+                "savedIntakesModal"
+            );
 
         if(!modal){
 
-            modal = formDoc.createElement("div");
+            modal =
+                formDoc.createElement("div");
 
-            modal.id = "savedIntakesModal";
+            modal.id =
+                "savedIntakesModal";
 
             modal.style.cssText = `
                 position:fixed;
-                top:0;
-                left:0;
-                width:100%;
-                height:100%;
+                inset:0;
                 background:rgba(0,0,0,.65);
                 z-index:999999;
                 display:flex;
                 justify-content:center;
                 align-items:flex-start;
-                overflow:auto;
                 padding:30px 0;
+                overflow:auto;
                 box-sizing:border-box;
             `;
 
@@ -2017,12 +2022,13 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                 <div style="
                     background:white;
                     width:700px;
-                    max-width:90%;
+                    max-width:92%;
                     max-height:85vh;
                     overflow:auto;
                     border-radius:12px;
                     padding:20px;
-                    box-shadow:0 10px 40px rgba(0,0,0,.35);
+                    box-sizing:border-box;
+                    box-shadow:0 10px 40px rgba(0,0,0,.4);
                     font-family:Arial;
                     color:#000;
                 ">
@@ -2032,21 +2038,21 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                         color:#BFA13A;
                         margin-top:0;
                     ">
-                        Saved Client Intakes
+                        📂 Saved Client Intakes
                     </h2>
 
                     <input
                         id="intakeSearch"
                         type="text"
-                        placeholder="Search Name, Case, Address or Phone..."
+                        placeholder="Search client name, case number, phone or address..."
                         style="
                             width:100%;
                             box-sizing:border-box;
-                            padding:10px;
+                            padding:11px;
                             margin-bottom:15px;
-                            font-size:15px;
                             border:1px solid #aaa;
                             border-radius:6px;
+                            font-size:14px;
                         "
                     >
 
@@ -2054,7 +2060,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
                     <div style="
                         text-align:center;
-                        margin-top:15px;
+                        margin-top:18px;
                     ">
 
                         <button
@@ -2064,7 +2070,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                                 background:#777;
                                 color:white;
                                 border:none;
-                                padding:10px 20px;
+                                padding:10px 25px;
                                 border-radius:6px;
                                 cursor:pointer;
                             "
@@ -2075,6 +2081,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                     </div>
 
                 </div>
+
             `;
 
             formDoc.body.appendChild(modal);
@@ -2084,11 +2091,8 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         modal.style.display = "flex";
 
         const searchBox =
-            formDoc.getElementById("intakeSearch");
-
-        const closeButton =
             formDoc.getElementById(
-                "closeSavedIntakesButton"
+                "intakeSearch"
             );
 
         if(searchBox){
@@ -2124,7 +2128,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                             ||
 
                             String(
-                                c.propertyAddress || ""
+                                c.phone || ""
                             )
                             .toLowerCase()
                             .includes(search)
@@ -2132,7 +2136,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                             ||
 
                             String(
-                                c.phone || ""
+                                c.propertyAddress || ""
                             )
                             .toLowerCase()
                             .includes(search)
@@ -2149,6 +2153,11 @@ async function showSavedIntakesForIntakeWindow(formDoc){
             };
 
         }
+
+        const closeButton =
+            formDoc.getElementById(
+                "closeSavedIntakesButton"
+            );
 
         if(closeButton){
 
@@ -2168,7 +2177,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
     }catch(err){
 
         console.error(
-            "Saved Intake Error:",
+            "SAVED INTAKES ERROR:",
             err
         );
 
