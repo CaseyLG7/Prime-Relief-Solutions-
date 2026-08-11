@@ -2154,19 +2154,25 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     const container =
-        formDoc.getElementById("savedIntakesList");
+        formDoc.getElementById(
+            "savedIntakesList"
+        );
 
     if(!container) return;
 
     if(!list.length){
 
         container.innerHTML = `
+
             <div style="
                 text-align:center;
                 padding:35px;
                 color:#777;
             ">
-                <div style="font-size:35px;">📂</div>
+
+                <div style="font-size:35px;">
+                    📂
+                </div>
 
                 <strong>
                     No Saved Intakes Found
@@ -2178,7 +2184,9 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                 ">
                     Save an intake to see it here.
                 </div>
+
             </div>
+
         `;
 
         return;
@@ -2189,11 +2197,27 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     list.forEach(c => {
 
+        const intakeID =
+            encodeURIComponent(c.id);
+
         html += `
 
-            <div class="savedCard">
+            <div style="
+                padding:12px;
+                margin-bottom:10px;
+                border:1px solid #ccc;
+                border-radius:8px;
+                background:#fafafa;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:15px;
+            ">
 
-                <div class="savedInfo">
+                <div style="
+                    font-size:14px;
+                    line-height:1.5;
+                ">
 
                     <b>
                         ${escapeHTML(
@@ -2228,11 +2252,22 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
                 <button
                     type="button"
-                    class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
-
+                    style="
+                        background:#2196f3;
+                        color:white;
+                        padding:8px 18px;
+                        border:none;
+                        border-radius:6px;
+                        cursor:pointer;
+                        white-space:nowrap;
+                    "
+                    onclick="
+                        window.opener.openSavedIntake(
+                            decodeURIComponent('${intakeID}')
+                        );
+                    "
+                >
                     Open
-
                 </button>
 
             </div>
