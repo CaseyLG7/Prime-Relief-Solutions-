@@ -1272,11 +1272,8 @@ function openSavedIntakes(){
     try{
 
         /*
-         * The Saved Intake modal exists on the main app,
-         * but this Intake form is running in a separate
-         * browser window.
-         *
-         * Create the modal INSIDE this Intake window.
+         * The saved-intakes window belongs inside
+         * the separate Intake form window.
          */
 
         let modal =
@@ -1298,69 +1295,64 @@ function openSavedIntakes(){
             modal.style.display = "block";
             modal.style.overflow = "auto";
 
-            modal.innerHTML = `
+            modal.innerHTML =
+                '<div style="' +
+                'background:white;' +
+                'width:90%;' +
+                'max-width:750px;' +
+                'margin:50px auto;' +
+                'padding:25px;' +
+                'border-radius:12px;' +
+                'box-shadow:0 10px 40px rgba(0,0,0,0.35);' +
+                'font-family:Arial;' +
+                '">' +
 
-                <div style="
-                    background:white;
-                    width:90%;
-                    max-width:750px;
-                    margin:50px auto;
-                    padding:25px;
-                    border-radius:12px;
-                    box-shadow:0 10px 40px rgba(0,0,0,0.35);
-                    font-family:Arial;
-                ">
+                    '<h2 style="' +
+                    'margin-top:0;' +
+                    'text-align:center;' +
+                    'color:#BFA13A;' +
+                    '">' +
+                    'Saved Client Intakes' +
+                    '</h2>' +
 
-                    <h2 style="
-                        margin-top:0;
-                        text-align:center;
-                        color:#BFA13A;
-                    ">
-                        Saved Client Intakes
-                    </h2>
+                    '<input ' +
+                    'id="intakeSearch" ' +
+                    'type="text" ' +
+                    'placeholder="Search Name, Case, Address or Phone..." ' +
+                    'style="' +
+                    'width:100%;' +
+                    'box-sizing:border-box;' +
+                    'padding:10px;' +
+                    'margin-bottom:15px;' +
+                    'font-size:15px;' +
+                    'border:1px solid #aaa;' +
+                    'border-radius:6px;' +
+                    '">' +
 
-                    <input
-                        id="intakeSearch"
-                        type="text"
-                        placeholder="Search Name, Case, Address or Phone..."
-                        oninput="window.filterSavedIntakes()"
-                        style="
-                            width:100%;
-                            box-sizing:border-box;
-                            padding:10px;
-                            margin-bottom:15px;
-                            font-size:15px;
-                            border:1px solid #aaa;
-                            border-radius:6px;
-                        "
-                    >
+                    '<div id="savedIntakesList"></div>' +
 
-                    <div id="savedIntakesList"></div>
+                    '<div style="' +
+                    'text-align:center;' +
+                    'margin-top:20px;' +
+                    '">' +
 
-                    <div style="
-                        text-align:center;
-                        margin-top:20px;
-                    ">
+                        '<button ' +
+                        'type="button" ' +
+                        'onclick="window.closeSavedIntakesBridge()" ' +
+                        'style="' +
+                        'background:#6c757d;' +
+                        'color:white;' +
+                        'border:none;' +
+                        'padding:10px 25px;' +
+                        'border-radius:6px;' +
+                        'cursor:pointer;' +
+                        '">' +
+                        'Close' +
+                        '</button>' +
 
-                        <button
-                            type="button"
-                            onclick="window.closeSavedIntakes()"
-                            style="
-                                background:#6c757d;
-                                color:white;
-                                border:none;
-                                padding:10px 25px;
-                                border-radius:6px;
-                                cursor:pointer;
-                            ">
-                            Close
-                        </button>
+                    '</div>' +
 
-                    </div>
-
-                </div>
-
-            `;
+                '</div>';
 
             document.body.appendChild(modal);
 
@@ -1371,9 +1363,81 @@ function openSavedIntakes(){
         }
 
         /*
-         * Tell the MAIN APP to retrieve the saved
-         * intake records and render them inside
-         * THIS Intake window.
+         * Create bridge functions in the Intake window.
+         * The actual Firebase functions remain in the
+         * main application window.
+         */
+
+        window.closeSavedIntakesBridge = function(){
+
+            if(
+                window.opener &&
+                !window.opener.closed &&
+                typeof window.opener.closeSavedIntakes === "function"
+            ){
+
+                window.opener.closeSavedIntakes();
+
+            }else{
+
+                const m =
+                    document.getElementById("savedIntakesModal");
+
+                if(m){
+                    m.style.display = "none";
+                }
+
+            }
+
+        };
+
+        window.openSavedIntake = function(intakeID){
+
+            if(
+                window.opener &&
+                !window.opener.closed &&
+                typeof window.opener.openSavedIntake === "function"
+            ){
+
+                window.opener.openSavedIntake(intakeID);
+
+            }else{
+
+                alert(
+                    "The main Prime Relief Solutions window is no longer available."
+                );
+
+            }
+
+        };
+
+        window.filterSavedIntakes = function(){
+
+            if(
+                window.opener &&
+                !window.opener.closed &&
+                typeof window.opener.filterSavedIntakes === "function"
+            ){
+
+                window.opener.filterSavedIntakes();
+
+            }
+
+        };
+
+        const searchBox =
+            document.getElementById("intakeSearch");
+
+        if(searchBox){
+
+            searchBox.oninput =
+                window.filterSavedIntakes;
+
+        }
+
+        /*
+         * Tell the main application to retrieve the
+         * saved Firebase intakes and render them here.
          */
 
         if(
