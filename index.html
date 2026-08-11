@@ -2010,18 +2010,12 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 // DISPLAY SAVED INTAKES
 //======================================
 
-function renderSavedIntakes(list){
+function renderSavedIntakesForIntakeWindow(formDoc,list){
 
-   const container =
-    currentIntakeWindow.getElementById(
-        "savedIntakesList"
-    );
-  
-    if(!container){
+    const container =
+        formDoc.getElementById("savedIntakesList");
 
-        return;
-
-    }
+    if(!container) return;
 
     if(!list.length){
 
@@ -2102,7 +2096,7 @@ function renderSavedIntakes(list){
                 <button
                     type="button"
                     class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
+                    data-intake-id="${escapeHTML(c.id)}">
 
                     Open
 
@@ -2115,6 +2109,37 @@ function renderSavedIntakes(list){
     });
 
     container.innerHTML = html;
+
+    /*
+       Attach the Open buttons directly from the
+       main application window.
+
+       This prevents the separate Intake popup from
+       trying to find openSavedIntake() in its own
+       JavaScript scope.
+    */
+
+    container
+        .querySelectorAll(".savedOpen")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                function(){
+
+                    const intakeID =
+                        this.getAttribute(
+                            "data-intake-id"
+                        );
+
+                    openSavedIntake(
+                        intakeID
+                    );
+
+                }
+            );
+
+        });
 
 }
 
