@@ -1850,14 +1850,29 @@ async function showSavedIntakes(formDoc){
 
     currentIntakeWindow = formDoc;
 
-    const modal =
+    let modal =
         formDoc.getElementById("savedIntakesModal");
 
+    // Copy the existing modal from the main page
+    // into the Intake window if it is not already there.
     if(!modal){
 
-        alert("Saved Intake window was not found.");
+        const source =
+            document.getElementById("savedIntakesModal");
 
-        return;
+        if(!source){
+
+            alert("Saved Intake window was not found.");
+
+            return;
+        }
+
+        modal = source.cloneNode(true);
+
+        formDoc.body.appendChild(modal);
+
+        modal.id = "savedIntakesModal";
+
     }
 
     modal.style.display = "block";
@@ -1872,7 +1887,41 @@ async function showSavedIntakes(formDoc){
 
         searchBox.oninput = function(){
 
-            filterSavedIntakes();
+            const search =
+                searchBox.value
+                    .trim()
+                    .toLowerCase();
+
+            const filtered =
+                savedIntakes.filter(c => {
+
+                    return (
+                        String(c.clientName || "")
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        String(c.caseNumber || "")
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        String(c.propertyAddress || "")
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        String(c.phone || "")
+                            .toLowerCase()
+                            .includes(search)
+                    );
+
+                });
+
+            renderSavedIntakes(filtered);
 
         };
 
@@ -1890,11 +1939,8 @@ async function showSavedIntakes(formDoc){
         snap.forEach(doc => {
 
             savedIntakes.push({
-
                 id: doc.id,
-
                 ...doc.data()
-
             });
 
         });
