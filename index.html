@@ -1623,6 +1623,102 @@ let displayedCases = [];
         });
 
 }
+
+async function selectSavedIntake(encodedCaseNumber){
+
+    try{
+
+        const caseNumber =
+            decodeURIComponent(encodedCaseNumber);
+
+        const intakeWindow =
+            window.savedIntakeTargetWindow;
+
+        if(!intakeWindow || intakeWindow.closed){
+
+            alert("The Intake window is no longer available.");
+
+            return;
+
+        }
+
+        const doc = await db
+            .collection("intakes")
+            .doc(caseNumber)
+            .get();
+
+        if(!doc.exists){
+
+            alert("Saved Intake could not be found.");
+
+            return;
+
+        }
+
+        const data = doc.data();
+
+        const intakeDocument =
+            intakeWindow.document;
+
+        Object.keys(data).forEach(key => {
+
+            const el =
+                intakeDocument.getElementById(key);
+
+            if(!el) return;
+
+            if(
+                el.type === "checkbox" ||
+                el.type === "radio"
+            ){
+
+                el.checked = data[key] === true;
+
+            }else{
+
+                if(
+                    data[key] !== null &&
+                    data[key] !== undefined
+                ){
+
+                    el.value = data[key];
+
+                }
+
+            }
+
+        });
+
+        const picker =
+            document.getElementById("savedIntakePicker");
+
+        if(picker){
+
+            picker.remove();
+
+        }
+
+        window.savedIntakeTargetWindow = null;
+
+        intakeWindow.focus();
+
+        alert("✅ Saved Intake Loaded");
+
+    }catch(error){
+
+        console.error(
+            "SELECT SAVED INTAKE ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to load saved intake:\n" +
+            error.message
+        );
+
+    }
+
+}
   
 function login(){ auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message)); }
 function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sendPasswordResetEmail(email.value).then(()=>alert("Reset email sent")); }
