@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prime Relief Solutions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+  <style>
+    body { font-family: Arial; padding:20px; background:#f4f6f8; color:#000; }
+    .dark-mode { background:#121212; color:#fff; }
+
+    .box { background:white; padding:12px; margin-bottom:15px; border-radius:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .dark-mode .box { background:#1f1f1f; }
+
+    input, button { padding:8px; border-radius:6px; border:1px solid #ccc; font-size:11px; }
+    button { background:black; color:white; cursor:pointer; }
+
+    .doc-btn { color:#fff; border:none; }
+    .btn-intake { background:#00bcd4; }
+    .btn-checklist { background:#4caf50; }
+    .btn-script { background:#ff9800; }
+    .btn-appeal { background:#9c27b0; }
+    .btn-workflow { background:#2196f3; }
+    .btn-service { background:#f9e27d; color:#000; }
+    .btn-nonattorney { background:#f4c430; color:#000; }
+    .btn-nolegal { background:#d6a400; color:#000; }
+
+    .status-open { background:#6c757d; color:#fff; }
+    .status-contacted { background:#17a2b8; color:#fff; }
+    .status-processing { background:#ffc107; color:#000; }
+    .status-closed { background:#28a745; color:#fff; }
+
+    .map-btn { background:#007bff; color:#fff; }
+
+    table { width:100%; border-collapse:collapse; background:white; }
+    th, td { border:1.5px solid #555; padding:6px; font-size:11px; color:#000; }
+    th { background:#ddd; }
+
+    .dark-mode table { background:#1f1f1f; }
+    .dark-mode tbody td { color:#000 !important; }
+
+    .row-hot { background:#f8d7da; }
+    .row-warm { background:#fff3cd; }
+    .row-cold { background:#d4edda; }
+
+    .logout-btn { background:#dc3545; }
+    .clear-btn { background:#6c757d; }
+
+    #loginOverlay {
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+      background:
+        linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)),
+        url("Prime Relief.PNG") center/cover no-repeat;
+    }
+
+    #loginBox {
+      background: rgba(255,255,255,0.9);
+      padding:20px;
+      border-radius:12px;
+      text-align:center;
+    }
+
+    .header-bar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+    
+  /*=============================*/
+/* SAVED INTAKES WINDOW */
+/*=============================*/
+
+.modal{
+
+display:none;
+
+position:fixed;
+
+left:0;
+top:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,.55);
+
+z-index:999999;
+
+}
+
+.modal-content{
+
+background:white;
+
+width:700px;
+
+max-width:90%;
+
+margin:40px auto;
+
+padding:20px;
+
+border-radius:12px;
+
+max-height:85vh;
+
+overflow:auto;
+
+}
+
+.savedCard{
+
+padding:12px;
+
+margin-bottom:10px;
+
+border:1px solid #ccc;
+
+border-radius:8px;
+
+background:#fafafa;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+}
+
+.savedCard:hover{
+
+background:#f0f7ff;
+
+}
+
+.savedInfo{
+
+font-size:14px;
+
+line-height:1.5;
+
+}
+
+.savedOpen{
+
+background:#2196f3;
+
+color:white;
+
+padding:8px 18px;
+
+border:none;
+
+border-radius:6px;
+
+cursor:pointer;
+
+}  
+  </style>
+</head>
+
+<body>
+
+<div id="loginOverlay">
+  <div id="loginBox">
+    <h3>Team Login</h3>
+    <input id="email" placeholder="Email"><br><br>
+    <input id="password" type="password" placeholder="Password"><br><br>
+    <button onclick="login()">Login</button>
+    <span style="cursor:pointer;color:#007bff;" onclick="resetPassword()">Forgot Password?</span>
+  </div>
+</div>
+
+<div class="header-bar">
+  <div style="display:flex; align-items:center; gap:15px;">
+    <img src="Prime Relief.PNG" style="height:95px;" />
+    <div>
+      <h1>Prime Relief Solutions</h1>
+      <div style="color:#BFA13A;font-size:14px;">Professional LDP Eviction Support & Lead Management</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <button onclick="window.open('https://jpwebsite.harriscountytx.gov/FindMyCase/search.jsp')">Case Search</button>
+    <button onclick="window.open('https://jpwebsite.harriscountytx.gov/PublicExtracts/search.jsp')">Files Search</button>
+   
+    <button class="doc-btn btn-script" onclick="openDoc('script')">Call Script</button>
+    <button class="doc-btn btn-intake" onclick="openDoc('intake')">Intake</button>
+    <button class="doc-btn btn-appeal" onclick="openDoc('appeal')">Appeal</button>
+    <button class="doc-btn btn-checklist" onclick="openDoc('checklist')">Checklist</button>
+    <div style="width:100%;margin-top:8px;"></div>
+
+<button class="doc-btn btn-service" onclick="openDoc('serviceAgreement')">
+Service Agreement
+</button>
+
+<button class="doc-btn btn-nonattorney" onclick="openDoc('limitedScope')">
+Disclosure
+</button>
+
+<button class="doc-btn btn-workflow" onclick="openDoc('authorization')">
+Authorization
+</button>
+
+<button class="doc-btn btn-checklist" onclick="openDoc('invoice')">
+Invoice
+</button>
+    
+ <button class="doc-btn btn-service"
+onclick="openDoc('inability')">
+Statement of Inability
+</button>  
+    
+    <button class="doc-btn btn-workflow" onclick="openDoc('completion')">Completion Letter</button>
+    <button class="clear-btn" style="margin-left:auto;" onclick="clearView()">Clear View</button>
+    <button onclick="toggleDark()">🌙</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="box">
+  <input type="file" id="file" />
+  <button onclick="upload()">Upload</button>
+
+  <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
+  <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
+  <input placeholder="Min $" id="minAmt" oninput="debounceFilter()">
+  <input placeholder="Max $" id="maxAmt" oninput="debounceFilter()">
+  <input placeholder="Search Date" id="searchDate" oninput="debounceFilter()">
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Case #</th>
+<th>Name</th>
+<th>Address</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Lead</th>
+<th>Status</th>
+<th>Updated By</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+  
+<!-- ============================= -->
+<!-- SAVED INTAKES POPUP -->
+<!-- ============================= -->
+
+<div id="savedIntakesModal" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Saved Client Intakes</h2>
+
+        <input
+            id="intakeSearch"
+            type="text"
+            placeholder="Search Name, Case, Address or Phone..."
+            onkeyup="filterSavedIntakes()"
+            style="
+                width:100%;
+                padding:10px;
+                margin-bottom:15px;
+                font-size:15px;
+            ">
+
+        <div id="savedIntakesList"></div>
+
+        <br>
+
+        <button onclick="closeSavedIntakes()">
+            Close
+        </button>
+
+    </div>
+
+</div>
+  
+<script>
+
+function toggleDark(){
+  document.body.classList.toggle("dark-mode");
+}
+
+function openDoc(type){
+let content="";
+const style="font-size:16px; line-height:1.6; white-space:pre-wrap;";
+const formInput='style="width:100%;max-width:520px;padding:8px;margin:5px 0 12px 0;border:1px solid #999;border-radius:5px;display:block;"';
+const smallInput='style="width:150px;padding:6px;margin:5px 0 12px 0;border:1px solid #999;border-radius:5px;display:block;"';
+  
+if(type==="inability"){
+    window.open("Statement of Inability(1).pdf","_blank");
+    return;
+}
+  
+if(type==="script"){ content=`<div style="${style}">
+<ul>
+<li><strong>Thank you for calling Prime Relief Solutions, this is [Your Name]. How may I help you?</strong></li>
+
+<li><strong>Disclaimer:</strong> "Ok I'm really glad you called" or "Ok no problem" or "Ok good." But first I would like to let you know Prime Relief Solutions is not a law firm. We do not provide legal advice or representation. We strictly assist with document preparation based on the information you provide.</li>
+
+<li>Let's start with your case #. Great!</li>
+
+<li>Let me tell you about our services: Here at Prime Relief Solutions, we help clients by preparing and organizing eviction appeal documents and guiding you step-by-step through the filing process, while also buying you more time to figure out your next move.</li>
+
+<li>Our services is $190.00 and you will not have to appear in court coming up on [Court Date].</li>
+
+<li>Okay, perfect! Have you already filed a Notice of Appeal?</li>
+
+<li>
+Do you plan to appeal using:
+<ul>
+<li><strong>Appeal Bond</strong> — Client pays bond set by the judge.</li>
+<li><strong>Cash Deposit</strong> — Client deposits amount with court.</li>
+<li><strong>Statement of Inability to Pay</strong> — Client files sworn statement if unable to afford court costs.</li>
+</ul>
+</li>
+
+<li>To get started I will need to send you some documents to sign explaining that we are not an attorney, and we do not give legal advice or represent you in court.</li>
+
+<li>Explain the deadline clearly. Example Script: "In Texas, eviction appeals from Justice Court must usually be filed within 5 calendar days of the judgment. I'll need to confirm your dates to see if you're still within that window."</li>
+
+<li>Provide Your LDP Disclosure Required: "I want to let you know that we are a Legal Document Preparation service, not attorneys. We do not provide legal advice or represent clients in court. We assist with preparing the appeal paperwork based on the information you provide."</li>
+</ul>
+──────────────────────────────
+
+COMMON CLIENT QUESTIONS
+
+• Q: How much is your service?
+  A: Our document preparation service is $190.00.
+
+• Q: Are you attorneys?
+  A: No. Prime Relief Solutions is a Legal Document Preparation service. We are not attorneys and do not provide legal advice or representation.
+
+• Q: Will someone represent me in court?
+  A: No. We prepare your documents based on the information you provide.
+
+• Q: Do I have to file the paperwork?
+  A: We will explain the filing process. Filing requirements are determined by the court.
+
+• Q: Can you guarantee my appeal will be successful?
+  A: No. No one can guarantee a court outcome.
+
+• Q: How long does the process take?
+  A: Timeframes vary depending on the court.
+
+• Q: Can I stay in my home?
+  A: Court procedures regarding possession depend on the circumstances of the case and applicable Texas law.
+
+• Q: What if I miss my deadline?
+  A: Appeal deadlines are established by Texas law. Missing a deadline may affect your ability to appeal.
+
+• Q: Can I call if I have questions later?
+  A: Absolutely. We're happy to answer questions about our document preparation process.
+
+• Q: Will you tell me what I should do?
+  A: We can explain the document preparation process and court procedures, but we cannot provide legal advice or recommend legal strategies.
+</div>`;}
+if(type==="intake"){ content=`
+<div style="font-family:Arial;font-size:15px;max-width:900px;margin:auto;">
+
+<h2 style="text-align:center;color:#BFA13A;">Prime Relief Solutions</h2>
+
+<h3 style="text-align:center;">Texas Eviction Appeal Client Intake Form</h3>
+
+<hr><br>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT INFORMATION</h3>
+
+<b>Date:</b><br>
+<input id="intakeDate" type="date" style="width:220px;"><br><br>
+
+<b>Full Name:</b><br>
+<input id="clientName" style="width:350px;"><br><br>
+
+<b>Case Number:</b><br>
+<input id="caseNumber" style="width:220px;"><br><br>
+
+<b>Date of Birth:</b><br>
+<input id="dob" type="date" style="width:220px;"><br><br>
+
+<b>Phone Number:</b><br>
+<input id="phone" style="width:250px;"><br><br>
+
+<b>Alternate Phone:</b><br>
+<input id="alternatePhone" style="width:250px;"><br><br>
+
+<b>Email Address:</b><br>
+<input id="clientEmail" style="width:350px;"><br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">PROPERTY INFORMATION</h3>
+
+<b>Property Address:</b><br>
+<textarea id="propertyAddress" style="width:70%;height:45px;"></textarea><br><br>
+
+<b>Apartment #:</b><br>
+<input id="apartment" style="width:120px;"><br><br>
+
+<b>City:</b><br>
+<input id="city" style="width:220px;">
+
+<b style="margin-left:30px;">State:</b>
+
+<input id="state" value="TX" style="width:70px;">
+
+<b style="margin-left:30px;">ZIP:</b>
+
+<input id="zip" style="width:100px;">
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">MAILING ADDRESS (If Different)</h3>
+
+<textarea id="mailingAddress" style="width:70%;height:45px;"></textarea>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">LANDLORD INFORMATION</h3>
+
+<b>Landlord / Property Management:</b><br>
+
+<input id="landlord" style="width:420px;"><br><br>
+
+<b>Attorney (if known):</b><br>
+
+<input id="attorney" style="width:420px;"><br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">COURT INFORMATION</h3>
+
+<b>County:</b><br>
+
+<input id="county" style="width:220px;"><br><br>
+
+<b>Justice Court Precinct:</b><br>
+
+<input id="precinct" style="width:220px;"><br><br>
+
+<b>Judgment Date:</b><br>
+
+<input id="judgmentDate" type="date" style="width:220px;"><br><br>
+
+<b>Upcoming Court Date:</b><br>
+
+<input id="courtDate" type="date" style="width:220px;"><br><br>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">APPEAL INFORMATION</h3>
+
+<b>Appeal Method</b><br><br>
+
+<label><input id="appealBond" type="checkbox"> Appeal Bond</label><br>
+
+<label><input id="cashDeposit" type="checkbox"> Cash Deposit</label><br>
+
+<label><input id="inabilityPay" type="checkbox"> Statement of Inability to Pay Court Costs</label>
+
+<br><br>
+
+<b>Has the client already filed a Notice of Appeal?</b><br>
+
+<label><input id="noticeYes" type="radio" name="noticeAppeal"> Yes</label>
+
+<label style="margin-left:20px;">
+<input id="noticeNo" type="radio" name="noticeAppeal"> No
+</label>
+
+<br><br>
+
+<b>Has a Writ of Possession been issued?</b><br>
+
+<label><input id="writYes" type="radio" name="writ"> Yes</label>
+
+<label style="margin-left:20px;">
+<input id="writNo" type="radio" name="writ"> No
+</label>
+
+<br><br>
+
+<b>Has the Constable posted a Notice to Vacate?</b><br>
+
+<label><input id="vacateYes" type="radio" name="vacate"> Yes</label>
+
+<label style="margin-left:20px;">
+<input id="vacateNo" type="radio" name="vacate"> No
+</label>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">SERVICE INFORMATION</h3>
+
+<b>Service Selected:</b><br>
+
+<input id="serviceSelected" value="Texas Eviction Appeal Document Preparation" style="width:420px;"><br><br>
+
+<b>Service Fee:</b><br>
+
+<input id="serviceFee" value="$190.00" style="width:120px;"><br><br>
+
+<b>Payment Method</b><br><br>
+
+<label><input id="payCash" type="checkbox"> Cash</label>
+
+<label style="margin-left:15px;">
+<input id="payCard" type="checkbox"> Credit / Debit
+</label>
+
+<label style="margin-left:15px;">
+<input id="payCashApp" type="checkbox"> Cash App
+</label>
+
+<label style="margin-left:15px;">
+<input id="payZelle" type="checkbox"> Zelle
+</label>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">DOCUMENT CHECKLIST</h3>
+
+<label><input id="docPetition" type="checkbox"> Eviction Petition</label><br>
+
+<label><input id="docJudgment" type="checkbox"> Judgment</label><br>
+
+<label><input id="docLease" type="checkbox"> Lease Agreement</label><br>
+
+<label><input id="docID" type="checkbox"> Driver License / ID</label><br>
+
+<label><input id="docCourt" type="checkbox"> Court Documents</label><br>
+
+<label><input id="docOther" type="checkbox"> Other</label>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT NOTES</h3>
+
+<textarea id="clientNotes" style="width:70%;height:90px;"></textarea>
+
+<br><br>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">INTERNAL STAFF NOTES</h3>
+
+<textarea id="staffNotes" style="width:70%;height:90px;"></textarea>
+
+<br><br>
+
+<hr>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">CLIENT ACKNOWLEDGEMENT</h3>
+
+I understand that Prime Relief Solutions is a Legal Document Preparation service and is not a law firm. I understand that no legal advice or legal representation has been provided.
+
+<br><br><br>
+
+<b>Client Signature</b>
+
+<hr style="width:320px;margin-left:0;">
+
+<br>
+
+<b>Date</b>
+
+<hr style="width:180px;margin-left:0;">
+
+<br>
+
+<b>Staff Member</b>
+
+<input id="staffMember" style="width:320px;"><br><br>
+
+<b>Staff Signature</b>
+
+<hr style="width:320px;margin-left:0;">
+
+<br><br>
+
+<hr>
+
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+
+<button type="button" onclick="intakeSaveButton()">💾 Save Intake</button>
+
+<button
+    type="button"
+    onclick="openSavedIntakes()"
+    style="
+        background:#BFA13A;
+        color:white;
+        border:none;
+        padding:10px 18px;
+        border-radius:5px;
+        cursor:pointer;
+        font-weight:bold;
+        margin-right:8px;
+    ">
+    📂 Open Saved Intake
+</button>
+
+<button type="button" onclick="window.print()">🖨 Save / Print</button>
+
+</div>
+
+</div>`;
+}
+if(type==="appeal"){ content=`<div style="${style}">
+
+<b>TEXAS EVICTION APPEAL INFORMATION</b>
+
+• Texas provides three common methods to perfect an eviction appeal from Justice Court:
+
+──────────────────────────────
+
+<b>1. Appeal Bond</b>
+
+• An Appeal Bond is a written guarantee filed with the Justice Court.
+
+• The amount of the bond is generally determined by the judge.
+
+• The bond usually requires one or more qualified sureties (people or companies willing to guarantee payment if required).
+
+• The bond must generally be filed within the appeal deadline established by Texas law.
+
+• The court clerk can explain the filing requirements and bond amount.
+
+Common Questions
+
+Q: Who sets the Appeal Bond amount?
+
+A: The Justice Court judge determines the required amount.
+
+Q: Do I pay the bond directly to the court?
+
+A: The court will explain the filing requirements. An Appeal Bond is different from making a cash deposit.
+
+──────────────────────────────
+
+<b>2. Cash Deposit (Cash Bond)</b>
+
+• Instead of filing an Appeal Bond, a tenant may qualify to make a cash deposit with the court.
+
+• The amount is generally determined by the Justice Court.
+
+• The funds are deposited directly with the court.
+
+• Court staff can explain acceptable payment methods.
+
+Common Questions
+
+Q: Is a Cash Deposit the same as an Appeal Bond?
+
+A: No. A Cash Deposit places money directly with the court, while an Appeal Bond is a written guarantee that satisfies the court's bond requirement.
+
+Q: Do I get the money back?
+
+A: The handling of deposited funds depends on the court's final orders and applicable Texas law.
+
+──────────────────────────────
+
+<b>3. Statement of Inability to Pay Court Costs</b>
+
+• A person who cannot afford court costs may file a Statement of Inability to Pay Court Costs if permitted by law.
+
+• The completed statement is filed with the Justice Court.
+
+• The court may review the statement and determine whether it meets legal requirements.
+
+Common Questions
+
+Q: Does filing this statement automatically approve my appeal?
+
+A: The court determines whether the statement satisfies legal requirements.
+
+Q: What information is requested?
+
+A: The form generally requests financial information regarding income, expenses, assets, and other relevant information.
+
+──────────────────────────────
+
+<b>Frequently Asked Questions</b>
+
+Q: Does filing an appeal stop the eviction?
+
+A: Texas law contains procedures regarding possession during an appeal. The court determines how the appeal proceeds.
+
+Q: Do I still have to attend court?
+
+A: Court appearance requirements depend on the case and court proceedings.
+
+Q: How long does an appeal take?
+
+A: Timeframes vary depending on the court and the circumstances of each case.
+
+Q: Can Prime Relief Solutions tell me which appeal option I should choose?
+
+A: No. We are a Legal Document Preparation service. We prepare documents based on the information you provide but do not provide legal advice or recommend legal strategies.
+
+</div>`;}
+
+if(type==="checklist"){ content=`<div style="${style}">
+<ul>
+<li>Explain Your Service:
+
+<div style="max-width:700px; margin-top:8px;">
+
+<p>
+<b>Prime Relief Solutions assists tenants by preparing and filing eviction appeal documents with the appropriate court after a judgment has been entered.</b> We help guide clients through the paperwork process and keep them informed throughout each step.
+</p>
+
+<p>
+<b>How can your services help me?</b><br>
+We prepare the required appeal documents and supporting forms that must be filed with the Justice Court. This can provide additional time if you're looking to remain in the property or need time to find another place to stay.
+</p>
+
+<p>
+<b>How much time does this give me?</b><br>
+Once your appeal has been properly filed and all required appeal steps have been completed, the case is transferred to the County Court. A new hearing will be scheduled. Most clients receive approximately four weeks or more before the new court date, although timelines vary by court.
+</p>
+
+<p>
+<b>Can you stop my eviction?</b><br>
+No. We cannot promise an eviction will be stopped. Our service is preparing and filing your appeal paperwork and guiding you through the process.
+</p>
+
+<p>
+<b>What happens after I pay?</b><br>
+Once payment is received, we'll send your intake documents. After we receive the completed paperwork and any supporting documents, we'll prepare your appeal, file it with the court, and keep you updated throughout the process.
+</p>
+
+<p>
+<b>How long does it take to prepare my documents?</b><br>
+The timeline varies depending on the court and your specific case. We'll keep you informed as we receive updates.
+</p>
+
+</div>
+
+</li>
+
+<li>Confirm Service Fee:
+  <ul>
+    <li>"Our document preparation service fee is $___ for preparing the eviction appeal paperwork."</li>
+    <li>Payment method.</li>
+    <li>When documents will be delivered.</li>
+  </ul>
+</li>
+<li>Collect Case Information Needed for Documents:
+  <ul>
+    <li>Court Information.</li>
+    <li>County.</li>
+    <li>Justice Precinct.</li>
+    <li>Court address.</li>
+    <li>Case number.</li>
+    <li>Plaintiff landlord.</li>
+    <li>Defendant tenant.</li>
+    <li>Judgment Date.</li>
+    <li>Client mailing address.</li>
+  </ul>
+</li>
+<li>Prepare the Required Documents:
+  <ul>
+    <li>Notice of Appeal.</li>
+    <li>Statement of Inability to Pay.</li>
+    <li>Appeal Bond Form.</li>
+    <li>Certificate of Service.</li>
+  </ul>
+</li>
+<li>Provide Filing Instructions:
+  <ul>
+    <li>"Once you receive the documents, you will file them with the Justice Court that issued the eviction judgment. Filing must occur within the deadline."</li>
+    <li>File in person or electronically.</li>
+    <li>Bring copies.</li>
+    <li>Ask clerk to stamp.</li>
+  </ul>
+</li>
+<li>Deliver Documents:
+  <ul>
+    <li>Email PDF.</li>
+    <li>Secure download.</li>
+    <li>Printed copies.</li>
+  </ul>
+</li>
+<li>Confirm Filing:
+  <ul>
+    <li>Did the court accept the documents?</li>
+    <li>Did the clerk stamp them?</li>
+    <li>Did they receive a hearing notice?</li>
+  </ul>
+</li>
+<li>Record the Case:
+  <ul>
+    <li>Client name.</li>
+    <li>Case number.</li>
+    <li>Court.</li>
+    <li>Judgment date.</li>
+    <li>Appeal type.</li>
+    <li>Date documents delivered.</li>
+  </ul>
+</li>
+</ul>
+</div>`;}
+  
+if(type==="serviceAgreement"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">PRIME RELIEF SOLUTIONS</h2>
+<h3 style="text-align:center;">LEGAL DOCUMENT PREPARATION SERVICE AGREEMENT</h3>
+
+<hr><br>
+
+<table style="width:100%;border:none;">
+<tr>
+
+<td style="border:none;">
+<b>Client Name</b><br>
+<input id="saClientName" style="width:95%;">
+</td>
+
+<td style="border:none;">
+<b>Case Number</b><br>
+<input id="saCaseNumber" style="width:95%;">
+</td>
+
+</tr>
+
+<tr>
+
+<td style="border:none;">
+<b>Date</b><br>
+<input id="saDate" type="date" style="width:95%;">
+</td>
+
+<td style="border:none;">
+<b>Staff Member</b><br>
+<input id="saStaff" style="width:95%;">
+</td>
+
+</tr>
+</table>
+
+<br>
+
+<p>
+Prime Relief Solutions is a Legal Document Preparation business.
+</p>
+
+<p>
+We agree to prepare legal documents using only the information you provide.
+</p>
+
+<b>Our services may include:</b><br><br>
+
+<label><input id="saNoticeAppeal" type="checkbox"> Notice of Appeal</label><br>
+<label><input id="saInability" type="checkbox"> Statement of Inability to Pay Court Costs</label><br>
+<label><input id="saAppealBond" type="checkbox"> Appeal Bond Documents</label><br>
+<label><input id="saOtherDocs" type="checkbox"> Other Document Preparation</label>
+
+<br><br>
+
+<div style="
+    border:1px solid #BFA13A;
+    background:#faf8ee;
+    padding:9px 12px;
+    margin:10px 0 14px 0;
+    border-radius:5px;
+    display:inline-block;
+    min-width:190px;
+">
+
+    <b style="font-size:14px;">
+        SERVICE FEE
+    </b>
+
+    <span style="
+        font-size:18px;
+        font-weight:bold;
+        color:#BFA13A;
+        margin-left:12px;
+    ">
+        $190.00
+    </span>
+
+    <div style="
+        margin-top:2px;
+        font-size:12px;
+    ">
+        Document Preparation Service Fee
+    </div>
+
+</div>
+
+<h3 style="background:#BFA13A;color:white;padding:8px;">
+IMPORTANT DISCLOSURE
+</h3>
+
+<ul>
+
+<li>We are NOT attorneys.</li>
+
+<li>We do not give legal advice.</li>
+
+<li>We do not represent clients in court.</li>
+
+<li>We do not tell clients what legal decisions to make.</li>
+
+<li>We do not guarantee any court outcome.</li>
+
+</ul>
+
+<p>
+The client is responsible for reviewing, signing and filing all documents unless separate filing assistance is purchased.
+</p>
+
+<br><br>
+
+<b>Client Signature</b>
+
+<hr>
+
+<br>
+
+<b>Date</b>
+
+<hr>
+
+<br>
+
+<br><br>
+
+</div>
+`;}
+  
+  if(type==="limitedScope"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">
+PRIME RELIEF SOLUTIONS
+</h2>
+
+<h3 style="text-align:center;">
+LIMITED SCOPE DISCLOSURE
+</h3>
+
+<hr><br>
+
+<p>I understand:</p>
+
+<label><input type="checkbox" checked> Prime Relief Solutions is not a law firm.</label><br>
+
+<label><input type="checkbox" checked> No attorney-client relationship exists.</label><br>
+
+<label><input type="checkbox" checked> No legal advice has been provided.</label><br>
+
+<label><input type="checkbox" checked> My documents are prepared only from the information I provide.</label><br>
+
+<label><input type="checkbox" checked> I am responsible for reviewing all paperwork before signing.</label><br>
+
+<label><input type="checkbox" checked> Court decisions are made solely by the court.</label>
+
+<br><br>
+
+<b>Client Name</b><br>
+
+<input id="lsClientName" style="width:350px;">
+
+<br><br>
+
+<b>Case Number</b><br>
+
+<input id="lsCaseNumber" style="width:220px;">
+
+<br><br>
+
+<b>Date</b><br>
+
+<input id="lsDate" type="date" style="width:220px;">
+
+<br><br>
+
+<b>Client Signature</b>
+
+<hr>
+
+<br>
+
+</div>
+`;}
+  
+if(type==="authorization"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">
+PRIME RELIEF SOLUTIONS
+</h2>
+
+<h3 style="text-align:center;">
+AUTHORIZATION TO PREPARE DOCUMENTS
+</h3>
+
+<hr><br>
+
+<p>
+I authorize Prime Relief Solutions to prepare legal documents using the information I provide regarding my eviction appeal.
+</p>
+
+<p>
+I certify the information I provide is true and correct to the best of my knowledge.
+</p>
+
+<p>
+I understand I am responsible for reviewing all documents before signing and filing them.
+</p>
+
+<br>
+
+<b>Client Name</b><br>
+<input id="authClientName" style="width:350px;">
+
+<br><br>
+
+<b>Case Number</b><br>
+<input id="authCaseNumber" style="width:220px;">
+
+<br><br>
+
+<b>Date</b><br>
+<input id="authDate" type="date" style="width:220px;">
+
+<br><br>
+
+<b>Client Signature</b>
+
+<hr>
+
+<br><br>
+
+<b>Staff Member</b><br>
+
+<input id="authStaff" style="width:300px;">
+
+<br><br>
+
+</div>
+`;}
+  
+if(type==="invoice"){ content=`
+<div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
+
+<h2 style="text-align:center;color:#BFA13A;">
+PRIME RELIEF SOLUTIONS
+</h2>
+
+<h3 style="text-align:center;">
+INVOICE / RECEIPT
+</h3>
+
+<hr><br>
+
+<b>Invoice #</b><br>
+<input id="invNumber" style="width:220px;">
+
+<br><br>
+
+<b>Date</b><br>
+<input id="invDate" type="date" style="width:220px;">
+
+<br><br>
+
+<b>Client</b><br>
+<input id="invClient" style="width:350px;">
+
+<br><br>
+
+<b>Case Number</b><br>
+<input id="invCase" style="width:250px;">
+
+<br><br>
+
+<b>Service</b><br>
+<input id="invService" style="width:500px;">
+
+<br><br>
+
+<b>Amount</b><br>
+<input id="invAmount" style="width:120px;">
+
+<br><br>
+
+<b>Paid By</b><br>
+
+<label><input id="invCash" type="checkbox" disabled> Cash</label><br>
+
+<label><input id="invCard" type="checkbox" disabled> Credit / Debit</label><br>
+
+<label><input id="invCashApp" type="checkbox" disabled> Cash App</label><br>
+
+<label><input id="invZelle" type="checkbox" disabled> Zelle</label>
+
+<br><br>
+
+<b>Balance Due</b><br>
+
+<input id="invBalance" style="width:120px;">
+
+<br><br>
+
+<b>Received By</b><br>
+
+<input id="invStaff" style="width:300px;">
+
+<br><br>
+
+</div>
+`;}
+  
+if(type==="completion"){ content=`<div>
+<h2>Prime Relief Solutions</h2>
+<h3>LETTER OF SERVICE COMPLETION</h3>
+
+<label>Date:</label>
+<input ${formInput}>
+
+<label>Client Name:</label>
+<input ${formInput}>
+
+<p><b>Re: Eviction Appeal Document Filing – Texas Justice Court</b></p>
+
+<label>Dear:</label>
+<input ${formInput}>
+
+<p>This letter confirms that the eviction appeal documents prepared for your case have been filed with the appropriate Texas Justice Court based on the information you provided to our office.</p>
+
+<p>Our document preparation and filing assistance services for this matter are now complete. Please retain copies of your filed documents for your records and monitor any notices or communications you may receive from the court regarding your case.</p>
+
+<p>Please note that our services are limited to document preparation and filing assistance. We do not provide legal advice, legal representation, or court advocacy. If you require legal advice or representation moving forward, you should consult a licensed Texas attorney.</p>
+
+<p>Thank you for allowing us to assist you.</p>
+
+<p>
+Prime Relief Solutions<br>
+Phone: (877) 234-3578<br>
+Email: help@prsolution.org
+</p>
+</div>`;}
+
+let w = window.open("", "_blank");
+
+w.document.open();
+
+w.document.write(`
+<html>
+<head>
+<title>Prime Relief Solutions</title>
+<style>
+body{
+    font-family:Arial;
+    padding:30px;
+    background:#f4f0df;
+    color:#000;
+}
+
+input,
+textarea{
+    border:1px solid #999;
+    padding:5px;
+    font-size:14px;
+}
+
+button{
+    padding:10px 20px;
+    margin:10px 5px;
+    cursor:pointer;
+    font-size:15px;
+    border:none;
+    border-radius:6px;
+    background:#BFA13A;
+    color:white;
+}
+
+button:hover{
+    opacity:.9;
+}
+</style>
+
+</head>
+
+<body>
+
+<div style="
+text-align:center;
+padding-bottom:18px;
+margin-bottom:25px;
+border-bottom:3px solid #BFA13A;
+">
+
+<img src="Prime Relief.PNG" style="height:95px;"><br>
+
+<div style="font-size:15px;color:#666;">
+Professional LDP Eviction Support
+</div>
+
+</div>
+
+${content}
+
+<br><br>
+
+<center>
+
+<button onclick="window.print()">
+Save / Print
+</button>
+
+</center>
+
+<script>
+
+async function intakeSaveButton(){
+
+    try{
+
+        const result =
+            await window.opener.saveIntake(document);
+
+        if(result === true){
+
+            alert("Intake Saved Successfully");
+
+        }else{
+
+            alert("Save Failed - Case Number is required.");
+
+        }
+
+    }catch(error){
+
+        console.error("INTAKE SAVE ERROR:", error);
+
+        alert("Save Intake Error: " + error.message);
+
+    }
+
+}
+
+function openSavedIntakes(){
+
+    const modal =
+        document.getElementById("savedIntakesModal");
+
+    if(!modal){
+
+        alert("Saved Intake window was not found.");
+
+        return;
+
+    }
+
+    modal.style.display = "block";
+
+    window.opener.showSavedIntakesForIntakeWindow(
+        document
+    );
+
+}
+
+<\/script>
+
+</body>
+
+</html>
+`);
+  
+w.document.close();
+  if(type==="intake")
+    w.document.title="Prime Relief Solutions - Intake";
+
+if(type==="script")
+    w.document.title="Prime Relief Solutions - Call Script";
+
+if(type==="appeal")
+    w.document.title="Prime Relief Solutions - Appeal Information";
+
+if(type==="checklist")
+    w.document.title="Prime Relief Solutions - Checklist";
+
+if(type==="completion")
+    w.document.title="Prime Relief Solutions - Completion Letter";
+
+if(type==="serviceAgreement")
+    w.document.title="Prime Relief Solutions - Service Agreement";
+
+if(type==="limitedScope")
+    w.document.title="Prime Relief Solutions - Limited Scope Disclosure";
+
+if(type==="authorization")
+    w.document.title="Prime Relief Solutions - Authorization";
+
+if(type==="invoice")
+    w.document.title="Prime Relief Solutions - Invoice";
+
+if(type==="serviceAgreement"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("saClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("saCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("saDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("saStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+    },200);
+
+}
+
+if(type==="limitedScope"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("lsClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("lsCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("lsDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+    },200);
+
+}
+
+if(type==="authorization"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("authClientName").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("authCaseNumber").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("authDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("authStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+    },200);
+
+}
+  
+if(type==="invoice"){
+
+    setTimeout(()=>{
+
+        const d = w.document;
+
+        d.getElementById("invNumber").value =
+            "INV-" + Date.now();
+
+        d.getElementById("invDate").value =
+            document.getElementById("intakeDate")?.value || "";
+
+        d.getElementById("invClient").value =
+            document.getElementById("clientName")?.value || "";
+
+        d.getElementById("invCase").value =
+            document.getElementById("caseNumber")?.value || "";
+
+        d.getElementById("invService").value =
+            document.getElementById("serviceSelected")?.value || "";
+
+        d.getElementById("invAmount").value =
+            document.getElementById("serviceFee")?.value || "$190.00";
+
+        d.getElementById("invBalance").value = "$0.00";
+
+        d.getElementById("invStaff").value =
+            document.getElementById("staffMember")?.value || "";
+
+        d.getElementById("invCash").checked =
+            document.getElementById("payCash")?.checked || false;
+
+        d.getElementById("invCard").checked =
+            document.getElementById("payCard")?.checked || false;
+
+        d.getElementById("invCashApp").checked =
+            document.getElementById("payCashApp")?.checked || false;
+
+        d.getElementById("invZelle").checked =
+            document.getElementById("payZelle")?.checked || false;
+
+    },200);
+
+}
+  
+return;
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA7E8hzpSD5b7ygCj_Xshq5qUEkKXDp_pA",
+  authDomain: "prsolutions-lead-management.firebaseapp.com",
+  projectId: "prsolutions-lead-management"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+//========================
+// Intake Variables
+//========================
+
+let currentIntakeID="";
+let currentUser="";
+let allData=[];
+let existingCases=new Set();
+let debounceTimer;
+let rowOrder=[];
+let displayedCases = [];
+  
+function login(){ auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message)); }
+function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sendPasswordResetEmail(email.value).then(()=>alert("Reset email sent")); }
+function logout(){ auth.signOut(); }
+
+auth.onAuthStateChanged(user=>{
+  if(user){ currentUser=user.email; loginOverlay.style.display="none"; load(); }
+  else { loginOverlay.style.display="flex"; }
+});
+
+function load(){
+  db.collection("cases").onSnapshot(snap=>{
+    existingCases.clear();
+    allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
+const savedUpload =
+    JSON.parse(localStorage.getItem("lastUpload") || "[]");
+
+if(savedUpload.length){
+
+    render(
+        allData.filter(c =>
+            savedUpload.includes(c.caseNumber)
+        )
+    );
+
+}else{
+
+   if(displayedCases.length){
+
+    const ids = displayedCases.map(c => c.caseNumber);
+
+    render(
+        allData.filter(c => ids.includes(c.caseNumber))
+    );
+
+}else{
+
+    render([]);
+
+}
+
+}
+    if(rowOrder.length){
+      allData.sort((a,b)=>{
+        let ai=rowOrder.indexOf(a.caseNumber);
+        let bi=rowOrder.indexOf(b.caseNumber);
+
+        if(ai === -1) ai = 999999;
+        if(bi === -1) bi = 999999;
+
+        return ai - bi;
+      });
+    }
+
+    render(allData);
+  });
+}
+
+function debounceFilter(){
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(()=>requestAnimationFrame(applyFilters),250);
+}
+
+function applyFilters(){
+  let nameValue = searchName.value.toLowerCase();
+  let zipValue = searchZip.value;
+  let dateValue = searchDate.value.toLowerCase();
+  let minValue = Number(minAmt.value)||0;
+  let maxValue = Number(maxAmt.value)||999999;
+
+  let rows=allData.filter(r=>
+    r.name.toLowerCase().includes(nameValue) &&
+    (r.zip || "").includes(zipValue) &&
+    (r.hearing || "").toLowerCase().includes(dateValue) &&
+    r.amount>= minValue &&
+    r.amount<= maxValue
+  );
+
+  requestAnimationFrame(()=>render(rows));
+}
+
+function upload(){
+  const file=document.getElementById("file").files[0];
+  if(!file) return alert("Choose file");
+
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split("\n").filter(l=>l.trim());
+    const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
+
+    let i=1, chunk=200, added=0, skipped=0, temp=[];
+
+    function processChunk(){
+      let end=Math.min(i+chunk, lines.length);
+
+      for(; i<end; i++){
+        let values=lines[i].split("\t");
+        let row={};
+        headers.forEach((h,idx)=> row[h]=values[idx]?.replace(/"/g,"").trim());
+
+        let caseNum=row["Case Number"];
+        if(!caseNum) continue;
+
+        let amount=Number(row["Claim Amount"]||0);
+        let zip=row["Defendant Addr Zip"]||"";
+
+        let addressParts=[
+          row["Defendant Addr Line 1"]||"",
+          row["Defendant Addr City"]||"",
+          zip
+        ].filter(Boolean);
+
+        let lead="Cold",cls="row-cold";
+        if(amount>1000){lead="Hot";cls="row-hot";}
+        else if(amount>500){lead="Warm";cls="row-warm";}
+
+        let record={
+          caseNumber:caseNum,
+          name:row["Defendant Name"]||"",
+          address:addressParts.join(", "),
+          amount,
+          hearing:row["Next Hearing Date"]||"",
+          zip,
+          lead,cls,
+          status:"Open",
+          updatedBy:currentUser
+        };
+
+        temp.push(record);
+
+      if(!existingCases.has(caseNum)){
+
+    existingCases.add(caseNum);
+
+    db.collection("cases")
+      .doc(caseNum)
+      .set(record,{merge:true});
+
+    allData.push(record);
+
+    added++;
+
+}else{
+
+    skipped++;
+
+}
+      }
+
+      render(temp);
+
+      if(i<lines.length){ setTimeout(processChunk,0); }
+      else { load();
+
+alert(`Upload Complete
+Added: ${added}
+Skipped: ${skipped}`); }
+    }
+localStorage.setItem(
+    "lastUpload",
+    JSON.stringify(temp.map(x=>x.caseNumber))
+);
+    processChunk();
+  };
+
+  reader.readAsText(file);
+}
+
+function cycle(btn,id){
+  const states=["Open","Contacted","Processing","Closed"];
+  let next=(states.indexOf(btn.innerText)+1)%states.length;
+  let newState=states[next];
+
+  btn.innerText=newState;
+  btn.className="status-"+newState.toLowerCase();
+
+  allData.forEach(r=>{
+    if(r.caseNumber === id){
+      r.status = newState;
+      r.updatedBy = currentUser;
+    }
+  });
+
+  setTimeout(()=>{
+    db.collection("cases").doc(id).update({
+      status:newState,
+      updatedBy:currentUser
+    });
+  },0);
+}
+
+function clearView(){
+
+    if(!confirm("Clear current file from view?")) return;
+
+    searchName.value="";
+    searchZip.value="";
+    minAmt.value="";
+    maxAmt.value="";
+    searchDate.value="";
+
+    document.getElementById("file").value="";
+
+    displayedCases=[];
+
+    tbody.innerHTML="";
+
+}
+
+function render(rows){
+displayedCases = rows;  
+  let html="";
+
+  rowOrder = rows.map(r=>r.caseNumber);
+
+  rows.forEach(r=>{
+    let displayAddress = r.address || "";
+
+    if(r.zip && displayAddress && !displayAddress.includes(r.zip)){
+      displayAddress = displayAddress + ", " + r.zip;
+    }
+
+    html+=`
+    <tr class="${r.cls}">
+      <td>${r.caseNumber}</td>
+      <td>${r.name}</td>
+      <td>${displayAddress}</td>
+      <td>$${r.amount}</td>
+      <td>${r.hearing}</td>
+      <td>${r.lead}</td>
+      <td><button class="status-${r.status.toLowerCase()}" onclick="cycle(this,'${r.caseNumber}')">${r.status}</button></td>
+      <td>${r.updatedBy||""}</td>
+      <td><button class="map-btn" onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}')">Map</button></td>
+    </tr>`;
+  });
+
+  tbody.innerHTML=html;
+}
+//======================================
+// SAVE ENTIRE INTAKE TO FIREBASE
+//======================================
+
+async function saveIntake(doc){
+
+try{
+
+    const data = {};
+
+    doc.querySelectorAll("input, textarea").forEach(el=>{
+
+        if(!el.id) return;
+
+        if(el.type==="checkbox" || el.type==="radio"){
+            data[el.id] = el.checked;
+        }else{
+            data[el.id] = el.value;
+        }
+
+    });
+
+    if(!data.caseNumber){
+        return false;
+    }
+
+    data.savedBy = currentUser;
+    data.savedOn = firebase.firestore.FieldValue.serverTimestamp();
+
+    await db.collection("intakes").doc(data.caseNumber).set(data);
+
+    return true;
+
+}catch(err){
+
+    console.error(err);
+    return false;
+
+}
+
+}
+  
+ //======================================
+// LOAD ENTIRE SAVED INTAKE
+//======================================
+
+async function loadIntake(formDoc, intakeID){
+
+    try{
+
+        const intakeDoc =
+            await db
+                .collection("intakes")
+                .doc(intakeID)
+                .get();
+
+        if(!intakeDoc.exists){
+
+            console.error(
+                "Saved intake not found:",
+                intakeID
+            );
+
+            return false;
+        }
+
+        const data = intakeDoc.data();
+
+        Object.keys(data).forEach(key => {
+
+            const el =
+                formDoc.getElementById(key);
+
+            if(!el){
+                return;
+            }
+
+            if(
+                el.type === "checkbox" ||
+                el.type === "radio"
+            ){
+
+                el.checked = !!data[key];
+
+            }else{
+
+                el.value = data[key] ?? "";
+
+            }
+
+        });
+
+        currentIntakeID = intakeID;
+
+        return true;
+
+    }catch(err){
+
+        console.error(
+            "LOAD INTAKE ERROR:",
+            err
+        );
+
+        alert(
+            "Unable to load saved intake.\n\n" +
+            err.message
+        );
+
+        return false;
+    }
+}
+  
+//======================================
+// SEARCH SAVED CLIENTS
+//======================================
+
+async function searchIntakes(name){
+
+try{
+
+    const snap = await db.collection("intakes")
+    .where("clientName", ">=", name)
+    .where("clientName", "<=", name + "\uf8ff")
+    .limit(1)
+    .get();
+
+    if(snap.empty){
+        return null;
+    }
+
+    const doc = snap.docs[0];
+
+    return doc.id + " - " + doc.data().clientName;
+
+}catch(err){
+
+    console.error(err);
+    return null;
+
+}
+
+}
+//======================================
+// SAVED INTAKE CRM
+//======================================
+
+let currentIntakeWindow = null;
+let savedIntakes = [];
+
+
+//======================================
+// OPEN SAVED INTAKES
+//======================================
+
+async function showSavedIntakes(formDoc){
+
+    currentIntakeWindow = formDoc;
+
+    let modal =
+        formDoc.getElementById("savedIntakesModal");
+
+    // Copy the existing modal from the main page
+    // into the Intake window if it is not already there.
+    if(!modal){
+
+        const source =
+            document.getElementById("savedIntakesModal");
+
+        if(!source){
+
+            alert("Saved Intake window was not found.");
+
+            return;
+        }
+
+        modal = source.cloneNode(true);
+
+        formDoc.body.appendChild(modal);
+
+        modal.id = "savedIntakesModal";
+
+    }
+
+    modal.style.display = "block";
+    modal.style.zIndex = "999999";
+
+    const searchBox =
+        formDoc.getElementById("intakeSearch");
+
+    if(searchBox){
+
+        searchBox.value = "";
+
+        searchBox.oninput = function(){
+
+            const search =
+                searchBox.value
+                    .trim()
+                    .toLowerCase();
+
+            const filtered =
+                savedIntakes.filter(c => {
+
+                    return (
+                        String(c.clientName || "")
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        String(c.caseNumber || "")
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        String(c.propertyAddress || "")
+                            .toLowerCase()
+                            .includes(search)
+
+                        ||
+
+                        String(c.phone || "")
+                            .toLowerCase()
+                            .includes(search)
+                    );
+
+                });
+
+            renderSavedIntakes(filtered);
+
+        };
+
+    }
+
+    try{
+
+        const snap =
+            await db
+                .collection("intakes")
+                .get();
+
+        savedIntakes = [];
+
+        snap.forEach(doc => {
+
+            savedIntakes.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+        savedIntakes.sort((a,b) => {
+
+            return String(a.clientName || "")
+                .localeCompare(
+                    String(b.clientName || "")
+                );
+
+        });
+
+        renderSavedIntakes(savedIntakes);
+
+    }catch(err){
+
+        console.error(
+            "Saved Intake Error:",
+            err
+        );
+
+        alert(
+            "Unable to load saved intakes.\n\n" +
+            err.message
+        );
+
+    }
+
+}
+  
+//======================================
+// DISPLAY SAVED INTAKES
+//======================================
+
+function renderSavedIntakes(list){
+
+   const container =
+    currentIntakeWindow.getElementById(
+        "savedIntakesList"
+    );
+  
+    if(!container){
+
+        return;
+
+    }
+
+    if(!list.length){
+
+        container.innerHTML = `
+
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#777;
+            ">
+
+                <div style="
+                    font-size:35px;
+                ">
+                    📂
+                </div>
+
+                <strong>
+                    No Saved Intakes Found
+                </strong>
+
+                <div style="
+                    margin-top:6px;
+                    font-size:13px;
+                ">
+                    Save an intake to see it here.
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    let html = "";
+
+    list.forEach(c => {
+
+        html += `
+
+            <div class="savedCard">
+
+                <div class="savedInfo">
+
+                    <b>
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
+
+                    <br>
+
+                    Case:
+                    ${escapeHTML(
+                        c.caseNumber ||
+                        "No Case Number"
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.propertyAddress ||
+                        ""
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.phone ||
+                        ""
+                    )}
+
+                </div>
+
+                <button
+                    type="button"
+                    class="savedOpen"
+                    onclick="openSavedIntake('${c.id}')">
+
+                    Open
+
+                </button>
+
+            </div>
+
+        `;
+
+    });
+
+    container.innerHTML = html;
+
+}
+
+
+//======================================
+// INSTANT SEARCH
+//======================================
+
+function filterSavedIntakes(){
+
+   const searchBox =
+    currentIntakeWindow.getElementById(
+        "intakeSearch"
+    );
+
+    if(!searchBox){
+
+        return;
+
+    }
+
+    const search =
+        searchBox.value
+            .trim()
+            .toLowerCase();
+
+    const filtered =
+        savedIntakes.filter(c => {
+
+            return (
+
+                String(
+                    c.clientName || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+                ||
+
+                String(
+                    c.caseNumber || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+                ||
+
+                String(
+                    c.propertyAddress || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+                ||
+
+                String(
+                    c.phone || ""
+                )
+                .toLowerCase()
+                .includes(search)
+
+            );
+
+        });
+
+    renderSavedIntakes(filtered);
+
+}
+
+
+//======================================
+// OPEN SELECTED INTAKE
+//======================================
+
+async function openSavedIntake(intakeID){
+
+    if(!currentIntakeWindow){
+
+        alert(
+            "The Intake window is no longer available."
+        );
+
+        return;
+
+    }
+
+    const ok =
+        await loadIntake(
+            currentIntakeWindow,
+            intakeID
+        );
+
+    if(ok){
+
+        closeSavedIntakes();
+
+    }else{
+
+        alert(
+            "Unable to load this saved intake."
+        );
+
+    }
+
+}
+
+
+//======================================
+// CLOSE SAVED INTAKES
+//======================================
+
+function closeSavedIntakes(){
+
+    if(!currentIntakeWindow) return;
+
+    const modal =
+        currentIntakeWindow.getElementById(
+            "savedIntakesModal"
+        );
+
+    if(modal){
+
+        modal.style.display = "none";
+
+    }
+
+}
+
+//======================================
+// SAFE HTML
+//======================================
+
+function escapeHTML(value){
+
+    return String(value || "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+  
+</script>
+</body>
+</html>
