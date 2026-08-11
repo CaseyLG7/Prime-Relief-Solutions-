@@ -1269,22 +1269,73 @@ async function intakeSaveButton(){
 
 function openSavedIntakes(){
 
-    const modal =
-        document.getElementById("savedIntakesModal");
+    try{
 
-    if(!modal){
+        // Get the working modal from the main page
+        const source =
+            window.opener.document.getElementById(
+                "savedIntakesModal"
+            );
 
-        alert("Saved Intake window was not found.");
+        if(!source){
 
-        return;
+            alert("Saved Intake window was not found.");
+
+            return;
+        }
+
+        // Copy it into THIS Intake window
+        let modal =
+            document.getElementById(
+                "savedIntakesModal"
+            );
+
+        if(!modal){
+
+            modal = source.cloneNode(true);
+
+            document.body.appendChild(modal);
+
+        }
+
+        modal.style.display = "block";
+        modal.style.zIndex = "999999";
+
+        // These buttons/search stay inside the Intake window
+        window.closeSavedIntakes = function(){
+
+            modal.style.display = "none";
+
+        };
+
+        window.filterSavedIntakes = function(){
+
+            window.opener.filterSavedIntakes();
+
+        };
+
+        window.openSavedIntake = function(id){
+
+            window.opener.openSavedIntake(id);
+
+        };
+
+        // Now let the MAIN page load Firebase data
+        window.opener.showSavedIntakes(document);
+
+    }catch(error){
+
+        console.error(
+            "OPEN SAVED INTAKE ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to open Saved Intakes.\n\n" +
+            error.message
+        );
 
     }
-
-    modal.style.display = "block";
-
-    window.opener.showSavedIntakesForIntakeWindow(
-        document
-    );
 
 }
 
