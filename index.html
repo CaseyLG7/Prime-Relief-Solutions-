@@ -1269,18 +1269,10 @@ async function intakeSaveButton(){
 
 function openSavedIntakes(){
 
-    const modal =
-        document.getElementById("savedIntakesModal");
-
-    if(!modal){
-
-        alert("Saved Intake window was not found.");
-
+    if(!window.opener || window.opener.closed){
+        alert("The main Prime Relief Solutions window is not available.");
         return;
-
     }
-
-    modal.style.display = "block";
 
     window.opener.showSavedIntakesForIntakeWindow(
         document
