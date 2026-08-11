@@ -1240,22 +1240,22 @@ Save / Print
 
 <script>
 
-async function intakeSaveButton(){
+async function saveIntake(){
 
     try{
+
+        if(!window.opener || window.opener.closed){
+
+            alert("The main Prime Relief Solutions window is not available.");
+
+            return false;
+
+        }
 
         const result =
             await window.opener.saveIntake(document);
 
-        if(result === true){
-
-            alert("Intake Saved Successfully");
-
-        }else{
-
-            alert("Save Failed - Case Number is required.");
-
-        }
+        return result === true;
 
     }catch(error){
 
@@ -1263,24 +1263,93 @@ async function intakeSaveButton(){
 
         alert("Save Intake Error: " + error.message);
 
+        return false;
+
     }
 
 }
+
+
+async function loadIntake(){
+
+    try{
+
+        if(!window.opener || window.opener.closed){
+
+            alert("The main Prime Relief Solutions window is not available.");
+
+            return;
+
+        }
+
+        if(typeof window.opener.showSavedIntakesForIntakeWindow === "function"){
+
+            window.opener.showSavedIntakesForIntakeWindow(document);
+
+        }else{
+
+            alert("Saved Intake window function is not available.");
+
+        }
+
+    }catch(error){
+
+        console.error("LOAD INTAKE ERROR:", error);
+
+        alert("Open Saved Intake Error: " + error.message);
+
+    }
+
+}
+
+
+async function searchIntakes(){
+
+    try{
+
+        if(!window.opener || window.opener.closed){
+
+            alert("The main Prime Relief Solutions window is not available.");
+
+            return;
+
+        }
+
+        if(typeof window.opener.searchIntakes === "function"){
+
+            await window.opener.searchIntakes(document);
+
+        }else{
+
+            alert("Find Client function is not available.");
+
+        }
+
+    }catch(error){
+
+        console.error("SEARCH INTAKE ERROR:", error);
+
+        alert("Find Client Error: " + error.message);
+
+    }
+
+}
+
+
+function intakeSaveButton(){
+
+    saveIntake();
+
+}
+
 
 function openSavedIntakes(){
 
-    if(!window.opener || window.opener.closed){
-        alert("The main Prime Relief Solutions window is not available.");
-        return;
-    }
-
-    window.opener.showSavedIntakesForIntakeWindow(
-        document
-    );
+    loadIntake();
 
 }
 
-<\/script>
+</script>
 
 </body>
 
