@@ -2055,6 +2055,213 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
     }
 }
+
+async function loadSavedIntakesIntoIntakeWindow(formDoc){
+
+    currentIntakeWindow = formDoc;
+
+    try{
+
+        const snap =
+            await db
+                .collection("intakes")
+                .get();
+
+        savedIntakes = [];
+
+        snap.forEach(doc => {
+
+            savedIntakes.push({
+                id: doc.id,
+                ...doc.data()
+            });
+
+        });
+
+        savedIntakes.sort((a,b) =>
+            String(a.clientName || "")
+                .localeCompare(
+                    String(b.clientName || "")
+                )
+        );
+
+        renderSavedIntakesInIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
+
+    }catch(err){
+
+        console.error(
+            "Saved Intake Error:",
+            err
+        );
+
+        alert(
+            "Unable to load saved intakes.\n\n" +
+            err.message
+        );
+    }
+}
+
+
+function renderSavedIntakesInIntakeWindow(formDoc,list){
+
+    const container =
+        formDoc.getElementById("savedIntakesList");
+
+    if(!container){
+        return;
+    }
+
+    if(!list.length){
+
+        container.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#111111;
+                background:#ffffff;
+            ">
+                <div style="font-size:35px;">📂</div>
+
+                <strong style="color:#111111;">
+                    No Saved Intakes Found
+                </strong>
+
+                <div style="
+                    margin-top:6px;
+                    font-size:13px;
+                    color:#333333;
+                ">
+                    Save an intake to see it here.
+                </div>
+            </div>
+        `;
+
+        return;
+    }
+
+    let html = "";
+
+    list.forEach(c => {
+
+        html += `
+            <div class="savedCard" style="
+                padding:12px;
+                margin-bottom:10px;
+                border:1px solid #999;
+                border-radius:8px;
+                background:#ffffff;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                gap:15px;
+            ">
+
+                <div class="savedInfo" style="
+                    font-size:14px;
+                    line-height:1.5;
+                    color:#111111;
+                ">
+
+                    <b style="color:#111111;">
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
+
+                    <br>
+
+                    <span style="color:#111111;">
+                        Case:
+                        ${escapeHTML(
+                            c.caseNumber ||
+                            "No Case Number"
+                        )}
+                    </span>
+
+                    <br>
+
+                    <span style="color:#111111;">
+                        ${escapeHTML(
+                            c.propertyAddress ||
+                            ""
+                        )}
+                    </span>
+
+                    <br>
+
+                    <span style="color:#111111;">
+                        ${escapeHTML(
+                            c.phone ||
+                            ""
+                        )}
+                    </span>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="savedOpen"
+                    onclick="
+                        window.opener.openSavedIntakeFromIntakeWindow(
+                            document,
+                            '${c.id}'
+                        )
+                    "
+                    style="
+                        background:#2196f3;
+                        color:#ffffff;
+                        padding:8px 18px;
+                        border:none;
+                        border-radius:6px;
+                        cursor:pointer;
+                        flex-shrink:0;
+                    "
+                >
+                    Open
+                </button>
+
+            </div>
+        `;
+
+    });
+
+    container.innerHTML = html;
+}
+
+async function openSavedIntakeFromIntakeWindow(
+    formDoc,
+    intakeID
+){
+
+    const ok =
+        await loadIntake(
+            formDoc,
+            intakeID
+        );
+
+    if(ok){
+
+        const modal =
+            formDoc.getElementById(
+                "savedIntakesModal"
+            );
+
+        if(modal){
+            modal.style.display = "none";
+        }
+
+    }else{
+
+        alert(
+            "Unable to load this saved intake."
+        );
+
+    }
+}
   
 function renderSavedIntakesForIntakeWindow(formDoc,list){
 
