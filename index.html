@@ -605,11 +605,15 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 
 <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
 
-<button type="button" onclick="openSavedIntakes()">💾 Save Intake</button>
+<button
+    type="button"
+    id="saveIntakeButton">
+    💾 Save Intake
+</button>
 
 <button
     type="button"
-    onclick="openSavedIntakes()"
+    id="openSavedIntakeButton"
     style="
         background:#BFA13A;
         color:white;
@@ -623,7 +627,11 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
     📂 Open Saved Intake
 </button>
 
-<button type="button" onclick="window.print()">🖨 Save / Print</button>
+<button
+    type="button"
+    id="printIntakeButton">
+    🖨 Save / Print
+</button>
 
 </div>
 
