@@ -1496,53 +1496,85 @@ auth.onAuthStateChanged(user=>{
 });
 
 function load(){
+
   db.collection("cases").onSnapshot(snap=>{
+
     existingCases.clear();
-    allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
+
+    allData = snap.docs.map(d => {
+
+      let r = d.data();
+
+      existingCases.add(r.caseNumber);
+
+      return r;
+
+    });
+
+
+    /*
+    ==========================================
+    KEEP THE CURRENT FILE VIEW
+    ==========================================
+    */
 
     const savedUpload =
-        JSON.parse(localStorage.getItem("lastUpload") || "[]");
+      JSON.parse(
+        localStorage.getItem("lastUpload") || "[]"
+      );
+
+
+    /*
+    ==========================================
+    IF A FILE WAS PREVIOUSLY LOADED,
+    ONLY SHOW THOSE CASES.
+    DO NOT SHOW ALL FIREBASE CASES.
+    ==========================================
+    */
 
     if(savedUpload.length){
 
-        render(
-            allData.filter(c =>
-                savedUpload.includes(c.caseNumber)
+      const visibleCases =
+        allData.filter(c =>
+          savedUpload.includes(c.caseNumber)
+        );
+
+
+      /*
+      Keep the uploaded file's original order.
+      */
+
+      const orderedCases =
+        savedUpload
+          .map(id =>
+            visibleCases.find(
+              c => c.caseNumber === id
             )
-        );
+          )
+          .filter(Boolean);
 
-    }else{
 
-       if(displayedCases.length){
+      displayedCases = orderedCases;
 
-        const ids = displayedCases.map(c => c.caseNumber);
+      render(orderedCases);
 
-        render(
-            allData.filter(c => ids.includes(c.caseNumber))
-        );
-
-    }else{
-
-        render([]);
+      return;
 
     }
 
-    }
 
-    if(rowOrder.length){
-      allData.sort((a,b)=>{
-        let ai=rowOrder.indexOf(a.caseNumber);
-        let bi=rowOrder.indexOf(b.caseNumber);
+    /*
+    ==========================================
+    NO CURRENT FILE
+    ==========================================
+    */
 
-        if(ai === -1) ai = 999999;
-        if(bi === -1) bi = 999999;
+    displayedCases = [];
 
-        return ai - bi;
-      });
-    }
+    render([]);
 
-    render(allData);
   });
+
 }
   
 function debounceFilter(){
