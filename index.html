@@ -2062,46 +2062,24 @@ function clearView(){
 
 }
   
-function render(
-  rows,
-  updateOrder = true
-){
+function render(rows){
 
   /*
-   * Make a copy so Firebase snapshot
-   * updates don't accidentally change
-   * the array we're using for display.
-   */
+  ==========================================
+  DO NOT CHANGE ROW ORDER HERE.
+  Firebase snapshots can arrive in a
+  different order after an update.
+  ==========================================
+  */
 
-  displayedCases = [
-    ...rows
-  ];
-
-
-  /*
-   * ONLY change rowOrder when we
-   * intentionally create a new case-file
-   * order.
-   */
-
-  if(updateOrder){
-
-    rowOrder =
-      rows.map(
-        r =>
-          String(r.caseNumber)
-      );
-
-  }
-
+  displayedCases = [...rows];
 
   let html = "";
 
 
   rows.forEach(r => {
 
-    let displayAddress =
-      r.address || "";
+    let displayAddress = r.address || "";
 
 
     if(
@@ -2111,103 +2089,69 @@ function render(
     ){
 
       displayAddress =
-        displayAddress +
-        ", " +
-        r.zip;
+        displayAddress + ", " + r.zip;
 
     }
 
 
-    const caseNumber =
-      String(
-        r.caseNumber || ""
-      );
-
-
-    /*
-     * Escape the case number before
-     * putting it inside onclick.
-     */
-
-    const safeCaseNumber =
-      caseNumber
-        .replace(/\\/g,"\\\\")
-        .replace(/'/g,"\\'");
-
-
-    const status =
-      String(
-        r.status || "Open"
-      );
-
-
     html += `
 
-<tr class="${r.cls || "row-cold"}">
+      <tr
+        data-case-number="${escapeHTML(r.caseNumber)}"
+        class="${r.cls || ""}"
+      >
 
-  <td>
-    ${r.caseNumber || ""}
-  </td>
+        <td>${escapeHTML(r.caseNumber || "")}</td>
 
-  <td>
-    ${r.name || ""}
-  </td>
+        <td>${escapeHTML(r.name || "")}</td>
 
-  <td>
-    ${displayAddress}
-  </td>
+        <td>${escapeHTML(displayAddress)}</td>
 
-  <td>
-    $${r.amount || 0}
-  </td>
+        <td>$${r.amount || 0}</td>
 
-  <td>
-    ${r.hearing || ""}
-  </td>
+        <td>${escapeHTML(r.hearing || "")}</td>
 
-  <td>
-    ${r.lead || ""}
-  </td>
+        <td>${escapeHTML(r.lead || "")}</td>
 
-  <td>
+        <td>
 
-    <button
-      type="button"
-      class="status-${status.toLowerCase()}"
-      onclick="cycle(this,'${safeCaseNumber}')"
-    >
-      ${status}
-    </button>
+          <button
+            type="button"
+            class="status-${String(r.status || "Open").toLowerCase()}"
+            onclick="cycle(this, '${String(r.caseNumber).replace(/'/g, "\\'")}')"
+          >
+            ${escapeHTML(r.status || "Open")}
+          </button>
 
-  </td>
+        </td>
 
-  <td>
-    ${r.updatedBy || ""}
-  </td>
+        <td>
+          ${escapeHTML(r.updatedBy || "")}
+        </td>
 
-  <td>
+        <td>
 
-    <button
-      type="button"
-      class="map-btn"
-      onclick="window.open(
-        'https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}'
-      )"
-    >
-      Map
-    </button>
+          <button
+            type="button"
+            class="map-btn"
+            onclick="window.open(
+              'https://www.google.com/maps?q=' +
+              encodeURIComponent('${String(displayAddress).replace(/'/g, "\\'")}')
+            )"
+          >
+            Map
+          </button>
 
-  </td>
+        </td>
 
-</tr>
+      </tr>
 
-`;
+    `;
 
   });
 
 
-  tbody.innerHTML =
-    html;
+  document.getElementById("tbody").innerHTML = html;
 
 }
   
