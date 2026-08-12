@@ -1569,109 +1569,200 @@ function debounceFilter(){
 
 function applyFilters(){
 
-  let nameValue =
-    searchName.value
-      .toLowerCase();
+  /*
+  ==========================================
+  GET CURRENT SEARCH VALUES
+  ==========================================
+  */
 
-  let zipValue =
-    searchZip.value;
+  const nameValue =
+    (
+      document.getElementById("searchName")?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
 
-  let dateValue =
-    searchDate.value
-      .toLowerCase();
 
-  let minValue =
-    Number(minAmt.value) || 0;
+  const zipValue =
+    (
+      document.getElementById("searchZip")?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
 
-  let maxValue =
-    Number(maxAmt.value) || 999999;
+
+  const dateValue =
+    (
+      document.getElementById("searchDate")?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  const minValue =
+    Number(
+      document.getElementById("minAmt")?.value
+    ) || 0;
+
+
+  const maxInput =
+    document.getElementById("maxAmt")?.value;
+
+
+  const maxValue =
+    maxInput === ""
+      ? Infinity
+      : Number(maxInput);
 
 
   /*
-   * When a case file is open,
-   * filter ONLY that case file.
-   */
+  ==========================================
+  ONLY SEARCH INSIDE THE CURRENT FILE
+  ==========================================
+  */
 
-  let sourceRows;
+  let rows =
+    allData.filter(function(r){
 
-  if(
-    hasActiveCaseFile &&
-    rowOrder.length
-  ){
+      return activeFileCases.includes(
+        r.caseNumber
+      );
 
-    const activeIDs =
-      new Set(
-        rowOrder.map(
-          id => String(id)
+    });
+
+
+  /*
+  ==========================================
+  NAME FILTER
+  ==========================================
+  */
+
+  if(nameValue){
+
+    rows =
+      rows.filter(function(r){
+
+        return String(
+          r.name || ""
         )
-      );
+        .toLowerCase()
+        .includes(nameValue);
 
-    sourceRows =
-      allData.filter(
-        r =>
-          activeIDs.has(
-            String(r.caseNumber)
-          )
-      );
-
-  }else{
-
-    sourceRows = [
-      ...allData
-    ];
+      });
 
   }
 
 
-  const rows =
-    sourceRows.filter(r =>
+  /*
+  ==========================================
+  ZIP FILTER
+  ==========================================
+  */
 
-      String(r.name || "")
+  if(zipValue){
+
+    rows =
+      rows.filter(function(r){
+
+        return String(
+          r.zip || ""
+        )
         .toLowerCase()
-        .includes(nameValue)
+        .includes(zipValue);
 
-      &&
+      });
 
-      String(r.zip || "")
-        .includes(zipValue)
-
-      &&
-
-      String(r.hearing || "")
-        .toLowerCase()
-        .includes(dateValue)
-
-      &&
-
-      Number(r.amount || 0)
-        >= minValue
-
-      &&
-
-      Number(r.amount || 0)
-        <= maxValue
-
-    );
+  }
 
 
   /*
-   * Filtering changes what is visible,
-   * but it should NOT destroy the
-   * active case-file order.
-   */
+  ==========================================
+  DATE FILTER
+  ==========================================
+  */
 
-  requestAnimationFrame(()=>{
+  if(dateValue){
 
-    displayedCases = [
-      ...rows
-    ];
+    rows =
+      rows.filter(function(r){
 
-    render(
-      rows,
-      false
-    );
+        return String(
+          r.hearing || ""
+        )
+        .toLowerCase()
+        .includes(dateValue);
 
-  });
+      });
+
+  }
+
+
+  /*
+  ==========================================
+  MINIMUM AMOUNT
+  ==========================================
+  */
+
+  rows =
+    rows.filter(function(r){
+
+      return Number(r.amount || 0)
+        >= minValue;
+
+    });
+
+
+  /*
+  ==========================================
+  MAXIMUM AMOUNT
+  ==========================================
+  */
+
+  rows =
+    rows.filter(function(r){
+
+      return Number(r.amount || 0)
+        <= maxValue;
+
+    });
+
+
+  /*
+  ==========================================
+  PRESERVE THE FILE'S ORIGINAL ORDER
+  ==========================================
+  */
+
+  const orderedRows =
+    activeFileCases
+      .map(function(caseNumber){
+
+        return rows.find(function(r){
+
+          return r.caseNumber === caseNumber;
+
+        });
+
+      })
+      .filter(Boolean);
+
+
+  /*
+  ==========================================
+  DISPLAY FILTERED FILE
+  ==========================================
+  */
+
+  displayedCases =
+    orderedRows;
+
+
+  render(
+    orderedRows
+  );
 
 }
 
