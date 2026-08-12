@@ -1692,17 +1692,25 @@ function applyFilters(){
 
 function upload(){
 
-  const file=
+  const file =
     document.getElementById("file").files[0];
 
   if(!file){
 
     alert("Choose file");
+
+    return;
+
+  }
+
+
   /*
   ==========================================
-  NEW FILE = NEW ACTIVE VIEW
+  NEW FILE STARTING
   ==========================================
   */
+
+  activeFileCases = [];
 
   displayedCases = [];
 
@@ -1711,143 +1719,193 @@ function upload(){
   localStorage.removeItem("lastUpload");
 
   document.getElementById("tbody").innerHTML = "";
- return;
 
-    }
 
-  const reader=new FileReader();
+  const reader = new FileReader();
 
-  reader.onload=e=>{
 
-    const lines=
+  reader.onload = e => {
+
+    const lines =
       e.target.result
         .split("\n")
-        .filter(l=>l.trim());
+        .filter(l => l.trim());
 
-    if(lines.length<2){
 
-      alert("The file does not contain any case records.");
-
-      return;
-
-    }
-
-    const headers=
+    const headers =
       lines[0]
         .split("\t")
-        .map(h=>
+        .map(h =>
           h.replace(/"/g,"").trim()
         );
 
-    let i=1;
-    let chunk=200;
-    let added=0;
-    let updated=0;
-    let temp=[];
+
+    let i = 1;
+
+    const chunk = 200;
+
+    let added = 0;
+
+    let skipped = 0;
+
+
+    /*
+    ==========================================
+    THIS IS THE IMPORTANT PART
+
+    This keeps EVERY CASE from the uploaded
+    file, whether it is NEW or UPDATED.
+    ==========================================
+    */
+
+    const uploadedCaseNumbers = [];
+
+
+    let temp = [];
+
 
     function processChunk(){
 
-      let end=
+      const end =
         Math.min(
-          i+chunk,
+          i + chunk,
           lines.length
         );
 
-      for(;i<end;i++){
 
-        let values=
+      for(; i < end; i++){
+
+        let values =
           lines[i].split("\t");
 
-        let row={};
+
+        let row = {};
+
 
         headers.forEach((h,idx)=>{
 
-          row[h]=
+          row[h] =
             values[idx]
               ?.replace(/"/g,"")
               .trim();
 
         });
 
-        let caseNum=
+
+        let caseNum =
           row["Case Number"];
 
-        if(!caseNum){
 
+        if(!caseNum)
           continue;
 
-        }
 
-        let amount=
+        /*
+        ======================================
+        REMEMBER EVERY CASE IN THIS FILE
+        ======================================
+        */
+
+        uploadedCaseNumbers.push(caseNum);
+
+
+        let amount =
           Number(
-            row["Claim Amount"]||0
+            row["Claim Amount"] || 0
           );
 
-        let zip=
-          row["Defendant Addr Zip"]||"";
 
-        let addressParts=[
+        let zip =
+          row["Defendant Addr Zip"] || "";
 
-          row["Defendant Addr Line 1"]||"",
 
-          row["Defendant Addr City"]||"",
+        let addressParts = [
+
+          row["Defendant Addr Line 1"] || "",
+
+          row["Defendant Addr City"] || "",
 
           zip
 
         ].filter(Boolean);
 
-        let lead="Cold";
-        let cls="row-cold";
 
-        if(amount>1000){
+        let lead = "Cold";
 
-          lead="Hot";
-          cls="row-hot";
+        let cls = "row-cold";
 
-        }else if(amount>500){
 
-          lead="Warm";
-          cls="row-warm";
+        if(amount > 1000){
+
+          lead = "Hot";
+
+          cls = "row-hot";
 
         }
 
-        const existing=
+        else if(amount > 500){
+
+          lead = "Warm";
+
+          cls = "row-warm";
+
+        }
+
+
+        /*
+        ======================================
+        IMPORTANT:
+
+        Preserve the existing status when
+        updating an existing case.
+        ======================================
+        */
+
+        let existingRecord =
           allData.find(
-            r=>
-              String(r.caseNumber)===
-              String(caseNum)
+            r => r.caseNumber === caseNum
           );
 
-        let record={
 
-          caseNumber:caseNum,
+        let record = {
+
+          caseNumber: caseNum,
 
           name:
-            row["Defendant Name"]||"",
+            row["Defendant Name"] || "",
 
           address:
             addressParts.join(", "),
 
-          amount:amount,
+          amount: amount,
 
           hearing:
-            row["Next Hearing Date"]||"",
+            row["Next Hearing Date"] || "",
 
-          zip:zip,
+          zip: zip,
 
-          lead:lead,
+          lead: lead,
 
-          cls:cls,
+          cls: cls,
 
           status:
-            existing?.status || "Open",
+            existingRecord?.status ||
+            "Open",
 
           updatedBy:
-            existing?.updatedBy || currentUser
+            currentUser
 
         };
 
+
         temp.push(record);
+
+
+        /*
+        ======================================
+        SAVE TO FIREBASE
+        ======================================
+        */
 
         db.collection("cases")
           .doc(caseNum)
@@ -1856,215 +1914,141 @@ function upload(){
             {merge:true}
           );
 
-        if(existing){
 
-          updated++;
+        if(
+          !existingCases.has(caseNum)
+        ){
 
-        }else{
+          existingCases.add(caseNum);
 
           added++;
+
+        }
+        else{
+
+          skipped++;
+
+        }
+
+
+        /*
+        Keep local copy current
+        */
+
+        const existingIndex =
+          allData.findIndex(
+            r =>
+              r.caseNumber === caseNum
+          );
+
+
+        if(existingIndex === -1){
+
+          allData.push(record);
+
+        }
+        else{
+
+          allData[existingIndex] =
+            {
+              ...allData[existingIndex],
+              ...record
+            };
 
         }
 
       }
 
-      displayedCases=[
-        ...temp
-      ];
 
-      rowOrder=
-        temp.map(
-          r=>r.caseNumber
-        );
+      /*
+      ==========================================
+      SHOW THE FILE CURRENTLY BEING UPLOADED
+      ==========================================
+      */
 
-      hasActiveCaseFile=true;
+      activeFileCases =
+        [...uploadedCaseNumbers];
 
-      render(
-        temp,
-        false
-      );
 
-      if(i<lines.length){
+      displayedCases =
+        temp;
+
+
+      render(temp);
+
+
+      if(i < lines.length){
 
         setTimeout(
           processChunk,
           0
         );
 
-      }else{
+      }
 
-        setTimeout(()=>{
+      else{
 
-          load();
+        /*
+        ======================================
+        UPLOAD FINISHED
 
-        },300);
+        SAVE THE COMPLETE FILE LIST.
+
+        THIS INCLUDES UPDATED CASES.
+        ======================================
+        */
+
+        activeFileCases =
+          [...uploadedCaseNumbers];
+
+
+        localStorage.setItem(
+
+          "lastUpload",
+
+          JSON.stringify(
+            activeFileCases
+          )
+
+        );
+
+
+        /*
+        ======================================
+        FINAL DISPLAY
+
+        DO NOT CALL load() HERE.
+        ======================================
+        */
+
+        displayedCases =
+          [...temp];
+
+
+        render(
+          displayedCases
+        );
+
 
         alert(
 `File Loaded Successfully
 
 New Cases: ${added}
-Updated Cases: ${updated}`
+
+Updated Cases: ${skipped}`
         );
 
       }
 
     }
 
+
     processChunk();
 
   };
 
+
   reader.readAsText(file);
-
-}
-
-async function cycle(btn, id){
-
-  const states = [
-    "Open",
-    "Contacted",
-    "Processing",
-    "Closed"
-  ];
-
-
-  /*
-  ==========================================
-  FIND THE CASE IN MEMORY
-  ==========================================
-  */
-
-  const record =
-    allData.find(
-      r => r.caseNumber === id
-    );
-
-
-  if(!record){
-
-    alert("Case could not be found.");
-
-    return;
-
-  }
-
-
-  const currentState =
-    record.status || "Open";
-
-
-  const currentIndex =
-    states.indexOf(currentState);
-
-
-  const nextIndex =
-    (currentIndex + 1) % states.length;
-
-
-  const newState =
-    states[nextIndex];
-
-
-  /*
-  ==========================================
-  UPDATE THE BUTTON IMMEDIATELY
-  ==========================================
-  */
-
-  btn.innerText = newState;
-
-  btn.className =
-    "status-" +
-    newState.toLowerCase();
-
-
-  /*
-  ==========================================
-  UPDATE ONLY THIS CLIENT'S DATA
-  ==========================================
-  */
-
-  record.status = newState;
-
-  record.updatedBy = currentUser;
-
-
-  /*
-  ==========================================
-  IMPORTANT:
-  SAVE THE CURRENT DISPLAY ORDER
-  BEFORE FIREBASE REFRESHES.
-  ==========================================
-  */
-
-  const currentOrder =
-    displayedCases.map(
-      r => r.caseNumber
-    );
-
-
-  try{
-
-    await db
-      .collection("cases")
-      .doc(id)
-      .update({
-
-        status: newState,
-
-        updatedBy: currentUser
-
-      });
-
-
-    /*
-    ==========================================
-    FIREBASE HAS NOW UPDATED.
-
-    Rebuild the displayed list using
-    the SAME order the user was looking at.
-    ==========================================
-    */
-
-    const refreshedCases =
-      currentOrder
-        .map(caseNumber =>
-          allData.find(
-            r => r.caseNumber === caseNumber
-          )
-        )
-        .filter(Boolean);
-
-
-    /*
-    Only render if Firebase has not already
-    refreshed the display.
-    */
-
-    if(refreshedCases.length){
-
-      displayedCases =
-        refreshedCases;
-
-      render(refreshedCases);
-
-    }
-
-
-  }catch(error){
-
-    console.error(
-      "STATUS UPDATE ERROR:",
-      error
-    );
-
-
-    alert(
-      "Unable to update case status.\n\n" +
-      error.message
-    );
-
-  }
 
 }
   
