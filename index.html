@@ -261,7 +261,7 @@ Statement of Inability
 
 <div class="box">
   <input type="file" id="file" />
-  <button onclick="upload()">Upload</button>
+  <button type="button" onclick="uploadFile()">Upload</button>
 
   <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
   <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
@@ -1690,84 +1690,428 @@ function applyFilters(){
 
 }
 
-function load(){
+function uploadFile(){
 
-  db.collection("cases").onSnapshot(snap=>{
+  const fileInput =
+    document.getElementById("file");
 
-    existingCases.clear();
+  if(!fileInput){
+
+    alert("File upload control was not found.");
+
+    return;
+
+  }
+
+  const file =
+    fileInput.files[0];
+
+  if(!file){
+
+    alert("Choose a file first.");
+
+    return;
+
+  }
 
 
-    allData =
-      snap.docs.map(d => {
+  /*
+  ==========================================
+  RESET CURRENT FILE VIEW
+  ==========================================
+  */
 
-        let r = d.data();
+  activeFileCases = [];
 
-        existingCases.add(
-          r.caseNumber
+  displayedCases = [];
+
+  rowOrder = [];
+
+  localStorage.removeItem("lastUpload");
+
+  document.getElementById("tbody").innerHTML = "";
+
+
+  /*
+  ==========================================
+  READ FILE
+  ==========================================
+  */
+
+  const reader =
+    new FileReader();
+
+
+  reader.onerror = function(){
+
+    alert(
+      "Unable to read this file."
+    );
+
+  };
+
+
+  reader.onload = function(event){
+
+    try{
+
+      const text =
+        event.target.result;
+
+
+      const lines =
+        text
+          .split(/\r?\n/)
+          .filter(line =>
+            line.trim() !== ""
+          );
+
+
+      if(lines.length < 2){
+
+        alert(
+          "The file appears to be empty or does not contain case records."
         );
 
-        return r;
+        return;
 
-      });
+      }
 
 
-    /*
-    ==========================================
-    GET THE CURRENT ACTIVE FILE
-    ==========================================
-    */
+      /*
+      ======================================
+      HEADER ROW
+      ======================================
+      */
 
-    const savedUpload =
-      JSON.parse(
-        localStorage.getItem(
-          "lastUpload"
-        ) || "[]"
+      const headers =
+        lines[0]
+          .split("\t")
+          .map(function(h){
+
+            return h
+              .replace(/"/g,"")
+              .trim();
+
+          });
+
+
+      let records = [];
+
+      let newCases = 0;
+
+      let updatedCases = 0;
+
+
+      /*
+      ======================================
+      PROCESS FILE
+      ======================================
+      */
+
+      for(let i = 1; i < lines.length; i++){
+
+        const values =
+          lines[i].split("\t");
+
+
+        const row = {};
+
+
+        headers.forEach(function(header,index){
+
+          row[header] =
+            values[index]
+              ? values[index]
+                  .replace(/"/g,"")
+                  .trim()
+              : "";
+
+        });
+
+
+        const caseNum =
+          row["Case Number"];
+
+
+        if(!caseNum){
+
+          continue;
+
+        }
+
+
+        /*
+        ====================================
+        REMEMBER EVERY CASE IN THIS FILE
+        ====================================
+        */
+
+        activeFileCases.push(
+          caseNum
+        );
+
+
+        /*
+        ====================================
+        CASE INFORMATION
+        ====================================
+        */
+
+        const amount =
+          Number(
+            row["Claim Amount"] || 0
+          );
+
+
+        const zip =
+          row["Defendant Addr Zip"] || "";
+
+
+        const addressParts = [
+
+          row["Defendant Addr Line 1"] || "",
+
+          row["Defendant Addr City"] || "",
+
+          zip
+
+        ].filter(Boolean);
+
+
+        let lead = "Cold";
+
+        let cls = "row-cold";
+
+
+        if(amount > 1000){
+
+          lead = "Hot";
+
+          cls = "row-hot";
+
+        }
+        else if(amount > 500){
+
+          lead = "Warm";
+
+          cls = "row-warm";
+
+        }
+
+
+        /*
+        ====================================
+        PRESERVE EXISTING STATUS
+        ====================================
+        */
+
+        const existing =
+          allData.find(function(r){
+
+            return r.caseNumber === caseNum;
+
+          });
+
+
+        const record = {
+
+          caseNumber: caseNum,
+
+          name:
+            row["Defendant Name"] || "",
+
+          address:
+            addressParts.join(", "),
+
+          amount: amount,
+
+          hearing:
+            row["Next Hearing Date"] || "",
+
+          zip: zip,
+
+          lead: lead,
+
+          cls: cls,
+
+          status:
+            existing &&
+            existing.status
+              ? existing.status
+              : "Open",
+
+          updatedBy:
+            currentUser
+
+        };
+
+
+        records.push(record);
+
+
+        /*
+        ====================================
+        NEW VS UPDATED
+        ====================================
+        */
+
+        if(
+          existingCases.has(caseNum)
+        ){
+
+          updatedCases++;
+
+        }
+        else{
+
+          newCases++;
+
+        }
+
+
+        /*
+        ====================================
+        UPDATE FIREBASE
+        ====================================
+        */
+
+        db.collection("cases")
+          .doc(caseNum)
+          .set(
+            record,
+            { merge:true }
+          )
+          .then(function(){
+
+            existingCases.add(
+              caseNum
+            );
+
+          })
+          .catch(function(error){
+
+            console.error(
+              "Firebase case save error:",
+              caseNum,
+              error
+            );
+
+          });
+
+
+        /*
+        ====================================
+        UPDATE LOCAL DATA
+        ====================================
+        */
+
+        const localIndex =
+          allData.findIndex(function(r){
+
+            return r.caseNumber === caseNum;
+
+          });
+
+
+        if(localIndex === -1){
+
+          allData.push(record);
+
+        }
+        else{
+
+          allData[localIndex] = {
+
+            ...allData[localIndex],
+
+            ...record
+
+          };
+
+        }
+
+      }
+
+
+      /*
+      ==========================================
+      REMOVE DUPLICATE CASE NUMBERS
+      ==========================================
+      */
+
+      activeFileCases =
+        [...new Set(activeFileCases)];
+
+
+      /*
+      ==========================================
+      SAVE CURRENT FILE CASE LIST
+      ==========================================
+      */
+
+      localStorage.setItem(
+
+        "lastUpload",
+
+        JSON.stringify(
+          activeFileCases
+        )
+
       );
 
 
-    /*
-    ==========================================
-    NO ACTIVE FILE
-    ==========================================
-    */
+      /*
+      ==========================================
+      DISPLAY THE FILE
+      ==========================================
+      */
 
-    if(!savedUpload.length){
+      displayedCases =
+        records;
 
-      displayedCases = [];
 
-      render([]);
+      render(
+        records
+      );
 
-      return;
+
+      /*
+      ==========================================
+      DONE
+      ==========================================
+      */
+
+      alert(
+        "File Loaded Successfully\n\n" +
+        "New Cases: " +
+        newCases +
+        "\n" +
+        "Updated Cases: " +
+        updatedCases
+      );
+
+
+    }
+    catch(error){
+
+      console.error(
+        "UPLOAD ERROR:",
+        error
+      );
+
+
+      alert(
+        "Upload Error:\n\n" +
+        error.message
+      );
 
     }
 
-
-    /*
-    ==========================================
-    ONLY DISPLAY CASES FROM THE ACTIVE FILE
-    ==========================================
-    */
-
-    const visibleCases =
-      savedUpload
-        .map(caseNumber =>
-          allData.find(
-            c =>
-              c.caseNumber === caseNumber
-          )
-        )
-        .filter(Boolean);
+  };
 
 
-    displayedCases =
-      visibleCases;
-
-
-    render(
-      visibleCases
-    );
-
-  });
+  reader.readAsText(file);
 
 }
   
