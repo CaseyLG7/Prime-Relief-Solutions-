@@ -1698,7 +1698,19 @@ function upload(){
   if(!file){
 
     alert("Choose file");
+  /*
+  ==========================================
+  NEW FILE = NEW ACTIVE VIEW
+  ==========================================
+  */
 
+  displayedCases = [];
+
+  rowOrder = [];
+
+  localStorage.removeItem("lastUpload");
+
+  document.getElementById("tbody").innerHTML = "";
     return;
 
   }
