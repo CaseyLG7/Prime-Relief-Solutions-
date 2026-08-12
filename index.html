@@ -1501,28 +1501,51 @@ function load(){
 
     existingCases.clear();
 
-    allData=snap.docs.map(d=>{
+    allData = snap.docs.map(d => {
 
-      let r=d.data();
+      const r = d.data();
 
-      existingCases.add(r.caseNumber);
+      existingCases.add(
+        String(r.caseNumber)
+      );
 
       return r;
 
     });
 
-    if(hasActiveCaseFile && rowOrder.length){
+    /*
+     * If a case file is currently open,
+     * ONLY show the cases belonging to
+     * that active file.
+     *
+     * This prevents old Firebase cases
+     * from coming back into the screen.
+     */
 
-      const caseMap=new Map(
-        allData.map(r=>[String(r.caseNumber),r])
-      );
+    if(
+      hasActiveCaseFile &&
+      rowOrder.length
+    ){
 
-      const visibleRows=[];
+      const caseMap = new Map();
 
-      rowOrder.forEach(caseNumber=>{
+      allData.forEach(r => {
 
-        const record=
-          caseMap.get(String(caseNumber));
+        caseMap.set(
+          String(r.caseNumber),
+          r
+        );
+
+      });
+
+      const visibleRows = [];
+
+      rowOrder.forEach(caseNumber => {
+
+        const record =
+          caseMap.get(
+            String(caseNumber)
+          );
 
         if(record){
 
@@ -1532,15 +1555,35 @@ function load(){
 
       });
 
-      displayedCases=visibleRows;
+      displayedCases = [
+        ...visibleRows
+      ];
 
-      render(visibleRows,false);
+      /*
+       * IMPORTANT:
+       * false means DO NOT rebuild rowOrder.
+       */
+
+      render(
+        visibleRows,
+        false
+      );
 
     }else{
 
-      displayedCases=[...allData];
+      /*
+       * No active uploaded file.
+       * Show the full Firebase case list.
+       */
 
-      render(displayedCases,false);
+      displayedCases = [
+        ...allData
+      ];
+
+      render(
+        displayedCases,
+        false
+      );
 
     }
 
