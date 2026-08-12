@@ -1879,22 +1879,34 @@ function cycle(btn,id){
   
 function clearView(){
 
-    if(!confirm("Clear current file from view?")) return;
+  if(
+    !confirm(
+      "Clear current file from view?"
+    )
+  ){
 
-    searchName.value="";
-    searchZip.value="";
-    minAmt.value="";
-    maxAmt.value="";
-    searchDate.value="";
+    return;
 
-    document.getElementById("file").value="";
+  }
 
-    displayedCases=[];
+  searchName.value="";
+  searchZip.value="";
+  minAmt.value="";
+  maxAmt.value="";
+  searchDate.value="";
 
-    tbody.innerHTML="";
+  document.getElementById("file").value="";
+
+  hasActiveCaseFile=false;
+
+  displayedCases=[];
+
+  rowOrder=[];
+
+  tbody.innerHTML="";
 
 }
-
+  
 function render(rows){
 displayedCases = rows;  
   let html="";
