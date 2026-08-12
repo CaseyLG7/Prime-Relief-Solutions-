@@ -1690,365 +1690,84 @@ function applyFilters(){
 
 }
 
-function upload(){
+function load(){
 
-  const file =
-    document.getElementById("file").files[0];
+  db.collection("cases").onSnapshot(snap=>{
 
-  if(!file){
-
-    alert("Choose file");
-
-    return;
-
-  }
+    existingCases.clear();
 
 
-  /*
-  ==========================================
-  NEW FILE STARTING
-  ==========================================
-  */
+    allData =
+      snap.docs.map(d => {
 
-  activeFileCases = [];
+        let r = d.data();
 
-  displayedCases = [];
-
-  rowOrder = [];
-
-  localStorage.removeItem("lastUpload");
-
-  document.getElementById("tbody").innerHTML = "";
-
-
-  const reader = new FileReader();
-
-
-  reader.onload = e => {
-
-    const lines =
-      e.target.result
-        .split("\n")
-        .filter(l => l.trim());
-
-
-    const headers =
-      lines[0]
-        .split("\t")
-        .map(h =>
-          h.replace(/"/g,"").trim()
+        existingCases.add(
+          r.caseNumber
         );
 
+        return r;
 
-    let i = 1;
-
-    const chunk = 200;
-
-    let added = 0;
-
-    let skipped = 0;
+      });
 
 
     /*
     ==========================================
-    THIS IS THE IMPORTANT PART
-
-    This keeps EVERY CASE from the uploaded
-    file, whether it is NEW or UPDATED.
+    GET THE CURRENT ACTIVE FILE
     ==========================================
     */
 
-    const uploadedCaseNumbers = [];
+    const savedUpload =
+      JSON.parse(
+        localStorage.getItem(
+          "lastUpload"
+        ) || "[]"
+      );
 
 
-    let temp = [];
+    /*
+    ==========================================
+    NO ACTIVE FILE
+    ==========================================
+    */
 
+    if(!savedUpload.length){
 
-    function processChunk(){
+      displayedCases = [];
 
-      const end =
-        Math.min(
-          i + chunk,
-          lines.length
-        );
+      render([]);
 
-
-      for(; i < end; i++){
-
-        let values =
-          lines[i].split("\t");
-
-
-        let row = {};
-
-
-        headers.forEach((h,idx)=>{
-
-          row[h] =
-            values[idx]
-              ?.replace(/"/g,"")
-              .trim();
-
-        });
-
-
-        let caseNum =
-          row["Case Number"];
-
-
-        if(!caseNum)
-          continue;
-
-
-        /*
-        ======================================
-        REMEMBER EVERY CASE IN THIS FILE
-        ======================================
-        */
-
-        uploadedCaseNumbers.push(caseNum);
-
-
-        let amount =
-          Number(
-            row["Claim Amount"] || 0
-          );
-
-
-        let zip =
-          row["Defendant Addr Zip"] || "";
-
-
-        let addressParts = [
-
-          row["Defendant Addr Line 1"] || "",
-
-          row["Defendant Addr City"] || "",
-
-          zip
-
-        ].filter(Boolean);
-
-
-        let lead = "Cold";
-
-        let cls = "row-cold";
-
-
-        if(amount > 1000){
-
-          lead = "Hot";
-
-          cls = "row-hot";
-
-        }
-
-        else if(amount > 500){
-
-          lead = "Warm";
-
-          cls = "row-warm";
-
-        }
-
-
-        /*
-        ======================================
-        IMPORTANT:
-
-        Preserve the existing status when
-        updating an existing case.
-        ======================================
-        */
-
-        let existingRecord =
-          allData.find(
-            r => r.caseNumber === caseNum
-          );
-
-
-        let record = {
-
-          caseNumber: caseNum,
-
-          name:
-            row["Defendant Name"] || "",
-
-          address:
-            addressParts.join(", "),
-
-          amount: amount,
-
-          hearing:
-            row["Next Hearing Date"] || "",
-
-          zip: zip,
-
-          lead: lead,
-
-          cls: cls,
-
-          status:
-            existingRecord?.status ||
-            "Open",
-
-          updatedBy:
-            currentUser
-
-        };
-
-
-        temp.push(record);
-
-
-        /*
-        ======================================
-        SAVE TO FIREBASE
-        ======================================
-        */
-
-        db.collection("cases")
-          .doc(caseNum)
-          .set(
-            record,
-            {merge:true}
-          );
-
-
-        if(
-          !existingCases.has(caseNum)
-        ){
-
-          existingCases.add(caseNum);
-
-          added++;
-
-        }
-        else{
-
-          skipped++;
-
-        }
-
-
-        /*
-        Keep local copy current
-        */
-
-        const existingIndex =
-          allData.findIndex(
-            r =>
-              r.caseNumber === caseNum
-          );
-
-
-        if(existingIndex === -1){
-
-          allData.push(record);
-
-        }
-        else{
-
-          allData[existingIndex] =
-            {
-              ...allData[existingIndex],
-              ...record
-            };
-
-        }
-
-      }
-
-
-      /*
-      ==========================================
-      SHOW THE FILE CURRENTLY BEING UPLOADED
-      ==========================================
-      */
-
-      activeFileCases =
-        [...uploadedCaseNumbers];
-
-
-      displayedCases =
-        temp;
-
-
-      render(temp);
-
-
-      if(i < lines.length){
-
-        setTimeout(
-          processChunk,
-          0
-        );
-
-      }
-
-      else{
-
-        /*
-        ======================================
-        UPLOAD FINISHED
-
-        SAVE THE COMPLETE FILE LIST.
-
-        THIS INCLUDES UPDATED CASES.
-        ======================================
-        */
-
-        activeFileCases =
-          [...uploadedCaseNumbers];
-
-
-        localStorage.setItem(
-
-          "lastUpload",
-
-          JSON.stringify(
-            activeFileCases
-          )
-
-        );
-
-
-        /*
-        ======================================
-        FINAL DISPLAY
-
-        DO NOT CALL load() HERE.
-        ======================================
-        */
-
-        displayedCases =
-          [...temp];
-
-
-        render(
-          displayedCases
-        );
-
-
-        alert(
-`File Loaded Successfully
-
-New Cases: ${added}
-
-Updated Cases: ${skipped}`
-        );
-
-      }
+      return;
 
     }
 
 
-    processChunk();
+    /*
+    ==========================================
+    ONLY DISPLAY CASES FROM THE ACTIVE FILE
+    ==========================================
+    */
 
-  };
+    const visibleCases =
+      savedUpload
+        .map(caseNumber =>
+          allData.find(
+            c =>
+              c.caseNumber === caseNumber
+          )
+        )
+        .filter(Boolean);
 
 
-  reader.readAsText(file);
+    displayedCases =
+      visibleCases;
+
+
+    render(
+      visibleCases
+    );
+
+  });
 
 }
   
