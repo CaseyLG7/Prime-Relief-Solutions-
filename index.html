@@ -1497,15 +1497,17 @@ auth.onAuthStateChanged(user=>{
 
 function load(){
 
-  db.collection("cases").onSnapshot(snap=>{
+  db.collection("cases").onSnapshot(function(snap){
 
     existingCases.clear();
 
-    allData = snap.docs.map(d => {
+    allData = snap.docs.map(function(d){
 
-      let r = d.data();
+      const r = d.data();
 
-      existingCases.add(r.caseNumber);
+      existingCases.add(
+        r.caseNumber
+      );
 
       return r;
 
@@ -1514,49 +1516,29 @@ function load(){
 
     /*
     ==========================================
-    KEEP THE CURRENT FILE VIEW
+    GET THE CURRENT ACTIVE FILE
     ==========================================
     */
 
-    const savedUpload =
+    activeFileCases =
       JSON.parse(
-        localStorage.getItem("lastUpload") || "[]"
+        localStorage.getItem(
+          "lastUpload"
+        ) || "[]"
       );
 
 
     /*
     ==========================================
-    IF A FILE WAS PREVIOUSLY LOADED,
-    ONLY SHOW THOSE CASES.
-    DO NOT SHOW ALL FIREBASE CASES.
+    NO ACTIVE FILE
     ==========================================
     */
 
-    if(savedUpload.length){
+    if(!activeFileCases.length){
 
-      const visibleCases =
-        allData.filter(c =>
-          savedUpload.includes(c.caseNumber)
-        );
+      displayedCases = [];
 
-
-      /*
-      Keep the uploaded file's original order.
-      */
-
-      const orderedCases =
-        savedUpload
-          .map(id =>
-            visibleCases.find(
-              c => c.caseNumber === id
-            )
-          )
-          .filter(Boolean);
-
-
-      displayedCases = orderedCases;
-
-      render(orderedCases);
+      render([]);
 
       return;
 
@@ -1565,13 +1547,16 @@ function load(){
 
     /*
     ==========================================
-    NO CURRENT FILE
+    IMPORTANT:
+
+    DO NOT DIRECTLY RENDER THE FILE HERE.
+
+    Let applyFilters() decide what should
+    actually be displayed.
     ==========================================
     */
 
-    displayedCases = [];
-
-    render([]);
+    applyFilters();
 
   });
 
