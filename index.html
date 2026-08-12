@@ -1572,90 +1572,219 @@ function applyFilters(){
 }
 
 function upload(){
-  const file=document.getElementById("file").files[0];
-  if(!file) return alert("Choose file");
+
+  const file=
+    document.getElementById("file").files[0];
+
+  if(!file){
+
+    alert("Choose file");
+
+    return;
+
+  }
 
   const reader=new FileReader();
-  reader.onload=e=>{
-    const lines=e.target.result.split("\n").filter(l=>l.trim());
-    const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
 
-    let i=1, chunk=200, added=0, skipped=0, temp=[];
+  reader.onload=e=>{
+
+    const lines=
+      e.target.result
+        .split("\n")
+        .filter(l=>l.trim());
+
+    if(lines.length<2){
+
+      alert("The file does not contain any case records.");
+
+      return;
+
+    }
+
+    const headers=
+      lines[0]
+        .split("\t")
+        .map(h=>
+          h.replace(/"/g,"").trim()
+        );
+
+    let i=1;
+    let chunk=200;
+    let added=0;
+    let updated=0;
+    let temp=[];
 
     function processChunk(){
-      let end=Math.min(i+chunk, lines.length);
 
-      for(; i<end; i++){
-        let values=lines[i].split("\t");
+      let end=
+        Math.min(
+          i+chunk,
+          lines.length
+        );
+
+      for(;i<end;i++){
+
+        let values=
+          lines[i].split("\t");
+
         let row={};
-        headers.forEach((h,idx)=> row[h]=values[idx]?.replace(/"/g,"").trim());
 
-        let caseNum=row["Case Number"];
-        if(!caseNum) continue;
+        headers.forEach((h,idx)=>{
 
-        let amount=Number(row["Claim Amount"]||0);
-        let zip=row["Defendant Addr Zip"]||"";
+          row[h]=
+            values[idx]
+              ?.replace(/"/g,"")
+              .trim();
+
+        });
+
+        let caseNum=
+          row["Case Number"];
+
+        if(!caseNum){
+
+          continue;
+
+        }
+
+        let amount=
+          Number(
+            row["Claim Amount"]||0
+          );
+
+        let zip=
+          row["Defendant Addr Zip"]||"";
 
         let addressParts=[
+
           row["Defendant Addr Line 1"]||"",
+
           row["Defendant Addr City"]||"",
+
           zip
+
         ].filter(Boolean);
 
-        let lead="Cold",cls="row-cold";
-        if(amount>1000){lead="Hot";cls="row-hot";}
-        else if(amount>500){lead="Warm";cls="row-warm";}
+        let lead="Cold";
+        let cls="row-cold";
+
+        if(amount>1000){
+
+          lead="Hot";
+          cls="row-hot";
+
+        }else if(amount>500){
+
+          lead="Warm";
+          cls="row-warm";
+
+        }
+
+        const existing=
+          allData.find(
+            r=>
+              String(r.caseNumber)===
+              String(caseNum)
+          );
 
         let record={
+
           caseNumber:caseNum,
-          name:row["Defendant Name"]||"",
-          address:addressParts.join(", "),
-          amount,
-          hearing:row["Next Hearing Date"]||"",
-          zip,
-          lead,cls,
-          status:"Open",
-          updatedBy:currentUser
+
+          name:
+            row["Defendant Name"]||"",
+
+          address:
+            addressParts.join(", "),
+
+          amount:amount,
+
+          hearing:
+            row["Next Hearing Date"]||"",
+
+          zip:zip,
+
+          lead:lead,
+
+          cls:cls,
+
+          status:
+            existing?.status || "Open",
+
+          updatedBy:
+            existing?.updatedBy || currentUser
+
         };
 
         temp.push(record);
 
-      if(!existingCases.has(caseNum)){
+        db.collection("cases")
+          .doc(caseNum)
+          .set(
+            record,
+            {merge:true}
+          );
 
-    existingCases.add(caseNum);
+        if(existing){
 
-    db.collection("cases")
-      .doc(caseNum)
-      .set(record,{merge:true});
+          updated++;
 
-    allData.push(record);
+        }else{
 
-    added++;
+          added++;
 
-}else{
+        }
 
-    skipped++;
-
-}
       }
 
-      render(temp);
+      displayedCases=[
+        ...temp
+      ];
 
-      if(i<lines.length){ setTimeout(processChunk,0); }
-      else { load();
+      rowOrder=
+        temp.map(
+          r=>r.caseNumber
+        );
 
-alert(`Upload Complete
-Added: ${added}
-Skipped: ${skipped}`); }
+      hasActiveCaseFile=true;
+
+      render(
+        temp,
+        false
+      );
+
+      if(i<lines.length){
+
+        setTimeout(
+          processChunk,
+          0
+        );
+
+      }else{
+
+        setTimeout(()=>{
+
+          load();
+
+        },300);
+
+        alert(
+`File Loaded Successfully
+
+New Cases: ${added}
+Updated Cases: ${updated}`
+        );
+
+      }
+
     }
-localStorage.setItem(
-    "lastUpload",
-    JSON.stringify(temp.map(x=>x.caseNumber))
-);
+
     processChunk();
+
   };
 
   reader.readAsText(file);
+
 }
 
 function cycle(btn,id){
