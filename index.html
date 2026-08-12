@@ -2191,6 +2191,139 @@ function uploadFile(){
 
 }
   
+async function cycle(btn, id){
+
+  const states = [
+    "Open",
+    "Contacted",
+    "Processing",
+    "Closed"
+  ];
+
+
+  /*
+  ==========================================
+  FIND THIS EXACT CASE
+  ==========================================
+  */
+
+  const record =
+    allData.find(function(r){
+
+      return r.caseNumber === id;
+
+    });
+
+
+  if(!record){
+
+    alert(
+      "Case could not be found."
+    );
+
+    return;
+
+  }
+
+
+  /*
+  ==========================================
+  FIND NEXT STATUS
+  ==========================================
+  */
+
+  const currentState =
+    record.status || "Open";
+
+
+  const currentIndex =
+    states.indexOf(currentState);
+
+
+  const nextIndex =
+    currentIndex === -1
+      ? 0
+      : (currentIndex + 1) % states.length;
+
+
+  const newState =
+    states[nextIndex];
+
+
+  /*
+  ==========================================
+  UPDATE LOCAL DATA IMMEDIATELY
+  ==========================================
+  */
+
+  record.status =
+    newState;
+
+  record.updatedBy =
+    currentUser;
+
+
+  /*
+  ==========================================
+  SAVE TO FIREBASE
+  ==========================================
+  */
+
+  try{
+
+    await db
+      .collection("cases")
+      .doc(id)
+      .update({
+
+        status: newState,
+
+        updatedBy: currentUser
+
+      });
+
+
+    /*
+    ==========================================
+    DO NOT MANUALLY REBUILD THE TABLE HERE.
+
+    Firebase onSnapshot() will fire.
+
+    load() will call applyFilters().
+
+    applyFilters() will preserve:
+      - current file
+      - current search
+      - current ZIP
+      - current date
+      - current amount filters
+      - original file order
+    ==========================================
+    */
+
+
+  }catch(error){
+
+    console.error(
+      "STATUS UPDATE ERROR:",
+      error
+    );
+
+
+    /*
+    Reload the current data if Firebase
+    rejected the update.
+    */
+
+    alert(
+      "Unable to update case status.\n\n" +
+      error.message
+    );
+
+  }
+
+}
+  
 function clearView(){
 
   if(
