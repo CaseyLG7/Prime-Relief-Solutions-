@@ -1906,7 +1906,7 @@ Updated Cases: ${updated}`
 
 }
 
-function cycle(btn,id){
+async function cycle(btn, id){
 
   const states = [
     "Open",
@@ -1917,84 +1917,49 @@ function cycle(btn,id){
 
 
   /*
-   * Get the status directly from the
-   * button that was clicked.
-   */
-
-  const currentState =
-    btn.innerText.trim();
-
-
-  let index =
-    states.indexOf(currentState);
-
-
-  if(index === -1){
-
-    index = 0;
-
-  }
-
-
-  const newState =
-    states[
-      (index + 1) % states.length
-    ];
-
-
-  /*
-   * Update the matching case in
-   * allData.
-   */
+  ==========================================
+  FIND THE CASE IN MEMORY
+  ==========================================
+  */
 
   const record =
     allData.find(
-      r =>
-        String(r.caseNumber) ===
-        String(id)
+      r => r.caseNumber === id
     );
 
 
-  if(record){
+  if(!record){
 
-    record.status =
-      newState;
+    alert("Case could not be found.");
 
-    record.updatedBy =
-      currentUser;
+    return;
 
   }
 
 
-  /*
-   * Update the matching visible case.
-   */
-
-  const displayedRecord =
-    displayedCases.find(
-      r =>
-        String(r.caseNumber) ===
-        String(id)
-    );
+  const currentState =
+    record.status || "Open";
 
 
-  if(displayedRecord){
+  const currentIndex =
+    states.indexOf(currentState);
 
-    displayedRecord.status =
-      newState;
 
-    displayedRecord.updatedBy =
-      currentUser;
+  const nextIndex =
+    (currentIndex + 1) % states.length;
 
-  }
+
+  const newState =
+    states[nextIndex];
 
 
   /*
-   * Change the button immediately.
-   */
+  ==========================================
+  UPDATE THE BUTTON IMMEDIATELY
+  ==========================================
+  */
 
-  btn.innerText =
-    newState;
+  btn.innerText = newState;
 
   btn.className =
     "status-" +
@@ -2002,33 +1967,92 @@ function cycle(btn,id){
 
 
   /*
-   * Save ONLY the status change.
-   *
-   * We are NOT replacing the case.
-   * We are NOT rebuilding the case file.
-   */
+  ==========================================
+  UPDATE ONLY THIS CLIENT'S DATA
+  ==========================================
+  */
 
-  db.collection("cases")
-    .doc(String(id))
-    .update({
+  record.status = newState;
 
-      status: newState,
+  record.updatedBy = currentUser;
 
-      updatedBy: currentUser
 
-    })
-    .catch(err => {
+  /*
+  ==========================================
+  IMPORTANT:
+  SAVE THE CURRENT DISPLAY ORDER
+  BEFORE FIREBASE REFRESHES.
+  ==========================================
+  */
 
-      console.error(
-        "STATUS UPDATE ERROR:",
-        err
-      );
+  const currentOrder =
+    displayedCases.map(
+      r => r.caseNumber
+    );
 
-      alert(
-        "Unable to update case status."
-      );
 
-    });
+  try{
+
+    await db
+      .collection("cases")
+      .doc(id)
+      .update({
+
+        status: newState,
+
+        updatedBy: currentUser
+
+      });
+
+
+    /*
+    ==========================================
+    FIREBASE HAS NOW UPDATED.
+
+    Rebuild the displayed list using
+    the SAME order the user was looking at.
+    ==========================================
+    */
+
+    const refreshedCases =
+      currentOrder
+        .map(caseNumber =>
+          allData.find(
+            r => r.caseNumber === caseNumber
+          )
+        )
+        .filter(Boolean);
+
+
+    /*
+    Only render if Firebase has not already
+    refreshed the display.
+    */
+
+    if(refreshedCases.length){
+
+      displayedCases =
+        refreshedCases;
+
+      render(refreshedCases);
+
+    }
+
+
+  }catch(error){
+
+    console.error(
+      "STATUS UPDATE ERROR:",
+      error
+    );
+
+
+    alert(
+      "Unable to update case status.\n\n" +
+      error.message
+    );
+
+  }
 
 }
   
