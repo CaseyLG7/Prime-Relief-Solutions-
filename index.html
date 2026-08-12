@@ -1922,80 +1922,116 @@ Updated Cases: ${updated}`
 
 function cycle(btn,id){
 
-  const states=[
+  const states = [
     "Open",
     "Contacted",
     "Processing",
     "Closed"
   ];
 
-  const currentState=
+
+  /*
+   * Get the status directly from the
+   * button that was clicked.
+   */
+
+  const currentState =
     btn.innerText.trim();
 
-  let index=
+
+  let index =
     states.indexOf(currentState);
 
-  if(index===-1){
 
-    index=0;
+  if(index === -1){
+
+    index = 0;
 
   }
 
-  const newState=
+
+  const newState =
     states[
-      (index+1)%states.length
+      (index + 1) % states.length
     ];
 
-  const record=
+
+  /*
+   * Update the matching case in
+   * allData.
+   */
+
+  const record =
     allData.find(
-      r=>
-        String(r.caseNumber)===
+      r =>
+        String(r.caseNumber) ===
         String(id)
     );
+
 
   if(record){
 
-    record.status=
+    record.status =
       newState;
 
-    record.updatedBy=
+    record.updatedBy =
       currentUser;
 
   }
 
-  const displayedRecord=
+
+  /*
+   * Update the matching visible case.
+   */
+
+  const displayedRecord =
     displayedCases.find(
-      r=>
-        String(r.caseNumber)===
+      r =>
+        String(r.caseNumber) ===
         String(id)
     );
 
+
   if(displayedRecord){
 
-    displayedRecord.status=
+    displayedRecord.status =
       newState;
 
-    displayedRecord.updatedBy=
+    displayedRecord.updatedBy =
       currentUser;
 
   }
 
-  btn.innerText=
+
+  /*
+   * Change the button immediately.
+   */
+
+  btn.innerText =
     newState;
 
-  btn.className=
-    "status-"+newState.toLowerCase();
+  btn.className =
+    "status-" +
+    newState.toLowerCase();
+
+
+  /*
+   * Save ONLY the status change.
+   *
+   * We are NOT replacing the case.
+   * We are NOT rebuilding the case file.
+   */
 
   db.collection("cases")
-    .doc(id)
+    .doc(String(id))
     .update({
 
-      status:newState,
+      status: newState,
 
-      updatedBy:currentUser
+      updatedBy: currentUser
 
     })
-    .catch(err=>{
+    .catch(err => {
 
       console.error(
         "STATUS UPDATE ERROR:",
