@@ -1496,101 +1496,55 @@ auth.onAuthStateChanged(user=>{
 });
 
 function load(){
-
   db.collection("cases").onSnapshot(snap=>{
-
     existingCases.clear();
+    allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
 
-    allData = snap.docs.map(d => {
+    const savedUpload =
+        JSON.parse(localStorage.getItem("lastUpload") || "[]");
 
-      const r = d.data();
+    if(savedUpload.length){
 
-      existingCases.add(
-        String(r.caseNumber)
-      );
-
-      return r;
-
-    });
-
-    /*
-     * If a case file is currently open,
-     * ONLY show the cases belonging to
-     * that active file.
-     *
-     * This prevents old Firebase cases
-     * from coming back into the screen.
-     */
-
-    if(
-      hasActiveCaseFile &&
-      rowOrder.length
-    ){
-
-      const caseMap = new Map();
-
-      allData.forEach(r => {
-
-        caseMap.set(
-          String(r.caseNumber),
-          r
+        render(
+            allData.filter(c =>
+                savedUpload.includes(c.caseNumber)
+            )
         );
-
-      });
-
-      const visibleRows = [];
-
-      rowOrder.forEach(caseNumber => {
-
-        const record =
-          caseMap.get(
-            String(caseNumber)
-          );
-
-        if(record){
-
-          visibleRows.push(record);
-
-        }
-
-      });
-
-      displayedCases = [
-        ...visibleRows
-      ];
-
-      /*
-       * IMPORTANT:
-       * false means DO NOT rebuild rowOrder.
-       */
-
-      render(
-        visibleRows,
-        false
-      );
 
     }else{
 
-      /*
-       * No active uploaded file.
-       * Show the full Firebase case list.
-       */
+       if(displayedCases.length){
 
-      displayedCases = [
-        ...allData
-      ];
+        const ids = displayedCases.map(c => c.caseNumber);
 
-      render(
-        displayedCases,
-        false
-      );
+        render(
+            allData.filter(c => ids.includes(c.caseNumber))
+        );
+
+    }else{
+
+        render([]);
 
     }
 
+    }
+
+    if(rowOrder.length){
+      allData.sort((a,b)=>{
+        let ai=rowOrder.indexOf(a.caseNumber);
+        let bi=rowOrder.indexOf(b.caseNumber);
+
+        if(ai === -1) ai = 999999;
+        if(bi === -1) bi = 999999;
+
+        return ai - bi;
+      });
+    }
+
+    render(allData);
   });
-
 }
-
+  
 function debounceFilter(){
   clearTimeout(debounceTimer);
   debounceTimer=setTimeout(()=>requestAnimationFrame(applyFilters),250);
