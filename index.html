@@ -1788,28 +1788,95 @@ Updated Cases: ${updated}`
 }
 
 function cycle(btn,id){
-  const states=["Open","Contacted","Processing","Closed"];
-  let next=(states.indexOf(btn.innerText)+1)%states.length;
-  let newState=states[next];
 
-  btn.innerText=newState;
-  btn.className="status-"+newState.toLowerCase();
+  const states=[
+    "Open",
+    "Contacted",
+    "Processing",
+    "Closed"
+  ];
 
-  allData.forEach(r=>{
-    if(r.caseNumber === id){
-      r.status = newState;
-      r.updatedBy = currentUser;
-    }
-  });
+  const currentState=
+    btn.innerText.trim();
 
-  setTimeout(()=>{
-    db.collection("cases").doc(id).update({
+  let index=
+    states.indexOf(currentState);
+
+  if(index===-1){
+
+    index=0;
+
+  }
+
+  const newState=
+    states[
+      (index+1)%states.length
+    ];
+
+  const record=
+    allData.find(
+      r=>
+        String(r.caseNumber)===
+        String(id)
+    );
+
+  if(record){
+
+    record.status=
+      newState;
+
+    record.updatedBy=
+      currentUser;
+
+  }
+
+  const displayedRecord=
+    displayedCases.find(
+      r=>
+        String(r.caseNumber)===
+        String(id)
+    );
+
+  if(displayedRecord){
+
+    displayedRecord.status=
+      newState;
+
+    displayedRecord.updatedBy=
+      currentUser;
+
+  }
+
+  btn.innerText=
+    newState;
+
+  btn.className=
+    "status-"+newState.toLowerCase();
+
+  db.collection("cases")
+    .doc(id)
+    .update({
+
       status:newState,
-      updatedBy:currentUser
-    });
-  },0);
-}
 
+      updatedBy:currentUser
+
+    })
+    .catch(err=>{
+
+      console.error(
+        "STATUS UPDATE ERROR:",
+        err
+      );
+
+      alert(
+        "Unable to update case status."
+      );
+
+    });
+
+}
+  
 function clearView(){
 
     if(!confirm("Clear current file from view?")) return;
