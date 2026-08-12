@@ -2076,34 +2076,47 @@ function clearView(){
 
 }
   
-function render(rows,updateOrder=true){
+function render(
+  rows,
+  updateOrder = true
+){
 
-  displayedCases=[
+  /*
+   * Make a copy so Firebase snapshot
+   * updates don't accidentally change
+   * the array we're using for display.
+   */
+
+  displayedCases = [
     ...rows
   ];
 
-  /*
-    Only update rowOrder when we intentionally
-    create a new display order.
 
-    Firebase status updates will NOT change it.
-  */
+  /*
+   * ONLY change rowOrder when we
+   * intentionally create a new case-file
+   * order.
+   */
 
   if(updateOrder){
 
-    rowOrder=
+    rowOrder =
       rows.map(
-        r=>r.caseNumber
+        r =>
+          String(r.caseNumber)
       );
 
   }
 
-  let html="";
 
-  rows.forEach(r=>{
+  let html = "";
 
-    let displayAddress=
+
+  rows.forEach(r => {
+
+    let displayAddress =
       r.address || "";
+
 
     if(
       r.zip &&
@@ -2111,60 +2124,103 @@ function render(rows,updateOrder=true){
       !displayAddress.includes(r.zip)
     ){
 
-      displayAddress=
-        displayAddress+
-        ", "+
+      displayAddress =
+        displayAddress +
+        ", " +
         r.zip;
 
     }
 
-    html+=`
 
-<tr class="${r.cls||"row-cold"}">
+    const caseNumber =
+      String(
+        r.caseNumber || ""
+      );
 
-  <td>${r.caseNumber||""}</td>
 
-  <td>${r.name||""}</td>
+    /*
+     * Escape the case number before
+     * putting it inside onclick.
+     */
 
-  <td>${displayAddress}</td>
+    const safeCaseNumber =
+      caseNumber
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'");
 
-  <td>$${r.amount||0}</td>
 
-  <td>${r.hearing||""}</td>
+    const status =
+      String(
+        r.status || "Open"
+      );
 
-  <td>${r.lead||""}</td>
+
+    html += `
+
+<tr class="${r.cls || "row-cold"}">
+
+  <td>
+    ${r.caseNumber || ""}
+  </td>
+
+  <td>
+    ${r.name || ""}
+  </td>
+
+  <td>
+    ${displayAddress}
+  </td>
+
+  <td>
+    $${r.amount || 0}
+  </td>
+
+  <td>
+    ${r.hearing || ""}
+  </td>
+
+  <td>
+    ${r.lead || ""}
+  </td>
 
   <td>
 
     <button
-      class="status-${String(r.status||"Open").toLowerCase()}"
-      onclick="cycle(this,'${String(r.caseNumber).replace(/'/g,"\\'")}')">
-
-      ${r.status||"Open"}
-
+      type="button"
+      class="status-${status.toLowerCase()}"
+      onclick="cycle(this,'${safeCaseNumber}')"
+    >
+      ${status}
     </button>
 
   </td>
 
-  <td>${r.updatedBy||""}</td>
+  <td>
+    ${r.updatedBy || ""}
+  </td>
 
   <td>
 
     <button
+      type="button"
       class="map-btn"
-      onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}')">
-
+      onclick="window.open(
+        'https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}'
+      )"
+    >
       Map
-
     </button>
 
   </td>
 
-</tr>`;
+</tr>
+
+`;
 
   });
 
-  tbody.innerHTML=
+
+  tbody.innerHTML =
     html;
 
 }
