@@ -1907,35 +1907,99 @@ function clearView(){
 
 }
   
-function render(rows){
-displayedCases = rows;  
+function render(rows,updateOrder=true){
+
+  displayedCases=[
+    ...rows
+  ];
+
+  /*
+    Only update rowOrder when we intentionally
+    create a new display order.
+
+    Firebase status updates will NOT change it.
+  */
+
+  if(updateOrder){
+
+    rowOrder=
+      rows.map(
+        r=>r.caseNumber
+      );
+
+  }
+
   let html="";
 
-  rowOrder = rows.map(r=>r.caseNumber);
-
   rows.forEach(r=>{
-    let displayAddress = r.address || "";
 
-    if(r.zip && displayAddress && !displayAddress.includes(r.zip)){
-      displayAddress = displayAddress + ", " + r.zip;
+    let displayAddress=
+      r.address || "";
+
+    if(
+      r.zip &&
+      displayAddress &&
+      !displayAddress.includes(r.zip)
+    ){
+
+      displayAddress=
+        displayAddress+
+        ", "+
+        r.zip;
+
     }
 
     html+=`
-    <tr class="${r.cls}">
-      <td>${r.caseNumber}</td>
-      <td>${r.name}</td>
-      <td>${displayAddress}</td>
-      <td>$${r.amount}</td>
-      <td>${r.hearing}</td>
-      <td>${r.lead}</td>
-      <td><button class="status-${r.status.toLowerCase()}" onclick="cycle(this,'${r.caseNumber}')">${r.status}</button></td>
-      <td>${r.updatedBy||""}</td>
-      <td><button class="map-btn" onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}')">Map</button></td>
-    </tr>`;
+
+<tr class="${r.cls||"row-cold"}">
+
+  <td>${r.caseNumber||""}</td>
+
+  <td>${r.name||""}</td>
+
+  <td>${displayAddress}</td>
+
+  <td>$${r.amount||0}</td>
+
+  <td>${r.hearing||""}</td>
+
+  <td>${r.lead||""}</td>
+
+  <td>
+
+    <button
+      class="status-${String(r.status||"Open").toLowerCase()}"
+      onclick="cycle(this,'${String(r.caseNumber).replace(/'/g,"\\'")}')">
+
+      ${r.status||"Open"}
+
+    </button>
+
+  </td>
+
+  <td>${r.updatedBy||""}</td>
+
+  <td>
+
+    <button
+      class="map-btn"
+      onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}')">
+
+      Map
+
+    </button>
+
+  </td>
+
+</tr>`;
+
   });
 
-  tbody.innerHTML=html;
+  tbody.innerHTML=
+    html;
+
 }
+  
 //======================================
 // SAVE ENTIRE INTAKE TO FIREBASE
 //======================================
