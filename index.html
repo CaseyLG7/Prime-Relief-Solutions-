@@ -1568,7 +1568,17 @@ function applyFilters(){
     r.amount<= maxValue
   );
 
-  requestAnimationFrame(()=>render(rows));
+ requestAnimationFrame(()=>{
+
+  displayedCases=rows;
+
+  rowOrder=rows.map(
+    r=>r.caseNumber
+  );
+
+  render(rows,false);
+
+});
 }
 
 function upload(){
