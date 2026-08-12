@@ -1492,34 +1492,36 @@ function load(){
   db.collection("cases").onSnapshot(snap=>{
     existingCases.clear();
     allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
-const savedUpload =
-    JSON.parse(localStorage.getItem("lastUpload") || "[]");
 
-if(savedUpload.length){
+    const savedUpload =
+        JSON.parse(localStorage.getItem("lastUpload") || "[]");
 
-    render(
-        allData.filter(c =>
-            savedUpload.includes(c.caseNumber)
-        )
-    );
+    if(savedUpload.length){
 
-}else{
+        render(
+            allData.filter(c =>
+                savedUpload.includes(c.caseNumber)
+            )
+        );
 
-   if(displayedCases.length){
+    }else{
 
-    const ids = displayedCases.map(c => c.caseNumber);
+       if(displayedCases.length){
 
-    render(
-        allData.filter(c => ids.includes(c.caseNumber))
-    );
+        const ids = displayedCases.map(c => c.caseNumber);
 
-}else{
+        render(
+            allData.filter(c => ids.includes(c.caseNumber))
+        );
 
-    render([]);
+    }else{
 
-}
+        render([]);
 
-}
+    }
+
+    }
+
     if(rowOrder.length){
       allData.sort((a,b)=>{
         let ai=rowOrder.indexOf(a.caseNumber);
