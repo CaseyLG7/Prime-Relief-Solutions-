@@ -1563,10 +1563,21 @@ function load(){
 }
   
 function debounceFilter(){
-  clearTimeout(debounceTimer);
-  debounceTimer=setTimeout(()=>requestAnimationFrame(applyFilters),250);
-}
 
+  clearTimeout(
+    debounceTimer
+  );
+
+
+  debounceTimer =
+    setTimeout(function(){
+
+      applyFilters();
+
+    }, 150);
+
+}
+  
 function applyFilters(){
 
   /*
