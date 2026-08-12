@@ -1597,31 +1597,111 @@ function debounceFilter(){
 }
 
 function applyFilters(){
-  let nameValue = searchName.value.toLowerCase();
-  let zipValue = searchZip.value;
-  let dateValue = searchDate.value.toLowerCase();
-  let minValue = Number(minAmt.value)||0;
-  let maxValue = Number(maxAmt.value)||999999;
 
-  let rows=allData.filter(r=>
-    r.name.toLowerCase().includes(nameValue) &&
-    (r.zip || "").includes(zipValue) &&
-    (r.hearing || "").toLowerCase().includes(dateValue) &&
-    r.amount>= minValue &&
-    r.amount<= maxValue
-  );
+  let nameValue =
+    searchName.value
+      .toLowerCase();
 
- requestAnimationFrame(()=>{
+  let zipValue =
+    searchZip.value;
 
-  displayedCases=rows;
+  let dateValue =
+    searchDate.value
+      .toLowerCase();
 
-  rowOrder=rows.map(
-    r=>r.caseNumber
-  );
+  let minValue =
+    Number(minAmt.value) || 0;
 
-  render(rows,false);
+  let maxValue =
+    Number(maxAmt.value) || 999999;
 
-});
+
+  /*
+   * When a case file is open,
+   * filter ONLY that case file.
+   */
+
+  let sourceRows;
+
+  if(
+    hasActiveCaseFile &&
+    rowOrder.length
+  ){
+
+    const activeIDs =
+      new Set(
+        rowOrder.map(
+          id => String(id)
+        )
+      );
+
+    sourceRows =
+      allData.filter(
+        r =>
+          activeIDs.has(
+            String(r.caseNumber)
+          )
+      );
+
+  }else{
+
+    sourceRows = [
+      ...allData
+    ];
+
+  }
+
+
+  const rows =
+    sourceRows.filter(r =>
+
+      String(r.name || "")
+        .toLowerCase()
+        .includes(nameValue)
+
+      &&
+
+      String(r.zip || "")
+        .includes(zipValue)
+
+      &&
+
+      String(r.hearing || "")
+        .toLowerCase()
+        .includes(dateValue)
+
+      &&
+
+      Number(r.amount || 0)
+        >= minValue
+
+      &&
+
+      Number(r.amount || 0)
+        <= maxValue
+
+    );
+
+
+  /*
+   * Filtering changes what is visible,
+   * but it should NOT destroy the
+   * active case-file order.
+   */
+
+  requestAnimationFrame(()=>{
+
+    displayedCases = [
+      ...rows
+    ];
+
+    render(
+      rows,
+      false
+    );
+
+  });
+
 }
 
 function upload(){
