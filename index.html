@@ -1476,15 +1476,15 @@ let currentUser="";
 let allData=[];
 let existingCases=new Set();
 let debounceTimer;
-
-// Cases currently being displayed
-let displayedCases=[];
-
-// Keeps the order of the currently displayed case file
 let rowOrder=[];
+let displayedCases = [];
 
-// True when a case file is currently being viewed
-let hasActiveCaseFile=false;
+/*
+==========================================
+CURRENT ACTIVE CASE FILE
+==========================================
+*/
+let activeFileCases = [];
   
 function login(){ auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message)); }
 function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sendPasswordResetEmail(email.value).then(()=>alert("Reset email sent")); }
