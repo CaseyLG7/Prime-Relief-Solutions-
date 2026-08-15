@@ -3094,220 +3094,81 @@ async function openSavedIntake(intakeID){
 
 }
 
-// ==========================================
+//======================================
 // DELETE SAVED INTAKE
-// ==========================================
+//======================================
 
-function addDeleteIntakeButton(formDoc){
+async function deleteSavedIntake(intakeID){
 
-    if(!formDoc){
+    if(!intakeID){
+
+        alert(
+            "Unable to delete this intake because the Case Number is missing."
+        );
+
         return;
     }
 
-    // Remove an old copy if one already exists
-    const oldButton =
-        formDoc.getElementById(
-            "deleteSavedIntakeButton"
+    const client =
+        savedIntakes.find(
+            c => String(c.id) === String(intakeID)
         );
 
-    if(oldButton){
-        oldButton.remove();
-    }
+    const clientName =
+        client
+            ? (
+                client.clientName ||
+                client.caseNumber ||
+                intakeID
+              )
+            : intakeID;
 
-    // Find the case number field
-    const caseNumberField =
-        formDoc.getElementById(
-            "caseNumber"
+    const confirmed =
+        confirm(
+            "DELETE SAVED INTAKE?\n\n" +
+            "Client: " +
+            clientName +
+            "\n\n" +
+            "This will permanently remove this saved intake.\n\n" +
+            "Click OK to delete it."
         );
 
-    if(!caseNumberField){
-        console.warn(
-            "caseNumber field not found."
-        );
+    if(!confirmed){
         return;
     }
-
-    // Create button
-    const button =
-        formDoc.createElement("button");
-
-    button.id =
-        "deleteSavedIntakeButton";
-
-    button.type =
-        "button";
-
-    button.textContent =
-        "Delete Intake";
-
-    button.style.background =
-        "#b91c1c";
-
-    button.style.color =
-        "white";
-
-    button.style.border =
-        "none";
-
-    button.style.padding =
-        "10px 18px";
-
-    button.style.borderRadius =
-        "6px";
-
-    button.style.cursor =
-        "pointer";
-
-    button.style.fontWeight =
-        "bold";
-
-    button.style.marginLeft =
-        "8px";
-
-    button.onclick =
-        function(){
-
-            deleteSavedIntake(formDoc);
-
-        };
-
-    // Put button beside the case number field
-    if(caseNumberField.parentElement){
-
-        caseNumberField.parentElement.appendChild(
-            button
-        );
-
-    }
-
-}
-
-
-// ==========================================
-// DELETE CURRENT SAVED INTAKE
-// ==========================================
-
-async function deleteSavedIntake(formDoc){
 
     try{
 
-        if(!formDoc){
-
-            alert(
-                "The Intake window is no longer available."
-            );
-
-            return;
-
-        }
-
-        // Get the current case number
-        const caseNumberField =
-            formDoc.getElementById(
-                "caseNumber"
-            );
-
-        const caseNumber =
-            caseNumberField
-                ? caseNumberField.value.trim()
-                : "";
-
-        // We need the actual Firestore document ID
-        const intakeID =
-            currentIntakeID ||
-            caseNumber;
-
-        if(!intakeID){
-
-            alert(
-                "No saved intake is currently loaded."
-            );
-
-            return;
-
-        }
-
-        const clientNameField =
-            formDoc.getElementById(
-                "clientName"
-            );
-
-        const clientName =
-            clientNameField
-                ? clientNameField.value.trim()
-                : "";
-
-        const displayName =
-            clientName ||
-            "this client";
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to permanently delete the saved intake for " +
-                displayName +
-                "?\n\nThis cannot be undone."
-            );
-
-        if(!confirmed){
-
-            return;
-
-        }
-
-        // Delete ONLY this intake document
         await db
             .collection("intakes")
             .doc(intakeID)
             .delete();
 
-        // Clear all fields in the Intake form
-        formDoc
-            .querySelectorAll(
-                "input, textarea, select"
-            )
-            .forEach(el => {
-
-                if(
-                    el.type === "checkbox" ||
-                    el.type === "radio"
-                ){
-
-                    el.checked = false;
-
-                }else{
-
-                    el.value = "";
-
-                }
-
-            });
-
-        // Reset current intake tracking
-        currentIntakeID = null;
-
-        // Remove Delete button
-        const deleteButton =
-            formDoc.getElementById(
-                "deleteSavedIntakeButton"
+        // Remove it from the local list immediately
+        savedIntakes =
+            savedIntakes.filter(
+                c =>
+                    String(c.id) !==
+                    String(intakeID)
             );
 
-        if(deleteButton){
+        // If the deleted intake was the one
+        // currently loaded, clear the tracking ID.
+        if(
+            typeof currentIntakeID !== "undefined" &&
+            String(currentIntakeID) ===
+            String(intakeID)
+        ){
 
-            deleteButton.remove();
+            currentIntakeID = null;
 
         }
 
-        // Refresh saved-intake data
-        savedIntakes =
-            savedIntakes.filter(
-                c => c.id !== intakeID
-            );
-
-        // Close saved-intake popup if open
-        closeSavedIntakes();
+        // Refresh the popup
+        filterSavedIntakes();
 
         alert(
-            "✅ Saved intake deleted successfully."
+            "Saved intake deleted successfully."
         );
 
     }catch(err){
@@ -3318,7 +3179,7 @@ async function deleteSavedIntake(formDoc){
         );
 
         alert(
-            "Unable to delete this intake.\n\n" +
+            "Unable to delete this saved intake.\n\n" +
             err.message
         );
 
