@@ -2935,8 +2935,9 @@ async function showSavedIntakesForIntakeWindow(formDoc){
     // Keep the Intake window as the document we will load data INTO
     currentIntakeWindow = formDoc;
 
-    // The Saved Intake popup is located in the MAIN page
-    const modal = document.getElementById("savedIntakesModal");
+    // Saved Intake popup is on the main application page
+    const modal =
+        document.getElementById("savedIntakesModal");
 
     if(!modal){
 
@@ -2952,7 +2953,9 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         document.getElementById("intakeSearch");
 
     if(searchBox){
+
         searchBox.value = "";
+
     }
 
     try{
@@ -2966,23 +2969,79 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
         snap.forEach(doc => {
 
+            const data = doc.data();
+
             savedIntakes.push({
+
                 id: doc.id,
-                ...doc.data()
+
+                ...data
+
             });
 
         });
 
+
+        /*
+         * SORT OLD CLIENTS FIRST
+         *
+         * Uses the saved date/time when available.
+         * Falls back through several common field names.
+         */
+
         savedIntakes.sort((a,b) => {
 
-            return String(a.clientName || "")
-                .localeCompare(
-                    String(b.clientName || "")
-                );
+            const getDate = client => {
+
+                const value =
+                    client.createdAt ||
+                    client.createdDate ||
+                    client.savedAt ||
+                    client.timestamp ||
+                    client.date ||
+                    client.created ||
+                    0;
+
+                if(
+                    value &&
+                    typeof value.toDate === "function"
+                ){
+
+                    return value.toDate().getTime();
+
+                }
+
+                if(
+                    value &&
+                    typeof value.seconds === "number"
+                ){
+
+                    return value.seconds * 1000;
+
+                }
+
+                const parsed =
+                    new Date(value).getTime();
+
+                if(!isNaN(parsed)){
+
+                    return parsed;
+
+                }
+
+                return 0;
+
+            };
+
+            return getDate(a) - getDate(b);
 
         });
 
-        renderSavedIntakes(savedIntakes);
+
+        renderSavedIntakesForIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
 
     }catch(err){
 
@@ -2997,6 +3056,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         );
 
     }
+
 }
   
 function renderSavedIntakesForIntakeWindow(formDoc,list){
