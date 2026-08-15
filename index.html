@@ -3039,7 +3039,12 @@ async function openSavedIntake(intakeID){
 
     if(ok){
 
+        currentIntakeID = intakeID;
+
         closeSavedIntakes();
+
+        // Add the Delete button to the active Intake window
+        addDeleteIntakeButton(currentIntakeWindow);
 
     }else{
 
