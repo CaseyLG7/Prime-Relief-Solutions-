@@ -2856,7 +2856,13 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 function renderSavedIntakes(list){
 
     const container =
-        document.getElementById("savedIntakesList");
+        currentIntakeWindow
+            ? currentIntakeWindow.getElementById(
+                "savedIntakesList"
+              )
+            : document.getElementById(
+                "savedIntakesList"
+              );
 
     if(!container){
         return;
@@ -2869,10 +2875,13 @@ function renderSavedIntakes(list){
             <div style="
                 text-align:center;
                 padding:35px;
-                color:#777;
+                color:#555;
+                font-weight:bold;
             ">
 
-                <div style="font-size:35px;">
+                <div style="
+                    font-size:35px;
+                ">
                     📂
                 </div>
 
@@ -2883,6 +2892,8 @@ function renderSavedIntakes(list){
                 <div style="
                     margin-top:6px;
                     font-size:13px;
+                    font-weight:normal;
+                    color:#555;
                 ">
                     Save an intake to see it here.
                 </div>
@@ -2916,6 +2927,7 @@ function renderSavedIntakes(list){
                     Case:
                     ${escapeHTML(
                         c.caseNumber ||
+                        c.id ||
                         "No Case Number"
                     )}
 
@@ -2935,14 +2947,40 @@ function renderSavedIntakes(list){
 
                 </div>
 
-                <button
-                    type="button"
-                    class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
+                <div style="
+                    display:flex;
+                    gap:8px;
+                    align-items:center;
+                    flex-shrink:0;
+                ">
 
-                    Open
+                    <button
+                        type="button"
+                        class="savedOpen"
+                        onclick="openSavedIntake('${c.id}')">
 
-                </button>
+                        Open
+
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="deleteSavedIntake('${c.id}')"
+                        style="
+                            background:#b91c1c;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:9px 15px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        ">
+
+                        Delete
+
+                    </button>
+
+                </div>
 
             </div>
 
@@ -2951,9 +2989,9 @@ function renderSavedIntakes(list){
     });
 
     container.innerHTML = html;
+
 }
-
-
+  
 //======================================
 // INSTANT SEARCH
 //======================================
