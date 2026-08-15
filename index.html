@@ -2813,15 +2813,48 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     }
 
-    let html = "";
+   let html = "";
 
-    list.forEach(c => {
+list.forEach((c,index) => {
 
-        html += `
+    html += `
 
-            <div class="savedCard">
+        <div class="savedCard"
+             style="
+                display:grid;
+                grid-template-columns:55px 1fr 100px;
+                align-items:stretch;
+                border:1px solid #999;
+                border-radius:6px;
+                padding:0;
+                margin-top:10px;
+                background:#fff;
+                color:#111;
+                overflow:hidden;
+             ">
 
-                <div class="savedInfo">
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-weight:bold;
+                font-size:16px;
+                color:#111;
+                background:#eee8d2;
+                border-right:1px solid #999;
+                padding:12px 5px;
+             ">
+
+                ${index + 1}
+
+            </div>
+
+            <div class="savedInfo"
+                 style="
+                    padding:12px 15px;
+                    border-right:1px solid #999;
+                    color:#111;
+                 ">
 
                     <b>
                         ${escapeHTML(
