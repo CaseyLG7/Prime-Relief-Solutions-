@@ -2856,56 +2856,32 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 function renderSavedIntakes(list){
 
     const container =
-        currentIntakeWindow
-            ? currentIntakeWindow.getElementById(
-                "savedIntakesList"
-              )
-            : document.getElementById(
-                "savedIntakesList"
-              );
+        document.getElementById(
+            "savedIntakesList"
+        );
 
     if(!container){
         return;
     }
 
-    if(!list.length){
+    let html = "";
 
-        container.innerHTML = `
+    if(!list || !list.length){
 
+        html = `
             <div style="
                 text-align:center;
                 padding:35px;
                 color:#555;
                 font-weight:bold;
             ">
-
-                <div style="
-                    font-size:35px;
-                ">
-                    📂
-                </div>
-
-                <strong>
-                    No Saved Intakes Found
-                </strong>
-
-                <div style="
-                    margin-top:6px;
-                    font-size:13px;
-                    font-weight:normal;
-                    color:#555;
-                ">
-                    Save an intake to see it here.
-                </div>
-
+                No Saved Client Intakes Found
             </div>
-
         `;
 
+        container.innerHTML = html;
         return;
     }
-
-    let html = "";
 
     list.forEach(c => {
 
