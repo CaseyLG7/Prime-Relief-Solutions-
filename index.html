@@ -3062,9 +3062,16 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     const container =
-        formDoc.getElementById("savedIntakesList");
+        formDoc.getElementById(
+            "savedIntakesList"
+        );
 
-    if(!container) return;
+    if(!container){
+
+        return;
+
+    }
+
 
     if(!list.length){
 
@@ -3072,20 +3079,33 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
             <div style="
                 text-align:center;
                 padding:35px;
-                color:#777;
+                color:#222;
+                background:#fff;
+                border:1px solid #aaa;
+                border-radius:7px;
             ">
-                <div style="font-size:35px;">📂</div>
 
-                <strong>
+                <div style="
+                    font-size:35px;
+                ">
+                    📂
+                </div>
+
+                <strong style="
+                    color:#111;
+                    font-size:16px;
+                ">
                     No Saved Intakes Found
                 </strong>
 
                 <div style="
                     margin-top:6px;
                     font-size:13px;
+                    color:#444;
                 ">
                     Save an intake to see it here.
                 </div>
+
             </div>
         `;
 
@@ -3093,13 +3113,75 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     }
 
-    let html = "";
 
-    list.forEach(c => {
+    /*
+     * CLIENT TABLE HEADER
+     */
+
+    let html = `
+
+        <div class="savedHeader">
+
+            <div style="
+                text-align:center;
+            ">
+                #
+            </div>
+
+            <div>
+                Client Information
+            </div>
+
+            <div style="
+                text-align:center;
+            ">
+                Action
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+     * NUMBER CLIENTS FROM OLD TO NEW
+     *
+     * The number is NOT saved in Firebase.
+     * It is generated every time the list renders.
+     *
+     * Therefore:
+     *
+     * Delete #3
+     * becomes
+     *
+     * 1
+     * 2
+     * 3
+     * 4
+     *
+     * automatically.
+     */
+
+    list.forEach((c,index) => {
+
+        const clientNumber =
+            index + 1;
+
 
         html += `
 
             <div class="savedCard">
+
+                <!-- NUMBER -->
+
+                <div class="savedNumber">
+
+                    ${clientNumber}
+
+                </div>
+
+
+                <!-- CLIENT INFORMATION -->
 
                 <div class="savedInfo">
 
@@ -3112,7 +3194,10 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
                     <br>
 
-                    Case:
+                    <strong>
+                        Case:
+                    </strong>
+
                     ${escapeHTML(
                         c.caseNumber ||
                         "No Case Number"
@@ -3120,34 +3205,49 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
                     <br>
 
+                    <strong>
+                        Address:
+                    </strong>
+
                     ${escapeHTML(
                         c.propertyAddress ||
-                        ""
+                        "No Address"
                     )}
 
                     <br>
 
+                    <strong>
+                        Phone:
+                    </strong>
+
                     ${escapeHTML(
                         c.phone ||
-                        ""
+                        "No Phone"
                     )}
 
                 </div>
 
-                <button
-                    type="button"
-                    class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
 
-                    Open
+                <!-- ACTION -->
 
-                </button>
+                <div class="savedOpenCell">
+
+                    <button
+                        type="button"
+                        class="savedOpen"
+                        onclick="openSavedIntake('${c.id}')"
+                    >
+                        Open
+                    </button>
+
+                </div>
 
             </div>
 
         `;
 
     });
+
 
     container.innerHTML = html;
 
