@@ -3003,12 +3003,25 @@ function renderSavedIntakesForIntakeWindow(formDoc, list){
         return;
     }
 
+
     let html = "";
+
 
     list.forEach((c,index) => {
 
         const intakeID =
-            String(c.id || c.caseNumber || "");
+            String(
+                c.id ||
+                c.caseNumber ||
+                ""
+            );
+
+
+        const safeID =
+            intakeID
+                .replace(/\\/g,"\\\\")
+                .replace(/'/g,"\\'");
+
 
         html += `
 
@@ -3109,6 +3122,9 @@ function renderSavedIntakesForIntakeWindow(formDoc, list){
                     padding:10px;
                 ">
 
+
+                    <!-- OPEN -->
+
                     <button
                         type="button"
                         style="
@@ -3127,17 +3143,25 @@ function renderSavedIntakesForIntakeWindow(formDoc, list){
                                 !window.opener.closed &&
                                 typeof window.opener.openSavedIntake === 'function'
                             ){
+
                                 window.opener.openSavedIntake(
-                                    '${intakeID.replace(/'/g,"\\\\'")}'
+                                    '${safeID}'
                                 );
+
                             }else{
-                                alert('The main Prime Relief Solutions window is not available.');
+
+                                alert(
+                                    'The main Prime Relief Solutions window is not available.'
+                                );
+
                             }
                         "
                     >
                         📂 Open
                     </button>
 
+
+                    <!-- DELETE -->
 
                     <button
                         type="button"
@@ -3157,11 +3181,17 @@ function renderSavedIntakesForIntakeWindow(formDoc, list){
                                 !window.opener.closed &&
                                 typeof window.opener.deleteSavedIntake === 'function'
                             ){
+
                                 window.opener.deleteSavedIntake(
-                                    '${intakeID.replace(/'/g,"\\\\'")}'
+                                    '${safeID}'
                                 );
+
                             }else{
-                                alert('The main Prime Relief Solutions window is not available.');
+
+                                alert(
+                                    'The main Prime Relief Solutions window is not available.'
+                                );
+
                             }
                         "
                     >
@@ -3175,6 +3205,7 @@ function renderSavedIntakesForIntakeWindow(formDoc, list){
         `;
 
     });
+
 
     container.innerHTML = html;
 
