@@ -3453,11 +3453,14 @@ async function deleteSavedIntake(intakeID){
         );
 
         return;
+
     }
 
     const client =
         savedIntakes.find(
-            c => String(c.id) === String(intakeID)
+            c =>
+                String(c.id) ===
+                String(intakeID)
         );
 
     const clientName =
@@ -3466,7 +3469,7 @@ async function deleteSavedIntake(intakeID){
                 client.clientName ||
                 client.caseNumber ||
                 intakeID
-              )
+            )
             : intakeID;
 
     const confirmed =
@@ -3480,7 +3483,9 @@ async function deleteSavedIntake(intakeID){
         );
 
     if(!confirmed){
+
         return;
+
     }
 
     try{
@@ -3490,7 +3495,9 @@ async function deleteSavedIntake(intakeID){
             .doc(intakeID)
             .delete();
 
-        // Remove it from the local list immediately
+
+        // Remove from local saved list
+
         savedIntakes =
             savedIntakes.filter(
                 c =>
@@ -3498,24 +3505,41 @@ async function deleteSavedIntake(intakeID){
                     String(intakeID)
             );
 
-        // If the deleted intake was the one
-        // currently loaded, clear the tracking ID.
+
+        // If this was the intake currently loaded,
+        // clear the current intake ID.
+
         if(
             typeof currentIntakeID !== "undefined" &&
             String(currentIntakeID) ===
             String(intakeID)
         ){
 
-            currentIntakeID = null;
+            currentIntakeID = "";
 
         }
 
-        // Refresh the popup
-        filterSavedIntakes();
+
+        // Refresh the SAVED INTAKE WINDOW,
+        // not the main application page.
+
+        if(
+            currentIntakeWindow &&
+            !currentIntakeWindow.closed
+        ){
+
+            renderSavedIntakesForIntakeWindow(
+                currentIntakeWindow,
+                savedIntakes
+            );
+
+        }
+
 
         alert(
-            "Saved intake deleted successfully."
+            "✅ Saved intake deleted successfully."
         );
+
 
     }catch(err){
 
