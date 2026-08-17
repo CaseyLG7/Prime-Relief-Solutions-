@@ -178,103 +178,93 @@ z-index:999999;
 
 
 /* ==========================================
-   SAVED CLIENT INTAKE ROWS
+   SAVED CLIENT INTAKE LIST
    ========================================== */
 
 .savedCard{
-    display:grid !important;
+    display:grid;
 
-    grid-template-columns:55px minmax(0,1fr) 130px;
-
-    align-items:stretch;
+    grid-template-columns:55px minmax(0,1fr) 115px;
 
     width:100%;
-    max-width:100%;
-
     box-sizing:border-box;
 
-    padding:0 !important;
-    margin:0 0 10px 0;
+    margin-top:10px;
+    padding:0;
 
-    border:2px solid #777;
-    border-radius:8px;
+    border:1px solid #d1d5db;
+    border-radius:7px;
 
-    background:#ffffff;
-    color:#111111;
+    background:#fff;
 
     overflow:hidden;
 }
 
 
-/* NUMBER COLUMN */
+.savedCard:hover{
+    border-color:#BFA13A;
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+}
 
-.savedCard > .savedNumber{
 
+/* NUMBER */
+
+.savedNumber{
     display:flex;
 
     align-items:center;
     justify-content:center;
 
-    width:auto;
     min-width:0;
 
-    padding:12px 5px;
+    padding:15px 5px;
 
-    background:#eee8d2;
+    background:#f3f4f6;
 
-    color:#111111;
+    color:#111827;
 
     font-size:16px;
     font-weight:bold;
 
-    border-right:2px solid #777;
+    border-right:1px solid #d1d5db;
 
     box-sizing:border-box;
 }
 
 
-/* CLIENT INFORMATION COLUMN */
+/* CLIENT INFORMATION */
 
-.savedCard > .savedInfo{
-
+.savedInfo{
     display:block;
 
-    width:auto;
     min-width:0;
+    width:100%;
 
-    padding:12px 15px;
+    padding:15px;
 
-    background:#ffffff;
+    line-height:1.6;
 
-    color:#111111;
-
-    font-size:14px;
-    line-height:1.55;
-
-    border-right:2px solid #777;
+    color:#111827;
 
     box-sizing:border-box;
 
-    overflow-wrap:anywhere;
-    word-break:normal;
+    overflow-wrap:break-word;
 }
 
 
 /* ACTION COLUMN */
 
-.savedCard > .savedOpenCell{
-
+.savedOpenCell{
     display:flex;
 
     align-items:center;
     justify-content:center;
 
-    width:auto;
     min-width:0;
 
     padding:10px;
 
-    background:#ffffff;
+    border-left:1px solid #d1d5db;
 
     box-sizing:border-box;
 }
@@ -283,28 +273,21 @@ z-index:999999;
 /* OPEN BUTTON */
 
 .savedOpen{
+    flex-shrink:0;
 
-    display:inline-flex;
-
-    align-items:center;
-    justify-content:center;
-
-    min-width:90px;
+    width:90px;
 
     background:#BFA13A;
+    color:white;
 
-    color:#ffffff;
+    border:0;
+    border-radius:5px;
 
-    padding:9px 16px;
-
-    border:none;
-    border-radius:6px;
-
-    cursor:pointer;
+    padding:9px 10px;
 
     font-weight:bold;
 
-    white-space:nowrap;
+    cursor:pointer;
 
     box-sizing:border-box;
 }
