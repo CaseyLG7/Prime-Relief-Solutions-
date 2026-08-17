@@ -2821,19 +2821,18 @@ list.forEach((c,index) => {
     html += `
 
         <div class="savedCard"
-             style="
-                display:grid;
-                grid-template-columns:55px 1fr 100px;
-                align-items:stretch;
-                border:1px solid #999;
-                border-radius:6px;
-                padding:0;
-                margin-top:10px;
-                background:#fff;
-                color:#111;
-                overflow:hidden;
-             ">
-
+     style="
+        display:grid;
+        grid-template-columns:55px minmax(0,1fr) 100px;
+        align-items:stretch;
+        border:1px solid #888;
+        border-radius:6px;
+        padding:0;
+        margin-top:10px;
+        background:#fff;
+        color:#111;
+        overflow:hidden;
+     ">
             <div style="
                 display:flex;
                 align-items:center;
