@@ -2896,9 +2896,11 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                 text-align:center;
                 padding:35px;
                 color:#111;
-                font-weight:bold;
             ">
-                <div style="font-size:35px;">
+
+                <div style="
+                    font-size:35px;
+                ">
                     📂
                 </div>
 
@@ -2910,10 +2912,10 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                     margin-top:6px;
                     font-size:13px;
                     color:#444;
-                    font-weight:normal;
                 ">
                     Save an intake to see it here.
                 </div>
+
             </div>
         `;
 
@@ -2921,9 +2923,130 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
     }
 
 
-    let html = "";
+    let html = `
+
+        <div style="
+            display:grid;
+            grid-template-columns:55px minmax(0,1fr) 115px;
+            width:100%;
+            box-sizing:border-box;
+            margin-bottom:5px;
+            background:#222;
+            color:white;
+            border:1px solid #555;
+            border-radius:6px;
+            overflow:hidden;
+        ">
+
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:10px 5px;
+                font-weight:bold;
+                border-right:1px solid #777;
+                box-sizing:border-box;
+            ">
+                #
+            </div>
+
+            <div style="
+                display:flex;
+                align-items:center;
+                padding:10px 15px;
+                font-weight:bold;
+                border-right:1px solid #777;
+                box-sizing:border-box;
+            ">
+                Client Information
+            </div>
+
+            <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:10px 5px;
+                font-weight:bold;
+                box-sizing:border-box;
+            ">
+                Action
+            </div>
+
+        </div>
+
+    `;
 
 
+    list.forEach((c,index) => {
+
+        html += `
+
+            <div class="savedCard">
+
+                <div class="savedNumber">
+
+                    ${index + 1}
+
+                </div>
+
+
+                <div class="savedInfo">
+
+                    <b>
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
+
+                    <br>
+
+                    Case:
+                    ${escapeHTML(
+                        c.caseNumber ||
+                        "No Case Number"
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.propertyAddress ||
+                        ""
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.phone ||
+                        ""
+                    )}
+
+                </div>
+
+
+                <div class="savedOpenCell">
+
+                    <button
+                        type="button"
+                        class="savedOpen"
+                        onclick="openSavedIntake('${c.id}')">
+
+                        Open
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+
+    container.innerHTML = html;
+
+}
     /* ==========================================
        COLUMN HEADERS
        ========================================== */
