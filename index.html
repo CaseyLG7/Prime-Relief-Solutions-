@@ -99,17 +99,56 @@ z-index:999999;
 
 }
 
+/* ============================= */
+/* SAVED INTAKES WINDOW */
+/* ============================= */
+
+.modal{
+    display:none;
+
+    position:fixed;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,.55);
+
+    z-index:999999;
+
+    overflow:hidden;
+}
+
+
+/* POPUP ITSELF */
+
 .modal-content{
-    background:#ffffff;
+    background:#f4f0df;
     color:#111111;
+
     width:700px;
     max-width:90%;
+
     margin:40px auto;
+
     padding:20px;
+
     border-radius:12px;
-    max-height:90vh;
-    overflow-y:auto;
+
+    max-height:85vh;
+
+    box-sizing:border-box;
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
 }
+
+
+/* EVERYTHING INSIDE POPUP */
 
 .modal-content h2,
 .modal-content h3,
@@ -121,82 +160,139 @@ z-index:999999;
     color:#111111;
 }
 
+
+/* CLIENT LIST IS THE ONLY SCROLLING AREA */
+
+#savedIntakesList{
+    flex:1;
+
+    min-height:0;
+
+    max-height:60vh;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    padding-right:5px;
+}
+
+
+/* CLIENT ROW */
+
 .savedCard{
-    color:#111111;
+
+    display:grid !important;
+
+    grid-template-columns:
+        55px
+        minmax(0,1fr)
+        100px;
+
+    align-items:stretch;
+
+    width:100%;
+
+    box-sizing:border-box;
+
+    padding:0 !important;
+
+    margin-bottom:10px;
+
+    border:2px solid #777;
+
+    border-radius:8px;
+
     background:#ffffff;
-}
 
-.savedInfo{
     color:#111111;
+
+    overflow:hidden;
+
+}
+
+
+/* NUMBER COLUMN */
+
+.savedCard > .savedNumber{
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    min-width:0;
+
+    padding:12px 5px;
+
+    background:#eee8d2;
+
+    color:#111111;
+
+    font-size:16px;
+
+    font-weight:bold;
+
+    border-right:2px solid #777;
+}
+
+
+/* CLIENT INFORMATION COLUMN */
+
+.savedCard > .savedInfo{
+
+    min-width:0;
+
+    padding:12px 15px;
+
+    color:#111111;
+
     font-size:14px;
+
     line-height:1.5;
+
+    border-right:2px solid #777;
 }
 
-width:700px;
 
-max-width:90%;
+/* OPEN BUTTON COLUMN */
 
-margin:40px auto;
+.savedCard > .savedOpenCell{
 
-padding:20px;
+    display:flex;
 
-border-radius:12px;
+    align-items:center;
 
-max-height:85vh;
+    justify-content:center;
 
-overflow:auto;
+    min-width:0;
 
+    padding:8px;
 }
 
-.savedCard{
 
-padding:12px;
-
-margin-bottom:10px;
-
-border:1px solid #ccc;
-
-border-radius:8px;
-
-background:#fafafa;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-}
-
-.savedCard:hover{
-
-background:#f0f7ff;
-
-}
-
-.savedInfo{
-
-font-size:14px;
-
-line-height:1.5;
-
-}
+/* OPEN BUTTON */
 
 .savedOpen{
 
-background:#2196f3;
+    background:#BFA13A;
 
-color:white;
+    color:white;
 
-padding:8px 18px;
+    padding:8px 18px;
 
-border:none;
+    border:none;
 
-border-radius:6px;
+    border-radius:6px;
 
-cursor:pointer;
+    cursor:pointer;
 
-}  
+    white-space:nowrap;
+}
+
+
+.savedCard:hover{
+    background:#fffdf2;
+}
   </style>
 </head>
 
