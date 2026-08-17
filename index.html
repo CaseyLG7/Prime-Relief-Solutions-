@@ -2970,14 +2970,14 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
 }
   
-function renderSavedIntakesForIntakeWindow(formDoc,list){
+function renderSavedIntakesForIntakeWindow(formDoc, list){
 
     const container =
         formDoc.getElementById("savedIntakesList");
 
     if(!container) return;
 
-    if(!list.length){
+    if(!list || !list.length){
 
         container.innerHTML = `
             <div style="
@@ -3001,101 +3001,177 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
         `;
 
         return;
-
     }
 
-   let html = "";
+    let html = "";
 
-list.forEach((c,index) => {
+    list.forEach((c,index) => {
 
-    html += `
+        const intakeID =
+            String(c.id || c.caseNumber || "");
 
-        <div class="savedCard"
-             style="
-                display:grid;
-                grid-template-columns:55px 1fr 100px;
-                align-items:stretch;
-                border:1px solid #999;
-                border-radius:6px;
-                padding:0;
-                margin-top:10px;
-                background:#fff;
-                color:#111;
-                overflow:hidden;
-             ">
+        html += `
 
-            <div style="
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-weight:bold;
-                font-size:16px;
-                color:#111;
-                background:#eee8d2;
-                border-right:1px solid #999;
-                padding:12px 5px;
-             ">
-
-                ${index + 1}
-
-            </div>
-
-            <div class="savedInfo"
-                 style="
-                    padding:12px 15px;
-                    border-right:1px solid #999;
+            <div
+                class="savedCard"
+                style="
+                    display:grid;
+                    grid-template-columns:55px 1fr 170px;
+                    align-items:stretch;
+                    border:1px solid #999;
+                    border-radius:6px;
+                    padding:0;
+                    margin-top:10px;
+                    background:#fff;
                     color:#111;
-                 ">
+                    overflow:hidden;
+                "
+            >
 
-                    <b>
+                <!-- NUMBER -->
+
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-weight:bold;
+                    font-size:16px;
+                    color:#111;
+                    background:#eee8d2;
+                    border-right:1px solid #999;
+                    padding:12px 5px;
+                ">
+
+                    ${index + 1}
+
+                </div>
+
+
+                <!-- CLIENT INFORMATION -->
+
+                <div
+                    class="savedInfo"
+                    style="
+                        padding:12px 15px;
+                        border-right:1px solid #999;
+                        color:#111;
+                    "
+                >
+
+                    <b style="font-size:16px;">
+
                         ${escapeHTML(
                             c.clientName ||
                             "Unnamed Client"
                         )}
+
                     </b>
 
-                    <br>
+                    <br><br>
 
-                    Case:
+                    <b>Case:</b>
+
                     ${escapeHTML(
                         c.caseNumber ||
+                        intakeID ||
                         "No Case Number"
                     )}
 
                     <br>
 
+                    <b>Address:</b>
+
                     ${escapeHTML(
                         c.propertyAddress ||
-                        ""
+                        "No Address"
                     )}
 
                     <br>
 
+                    <b>Phone:</b>
+
                     ${escapeHTML(
                         c.phone ||
-                        ""
+                        "No Phone"
                     )}
 
                 </div>
 
-                              <div style="
+
+                <!-- BUTTONS -->
+
+                <div style="
                     display:flex;
+                    flex-direction:column;
                     align-items:center;
                     justify-content:center;
-                    padding:8px;
-                 ">
+                    gap:8px;
+                    padding:10px;
+                ">
 
                     <button
                         type="button"
-                        class="savedOpen"
-                        onclick="openSavedIntake('${c.id}')">
-                                    Open
+                        style="
+                            width:110px;
+                            background:#BFA13A;
+                            color:white;
+                            border:none;
+                            padding:9px 14px;
+                            border-radius:5px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                        onclick="
+                            if(
+                                window.opener &&
+                                !window.opener.closed &&
+                                typeof window.opener.openSavedIntake === 'function'
+                            ){
+                                window.opener.openSavedIntake(
+                                    '${intakeID.replace(/'/g,"\\\\'")}'
+                                );
+                            }else{
+                                alert('The main Prime Relief Solutions window is not available.');
+                            }
+                        "
+                    >
+                        📂 Open
+                    </button>
 
+
+                    <button
+                        type="button"
+                        style="
+                            width:110px;
+                            background:#dc3545;
+                            color:white;
+                            border:none;
+                            padding:9px 14px;
+                            border-radius:5px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                        onclick="
+                            if(
+                                window.opener &&
+                                !window.opener.closed &&
+                                typeof window.opener.deleteSavedIntake === 'function'
+                            ){
+                                window.opener.deleteSavedIntake(
+                                    '${intakeID.replace(/'/g,"\\\\'")}'
+                                );
+                            }else{
+                                alert('The main Prime Relief Solutions window is not available.');
+                            }
+                        "
+                    >
+                        🗑 Delete
                     </button>
 
                 </div>
 
-            </div>  
+            </div>
+
         `;
 
     });
