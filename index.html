@@ -2726,7 +2726,9 @@ async function showSavedIntakesForIntakeWindow(formDoc){
     }
 
     modal.style.display = "block";
-    modal.style.zIndex = "999999";
+modal.style.zIndex = "999999";
+
+document.body.style.overflow = "hidden";
 
     const searchBox =
         document.getElementById("intakeSearch");
