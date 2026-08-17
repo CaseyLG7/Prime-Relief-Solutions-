@@ -3463,12 +3463,26 @@ async function deleteSavedIntake(intakeID){
 
 function closeSavedIntakes(){
 
+    // Prefer the active Intake window.
+    const targetDoc =
+        currentIntakeWindow || document;
+
     const modal =
-        document.getElementById("savedIntakesModal");
+        targetDoc.getElementById(
+            "savedIntakesModal"
+        );
 
     if(modal){
 
         modal.style.display = "none";
+
+    }
+
+    // Restore scrolling to whichever window
+    // contains the Saved Intake popup.
+    if(targetDoc.body){
+
+        targetDoc.body.style.overflow = "";
 
     }
 
