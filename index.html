@@ -2906,18 +2906,16 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
     if(!container) return;
 
 
-    if(!list.length){
+    if(!list || !list.length){
 
         container.innerHTML = `
             <div style="
                 text-align:center;
                 padding:35px;
                 color:#111;
+                font-weight:bold;
             ">
-
-                <div style="
-                    font-size:35px;
-                ">
+                <div style="font-size:35px;">
                     📂
                 </div>
 
@@ -2929,64 +2927,73 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                     margin-top:6px;
                     font-size:13px;
                     color:#444;
+                    font-weight:normal;
                 ">
                     Save an intake to see it here.
                 </div>
-
             </div>
         `;
 
         return;
-
     }
 
 
     let html = "";
 
 
-    /*
-     * COLUMN HEADERS
-     */
+    /* ==========================================
+       COLUMN HEADERS
+       ========================================== */
 
     html += `
 
         <div style="
             display:grid;
-            grid-template-columns:55px minmax(0,1fr) 100px;
+            grid-template-columns:55px minmax(0,1fr) 130px;
             width:100%;
+            max-width:100%;
             box-sizing:border-box;
-            margin-bottom:5px;
+            margin-bottom:6px;
             background:#222;
-            color:white;
+            color:#fff;
             border:2px solid #555;
             border-radius:6px;
             overflow:hidden;
         ">
 
             <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
                 padding:10px 5px;
-                text-align:center;
-                color:white;
+                color:#fff;
                 font-weight:bold;
                 border-right:2px solid #777;
+                box-sizing:border-box;
             ">
                 #
             </div>
 
             <div style="
-                padding:10px 12px;
-                color:white;
+                display:flex;
+                align-items:center;
+                padding:10px 15px;
+                color:#fff;
                 font-weight:bold;
                 border-right:2px solid #777;
+                box-sizing:border-box;
             ">
                 Client Information
             </div>
 
             <div style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
                 padding:10px 5px;
-                text-align:center;
-                color:white;
+                color:#fff;
                 font-weight:bold;
+                box-sizing:border-box;
             ">
                 Action
             </div>
@@ -2996,9 +3003,9 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
     `;
 
 
-    /*
-     * CLIENTS
-     */
+    /* ==========================================
+       CLIENT ROWS
+       ========================================== */
 
     list.forEach((c,index) => {
 
@@ -3006,8 +3013,7 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
             <div class="savedCard">
 
-
-                <!-- NUMBER COLUMN -->
+                <!-- NUMBER -->
 
                 <div class="savedNumber">
 
@@ -3016,7 +3022,7 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                 </div>
 
 
-                <!-- CLIENT INFORMATION COLUMN -->
+                <!-- CLIENT INFORMATION -->
 
                 <div class="savedInfo">
 
@@ -3029,9 +3035,10 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
                     <br>
 
-                    Case:
+                    <strong>Case:</strong>
                     ${escapeHTML(
                         c.caseNumber ||
+                        c.id ||
                         "No Case Number"
                     )}
 
@@ -3052,21 +3059,54 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                 </div>
 
 
-                <!-- ACTION COLUMN -->
+                <!-- ACTIONS -->
 
                 <div class="savedOpenCell">
 
-                    <button
-                        type="button"
-                        class="savedOpen"
-                        onclick="openSavedIntake('${c.id}')">
+                    <div style="
+                        display:flex;
+                        flex-direction:column;
+                        align-items:center;
+                        justify-content:center;
+                        gap:8px;
+                        width:100%;
+                    ">
 
-                        Open
+                        <button
+                            type="button"
+                            class="savedOpen"
+                            onclick="openSavedIntake('${c.id}')">
 
-                    </button>
+                            Open
+
+                        </button>
+
+                        <button
+                            type="button"
+                            onclick="deleteSavedIntake('${c.id}')"
+                            style="
+                                display:inline-flex;
+                                align-items:center;
+                                justify-content:center;
+                                min-width:90px;
+                                padding:9px 16px;
+                                background:#b91c1c;
+                                color:#fff;
+                                border:none;
+                                border-radius:6px;
+                                cursor:pointer;
+                                font-weight:bold;
+                                white-space:nowrap;
+                                box-sizing:border-box;
+                            ">
+
+                            Delete
+
+                        </button>
+
+                    </div>
 
                 </div>
-
 
             </div>
 
