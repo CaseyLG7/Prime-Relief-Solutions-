@@ -2712,30 +2712,212 @@ async function showSavedIntakes(formDoc){
   
 async function showSavedIntakesForIntakeWindow(formDoc){
 
-    // Keep the Intake window as the document we will load data INTO
+    // This is the actual Intake popup window.
+    // Keep all Saved Intake UI inside that window.
     currentIntakeWindow = formDoc;
 
-    // The Saved Intake popup is located in the MAIN page
-    const modal = document.getElementById("savedIntakesModal");
-
-    if(!modal){
-
-        alert("Saved Intake window was not found.");
-
-        return;
-    }
-
-    modal.style.display = "block";
-    modal.style.zIndex = "999999";
-
-    const searchBox =
-        document.getElementById("intakeSearch");
-
-    if(searchBox){
-        searchBox.value = "";
-    }
-
     try{
+
+        // Look for the popup INSIDE the Intake window.
+        let modal =
+            formDoc.getElementById("savedIntakesModal");
+
+        // If it does not exist, create it inside the Intake window.
+        if(!modal){
+
+            modal = formDoc.createElement("div");
+
+            modal.id = "savedIntakesModal";
+
+            modal.style.cssText = `
+                display:block;
+                position:fixed;
+                inset:0;
+                width:100%;
+                height:100%;
+                z-index:999999;
+                background:rgba(0,0,0,0.55);
+                overflow:auto;
+                padding:30px;
+                box-sizing:border-box;
+            `;
+
+            modal.innerHTML = `
+
+                <div style="
+                    background:#f4f0df;
+                    color:#111;
+                    border:3px solid #BFA13A;
+                    border-radius:10px;
+                    width:700px;
+                    max-width:95%;
+                    max-height:90vh;
+                    margin:20px auto;
+                    overflow-y:auto;
+                    box-sizing:border-box;
+                    box-shadow:0 10px 35px rgba(0,0,0,.35);
+                ">
+
+                    <div style="
+                        text-align:center;
+                        padding:15px 10px;
+                        border-bottom:3px solid #BFA13A;
+                    ">
+
+                        <img
+                            src="Prime Relief.PNG"
+                            style="
+                                height:85px;
+                                max-width:100%;
+                                object-fit:contain;
+                            "
+                        >
+
+                    </div>
+
+                    <div style="padding:20px;">
+
+                        <h2 style="
+                            text-align:center;
+                            margin-top:0;
+                            color:#111;
+                        ">
+                            Saved Client Intakes
+                        </h2>
+
+                        <input
+                            id="intakeSearch"
+                            type="text"
+                            placeholder="Search Name, Case, Address or Phone..."
+                            style="
+                                width:100%;
+                                padding:10px;
+                                margin-bottom:15px;
+                                font-size:15px;
+                                box-sizing:border-box;
+                                border:1px solid #999;
+                                border-radius:5px;
+                            "
+                        >
+
+                        <div id="savedIntakesList"></div>
+
+                        <div style="
+                            text-align:center;
+                            margin-top:20px;
+                        ">
+
+                            <button
+                                type="button"
+                                id="closeSavedIntakesButton"
+                                style="
+                                    background:#6c757d;
+                                    color:white;
+                                    border:none;
+                                    padding:10px 20px;
+                                    border-radius:6px;
+                                    cursor:pointer;
+                                "
+                            >
+                                Close
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+            formDoc.body.appendChild(modal);
+
+            const closeButton =
+                modal.querySelector(
+                    "#closeSavedIntakesButton"
+                );
+
+            if(closeButton){
+
+                closeButton.onclick = function(){
+
+                    modal.style.display = "none";
+
+                };
+
+            }
+
+            const searchBox =
+                modal.querySelector(
+                    "#intakeSearch"
+                );
+
+            if(searchBox){
+
+                searchBox.oninput = function(){
+
+                    const search =
+                        searchBox.value
+                            .trim()
+                            .toLowerCase();
+
+                    const filtered =
+                        savedIntakes.filter(c => {
+
+                            return (
+
+                                String(
+                                    c.clientName || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                                ||
+
+                                String(
+                                    c.caseNumber || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                                ||
+
+                                String(
+                                    c.propertyAddress || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                                ||
+
+                                String(
+                                    c.phone || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                            );
+
+                        });
+
+                    renderSavedIntakesForIntakeWindow(
+                        formDoc,
+                        filtered
+                    );
+
+                };
+
+            }
+
+        }else{
+
+            modal.style.display = "block";
+
+        }
+
+        // IMPORTANT:
+        // Prevent the Intake window itself from scrolling
+        // when the popup is open.
+        formDoc.body.style.overflow = "hidden";
 
         const snap =
             await db
@@ -2747,22 +2929,30 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         snap.forEach(doc => {
 
             savedIntakes.push({
+
                 id: doc.id,
                 ...doc.data()
+
             });
 
         });
 
         savedIntakes.sort((a,b) => {
 
-            return String(a.clientName || "")
-                .localeCompare(
-                    String(b.clientName || "")
-                );
+            return String(
+                a.clientName || ""
+            ).localeCompare(
+                String(
+                    b.clientName || ""
+                )
+            );
 
         });
 
-        renderSavedIntakes(savedIntakes);
+        renderSavedIntakesForIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
 
     }catch(err){
 
@@ -2777,6 +2967,7 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         );
 
     }
+
 }
   
 function renderSavedIntakesForIntakeWindow(formDoc,list){
