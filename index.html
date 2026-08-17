@@ -3376,6 +3376,18 @@ async function openSavedIntake(intakeID){
 
     }
 
+    if(currentIntakeWindow.closed){
+
+        alert(
+            "The Intake window has been closed."
+        );
+
+        currentIntakeWindow = null;
+
+        return;
+
+    }
+
     try{
 
         const ok =
@@ -3384,45 +3396,48 @@ async function openSavedIntake(intakeID){
                 intakeID
             );
 
-        if(ok){
 
-            currentIntakeID = intakeID;
-
-            // Close the Saved Intake popup
-            // INSIDE the Intake window.
-            const modal =
-                currentIntakeWindow.getElementById(
-                    "savedIntakesModal"
-                );
-
-            if(modal){
-
-                modal.style.display = "none";
-
-            }
-
-            // Restore normal scrolling on the Intake form.
-            currentIntakeWindow.body.style.overflow = "";
-
-            // Keep your existing delete-button behavior.
-            if(
-                typeof addDeleteIntakeButton ===
-                "function"
-            ){
-
-                addDeleteIntakeButton(
-                    currentIntakeWindow
-                );
-
-            }
-
-        }else{
+        if(!ok){
 
             alert(
                 "Unable to load this saved intake."
             );
 
+            return;
+
         }
+
+
+        currentIntakeID = intakeID;
+
+
+        // Close Saved Intake popup INSIDE the Intake window.
+
+        const modal =
+            currentIntakeWindow.getElementById(
+                "savedIntakesModal"
+            );
+
+        if(modal){
+
+            modal.style.display = "none";
+
+        }
+
+
+        // Restore Intake window scrolling.
+
+        if(currentIntakeWindow.body){
+
+            currentIntakeWindow.body.style.overflow = "";
+
+        }
+
+
+        alert(
+            "✅ Client intake loaded successfully."
+        );
+
 
     }catch(error){
 
