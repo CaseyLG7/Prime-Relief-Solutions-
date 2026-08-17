@@ -2883,15 +2883,21 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     if(!container) return;
 
+
     if(!list.length){
 
         container.innerHTML = `
             <div style="
                 text-align:center;
                 padding:35px;
-                color:#777;
+                color:#111;
             ">
-                <div style="font-size:35px;">📂</div>
+
+                <div style="
+                    font-size:35px;
+                ">
+                    📂
+                </div>
 
                 <strong>
                     No Saved Intakes Found
@@ -2900,9 +2906,11 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
                 <div style="
                     margin-top:6px;
                     font-size:13px;
+                    color:#444;
                 ">
                     Save an intake to see it here.
                 </div>
+
             </div>
         `;
 
@@ -2910,45 +2918,85 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
     }
 
-   let html = "";
 
-list.forEach((c,index) => {
+    let html = "";
+
+
+    /*
+     * COLUMN HEADERS
+     */
 
     html += `
 
-        <div class="savedCard"
-     style="
-        display:grid;
-        grid-template-columns:55px minmax(0,1fr) 100px;
-        align-items:stretch;
-        border:1px solid #888;
-        border-radius:6px;
-        padding:0;
-        margin-top:10px;
-        background:#fff;
-        color:#111;
-        overflow:hidden;
-     ">
-           <div style="
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:bold;
-    font-size:16px;
-    color:#111;
-    background:#eee8d2;
-    border-right:2px solid #777;
-    padding:12px 5px;
-">
-    ${index + 1}
-</div>
-          <div class="savedInfo"
-     style="
-        padding:12px 15px;
-        border-right:2px solid #777;
-        color:#111;
-        min-width:0;
-     ">
+        <div style="
+            display:grid;
+            grid-template-columns:55px minmax(0,1fr) 100px;
+            width:100%;
+            box-sizing:border-box;
+            margin-bottom:5px;
+            background:#222;
+            color:white;
+            border:2px solid #555;
+            border-radius:6px;
+            overflow:hidden;
+        ">
+
+            <div style="
+                padding:10px 5px;
+                text-align:center;
+                color:white;
+                font-weight:bold;
+                border-right:2px solid #777;
+            ">
+                #
+            </div>
+
+            <div style="
+                padding:10px 12px;
+                color:white;
+                font-weight:bold;
+                border-right:2px solid #777;
+            ">
+                Client Information
+            </div>
+
+            <div style="
+                padding:10px 5px;
+                text-align:center;
+                color:white;
+                font-weight:bold;
+            ">
+                Action
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+     * CLIENTS
+     */
+
+    list.forEach((c,index) => {
+
+        html += `
+
+            <div class="savedCard">
+
+
+                <!-- NUMBER COLUMN -->
+
+                <div class="savedNumber">
+
+                    ${index + 1}
+
+                </div>
+
+
+                <!-- CLIENT INFORMATION COLUMN -->
+
+                <div class="savedInfo">
 
                     <b>
                         ${escapeHTML(
@@ -2981,27 +3029,29 @@ list.forEach((c,index) => {
 
                 </div>
 
-                              <div style="
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    padding:8px;
-                 ">
+
+                <!-- ACTION COLUMN -->
+
+                <div class="savedOpenCell">
 
                     <button
                         type="button"
                         class="savedOpen"
                         onclick="openSavedIntake('${c.id}')">
-                                    Open
+
+                        Open
 
                     </button>
 
                 </div>
 
-            </div>  
+
+            </div>
+
         `;
 
     });
+
 
     container.innerHTML = html;
 
