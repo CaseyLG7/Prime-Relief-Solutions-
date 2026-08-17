@@ -3578,12 +3578,22 @@ async function deleteSavedIntake(intakeID){
 
 function closeSavedIntakes(){
 
-    // Prefer the active Intake window.
-    const targetDoc =
-        currentIntakeWindow || document;
+    if(!currentIntakeWindow){
+
+        return;
+
+    }
+
+    if(currentIntakeWindow.closed){
+
+        currentIntakeWindow = null;
+
+        return;
+
+    }
 
     const modal =
-        targetDoc.getElementById(
+        currentIntakeWindow.getElementById(
             "savedIntakesModal"
         );
 
@@ -3593,16 +3603,22 @@ function closeSavedIntakes(){
 
     }
 
-    // Restore scrolling to whichever window
-    // contains the Saved Intake popup.
-    if(targetDoc.body){
+    // Restore the Intake window so it can be used normally.
 
-        targetDoc.body.style.overflow = "";
+    if(currentIntakeWindow.body){
+
+        currentIntakeWindow.body.style.overflow = "auto";
+
+    }
+
+    if(currentIntakeWindow.documentElement){
+
+        currentIntakeWindow.documentElement.style.overflow = "auto";
 
     }
 
 }
-
+  
 //======================================
 // SAFE HTML
 //======================================
