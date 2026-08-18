@@ -3619,12 +3619,19 @@ async function deleteSavedIntake(intakeID){
 
 function closeSavedIntakes(){
 
-    // The Saved Intake popup belongs to the Intake window.
-    const targetDoc =
-        currentIntakeWindow || document;
+    // The Saved Intake popup belongs to the
+    // separate Intake form window.
+    const intakeWin = currentIntakeWindow;
 
+    if(!intakeWin){
+
+        return;
+
+    }
+
+    // Get the popup from the ACTUAL Intake window.
     const modal =
-        targetDoc.getElementById(
+        intakeWin.getElementById(
             "savedIntakesModal"
         );
 
@@ -3632,22 +3639,46 @@ function closeSavedIntakes(){
 
         modal.style.display = "none";
 
+        // Make absolutely sure the popup cannot
+        // block clicks after it is closed.
+        modal.style.pointerEvents = "none";
+
     }
 
-    // IMPORTANT:
-    // Restore the Intake form so it can be used again
-    // after the Saved Intake popup is closed.
-    if(targetDoc.body){
+    // Restore the Intake form itself.
+    if(intakeWin.body){
 
-        targetDoc.body.style.overflow = "";
-        targetDoc.body.style.position = "";
-        targetDoc.body.style.height = "";
-        targetDoc.body.style.pointerEvents = "";
+        intakeWin.body.style.overflow = "auto";
+        intakeWin.body.style.pointerEvents = "auto";
+        intakeWin.body.style.position = "";
+        intakeWin.body.style.height = "";
+
+    }
+
+    // Restore the document scrolling as well.
+    if(intakeWin.documentElement){
+
+        intakeWin.documentElement.style.overflow = "auto";
+        intakeWin.documentElement.style.pointerEvents = "auto";
+
+    }
+
+    // Put the Intake window back in front and active.
+    try{
+
+        intakeWin.defaultView.focus();
+
+    }catch(error){
+
+        console.log(
+            "Intake window focus restore:",
+            error
+        );
 
     }
 
 }
-
+  
 //======================================
 // SAFE HTML
 //======================================
