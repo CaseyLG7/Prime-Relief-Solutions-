@@ -3619,7 +3619,7 @@ async function deleteSavedIntake(intakeID){
 
 function closeSavedIntakes(){
 
-    // Prefer the active Intake window.
+    // The Saved Intake popup belongs to the Intake window.
     const targetDoc =
         currentIntakeWindow || document;
 
@@ -3634,11 +3634,15 @@ function closeSavedIntakes(){
 
     }
 
-    // Restore scrolling to whichever window
-    // contains the Saved Intake popup.
+    // IMPORTANT:
+    // Restore the Intake form so it can be used again
+    // after the Saved Intake popup is closed.
     if(targetDoc.body){
 
         targetDoc.body.style.overflow = "";
+        targetDoc.body.style.position = "";
+        targetDoc.body.style.height = "";
+        targetDoc.body.style.pointerEvents = "";
 
     }
 
