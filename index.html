@@ -2836,15 +2836,32 @@ async function showSavedIntakesForIntakeWindow(formDoc){
                     "#closeSavedIntakesButton"
                 );
 
-            if(closeButton){
+           if(closeButton){
 
-                closeButton.onclick = function(){
+    closeButton.onclick = function(){
 
-                    modal.style.display = "none";
+        // Close the Saved Intake popup
+        modal.style.display = "none";
 
-                };
+        // UNFREEZE THE ACTUAL INTAKE WINDOW
+        formDoc.body.style.overflow = "";
 
-            }
+        // Restore the normal page scrolling
+        formDoc.documentElement.style.overflow = "";
+
+        // Make sure the Intake window can receive clicks again
+        formDoc.body.style.pointerEvents = "";
+
+        // Put focus back on the Intake window
+        if(formDoc.defaultView){
+
+            formDoc.defaultView.focus();
+
+        }
+
+    };
+
+}
 
             const searchBox =
                 modal.querySelector(
