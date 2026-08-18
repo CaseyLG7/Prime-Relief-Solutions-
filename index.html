@@ -3121,9 +3121,17 @@ function renderSavedIntakesForIntakeWindow(formDoc, list){
                             cursor:pointer;
                             font-weight:bold;
                         "
-                        onclick="
-                            window.opener.deleteSavedIntake('${safeID}');
-                        "
+                       onclick="
+    if(
+        window.opener &&
+        !window.opener.closed &&
+        typeof window.opener.deleteSavedIntake === 'function'
+    ){
+        window.opener.deleteSavedIntake('${safeID}');
+    }else{
+        alert('The main Prime Relief Solutions window is not available.');
+    }
+"
                     >
                         🗑 Delete
                     </button>
