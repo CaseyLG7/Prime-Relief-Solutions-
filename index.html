@@ -3103,7 +3103,7 @@ list.forEach((c,index) => {
     container.innerHTML = html;
 
 }
-  
+
 //======================================
 // DISPLAY SAVED INTAKES
 //======================================
@@ -3111,11 +3111,12 @@ list.forEach((c,index) => {
 function renderSavedIntakes(list){
 
     const container =
-        document.getElementById(
-            "savedIntakesList"
-        );
+        currentIntakeWindow
+            ? currentIntakeWindow.getElementById("savedIntakesList")
+            : document.getElementById("savedIntakesList");
 
     if(!container){
+        console.error("Saved intake list container not found.");
         return;
     }
 
@@ -3140,13 +3141,34 @@ function renderSavedIntakes(list){
 
     list.forEach(c => {
 
+        const intakeID =
+            String(c.id || c.caseNumber || "")
+                .replace(/\\/g,"\\\\")
+                .replace(/'/g,"\\'");
+
         html += `
 
-            <div class="savedCard">
+            <div
+                class="savedCard"
+                style="
+                    background:white;
+                    border:1px solid #ccc;
+                    border-radius:8px;
+                    margin-bottom:12px;
+                    padding:12px;
+                    box-shadow:0 2px 5px rgba(0,0,0,.08);
+                "
+            >
 
-                <div class="savedInfo">
+                <div
+                    class="savedInfo"
+                    style="
+                        margin-bottom:10px;
+                        line-height:1.6;
+                    "
+                >
 
-                    <b>
+                    <b style="font-size:16px;">
                         ${escapeHTML(
                             c.clientName ||
                             "Unnamed Client"
@@ -3155,7 +3177,7 @@ function renderSavedIntakes(list){
 
                     <br>
 
-                    Case:
+                    <b>Case:</b>
                     ${escapeHTML(
                         c.caseNumber ||
                         c.id ||
@@ -3178,37 +3200,74 @@ function renderSavedIntakes(list){
 
                 </div>
 
-                <div style="
-                    display:flex;
-                    gap:8px;
-                    align-items:center;
-                    flex-shrink:0;
-                ">
+
+                <div
+                    style="
+                        display:flex;
+                        gap:8px;
+                        align-items:center;
+                        justify-content:center;
+                        flex-wrap:wrap;
+                        border-top:1px solid #ddd;
+                        padding-top:10px;
+                    "
+                >
+
+                    <!-- OPEN BUTTON -->
 
                     <button
                         type="button"
-                        class="savedOpen"
-                        onclick="openSavedIntake('${c.id}')">
-
-                        Open
-
+                        style="
+                            background:#BFA13A;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:9px 18px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        "
+                        onclick="
+                            if(
+                                window.opener &&
+                                !window.opener.closed &&
+                                typeof window.opener.openSavedIntake === 'function'
+                            ){
+                                window.opener.openSavedIntake('${intakeID}');
+                            }else{
+                                alert('The main Prime Relief Solutions window is not available.');
+                            }
+                        "
+                    >
+                        📂 Open
                     </button>
 
+
+                    <!-- DELETE BUTTON -->
+
                     <button
                         type="button"
-                        onclick="deleteSavedIntake('${c.id}')"
                         style="
                             background:#b91c1c;
                             color:white;
                             border:none;
                             border-radius:5px;
-                            padding:9px 15px;
+                            padding:9px 18px;
                             font-weight:bold;
                             cursor:pointer;
-                        ">
-
-                        Delete
-
+                        "
+                        onclick="
+                            if(
+                                window.opener &&
+                                !window.opener.closed &&
+                                typeof window.opener.deleteSavedIntake === 'function'
+                            ){
+                                window.opener.deleteSavedIntake('${intakeID}');
+                            }else{
+                                alert('The main Prime Relief Solutions window is not available.');
+                            }
+                        "
+                    >
+                        🗑 Delete
                     </button>
 
                 </div>
