@@ -3445,6 +3445,96 @@ async function openSavedIntake(intakeID){
     }
 }
   
+ //======================================
+// DELETE SAVED INTAKE
+//======================================
+
+async function deleteSavedIntake(intakeID){
+
+    if(!intakeID){
+
+        alert(
+            "Unable to delete this intake because the saved intake ID is missing."
+        );
+
+        return;
+    }
+
+    const client =
+        savedIntakes.find(
+            c =>
+                String(c.id) ===
+                String(intakeID)
+        );
+
+    const clientName =
+        client
+            ? (
+                client.clientName ||
+                client.caseNumber ||
+                intakeID
+            )
+            : intakeID;
+
+    const confirmed =
+        confirm(
+            "DELETE SAVED INTAKE?\n\n" +
+            "Client: " +
+            clientName +
+            "\n\n" +
+            "This will permanently delete this saved intake.\n\n" +
+            "Click OK to permanently delete it."
+        );
+
+    if(!confirmed){
+        return;
+    }
+
+    try{
+
+        await db
+            .collection("intakes")
+            .doc(intakeID)
+            .delete();
+
+        savedIntakes =
+            savedIntakes.filter(
+                c =>
+                    String(c.id) !==
+                    String(intakeID)
+            );
+
+        if(
+            String(currentIntakeID) ===
+            String(intakeID)
+        ){
+
+            currentIntakeID = "";
+        }
+
+        renderSavedIntakesForIntakeWindow(
+            currentIntakeWindow,
+            savedIntakes
+        );
+
+        alert(
+            "✅ Saved intake deleted successfully."
+        );
+
+    }catch(error){
+
+        console.error(
+            "DELETE INTAKE ERROR:",
+            error
+        );
+
+        alert(
+            "Unable to delete this saved intake.\n\n" +
+            error.message
+        );
+    }
+}
+  
 //======================================
 // DELETE SAVED INTAKE
 //======================================
