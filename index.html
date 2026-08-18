@@ -2970,14 +2970,17 @@ async function showSavedIntakesForIntakeWindow(formDoc){
 
 }
   
-function renderSavedIntakesForIntakeWindow(formDoc,list){
+function renderSavedIntakesForIntakeWindow(formDoc, list){
 
     const container =
         formDoc.getElementById("savedIntakesList");
 
-    if(!container) return;
+    if(!container){
+        alert("Saved intake list could not be found.");
+        return;
+    }
 
-    if(!list.length){
+    if(!list || !list.length){
 
         container.innerHTML = `
             <div style="
@@ -3001,53 +3004,43 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
         `;
 
         return;
-
     }
 
-   let html = "";
+    let html = "";
 
-list.forEach((c,index) => {
+    list.forEach(c => {
 
-    html += `
+        const id =
+            String(c.id || c.caseNumber || "");
 
-        <div class="savedCard"
-             style="
-                display:grid;
-                grid-template-columns:55px 1fr 100px;
-                align-items:stretch;
-                border:1px solid #999;
-                border-radius:6px;
-                padding:0;
-                margin-top:10px;
-                background:#fff;
-                color:#111;
-                overflow:hidden;
-             ">
+        const safeID =
+            id
+                .replace(/\\/g,"\\\\")
+                .replace(/'/g,"\\'");
 
-            <div style="
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-weight:bold;
-                font-size:16px;
-                color:#111;
-                background:#eee8d2;
-                border-right:1px solid #999;
-                padding:12px 5px;
-             ">
+        html += `
 
-                ${index + 1}
+            <div
+                class="savedCard"
+                style="
+                    background:#fff;
+                    border:1px solid #ccc;
+                    border-radius:8px;
+                    padding:14px;
+                    margin-bottom:12px;
+                    box-shadow:0 2px 5px rgba(0,0,0,.10);
+                "
+            >
 
-            </div>
+                <div
+                    class="savedInfo"
+                    style="
+                        margin-bottom:12px;
+                        line-height:1.7;
+                    "
+                >
 
-            <div class="savedInfo"
-                 style="
-                    padding:12px 15px;
-                    border-right:1px solid #999;
-                    color:#111;
-                 ">
-
-                    <b>
+                    <b style="font-size:17px;">
                         ${escapeHTML(
                             c.clientName ||
                             "Unnamed Client"
@@ -3056,7 +3049,7 @@ list.forEach((c,index) => {
 
                     <br>
 
-                    Case:
+                    <b>Case:</b>
                     ${escapeHTML(
                         c.caseNumber ||
                         "No Case Number"
@@ -3078,30 +3071,63 @@ list.forEach((c,index) => {
 
                 </div>
 
-                              <div style="
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    padding:8px;
-                 ">
+
+                <div
+                    style="
+                        border-top:1px solid #ddd;
+                        padding-top:10px;
+                        display:flex;
+                        gap:8px;
+                        justify-content:center;
+                        flex-wrap:wrap;
+                    "
+                >
 
                     <button
                         type="button"
-                        class="savedOpen"
-                        onclick="openSavedIntake('${c.id}')">
-                                    Open
+                        style="
+                            background:#BFA13A;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:10px 20px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                        onclick="
+                            window.opener.openSavedIntake('${safeID}');
+                        "
+                    >
+                        📂 Open
+                    </button>
 
+
+                    <button
+                        type="button"
+                        style="
+                            background:#b91c1c;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:10px 20px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                        onclick="
+                            window.opener.deleteSavedIntake('${safeID}');
+                        "
+                    >
+                        🗑 Delete
                     </button>
 
                 </div>
 
-            </div>  
-        `;
+            </div>
 
+        `;
     });
 
     container.innerHTML = html;
-
 }
 
 //======================================
