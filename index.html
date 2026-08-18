@@ -3479,8 +3479,8 @@ async function deleteSavedIntake(intakeID){
 
     if(!intakeID){
 
-        alert(
-            "Unable to delete this intake because the Case Number is missing."
+        currentIntakeWindow?.defaultView.alert(
+            "Unable to delete this intake because the saved intake ID is missing."
         );
 
         return;
@@ -3488,7 +3488,9 @@ async function deleteSavedIntake(intakeID){
 
     const client =
         savedIntakes.find(
-            c => String(c.id) === String(intakeID)
+            c =>
+                String(c.id) ===
+                String(intakeID)
         );
 
     const clientName =
@@ -3497,18 +3499,27 @@ async function deleteSavedIntake(intakeID){
                 client.clientName ||
                 client.caseNumber ||
                 intakeID
-              )
+            )
             : intakeID;
 
     const confirmed =
-        confirm(
-            "DELETE SAVED INTAKE?\n\n" +
-            "Client: " +
-            clientName +
-            "\n\n" +
-            "This will permanently remove this saved intake.\n\n" +
-            "Click OK to delete it."
-        );
+        currentIntakeWindow
+            ? currentIntakeWindow.defaultView.confirm(
+                "DELETE SAVED INTAKE?\n\n" +
+                "Client: " +
+                clientName +
+                "\n\n" +
+                "This will permanently delete this saved intake.\n\n" +
+                "Click OK to permanently delete it."
+            )
+            : confirm(
+                "DELETE SAVED INTAKE?\n\n" +
+                "Client: " +
+                clientName +
+                "\n\n" +
+                "This will permanently delete this saved intake.\n\n" +
+                "Click OK to permanently delete it."
+            );
 
     if(!confirmed){
         return;
@@ -3518,10 +3529,9 @@ async function deleteSavedIntake(intakeID){
 
         await db
             .collection("intakes")
-            .doc(intakeID)
+            .doc(String(intakeID))
             .delete();
 
-        // Remove it from the local list immediately
         savedIntakes =
             savedIntakes.filter(
                 c =>
@@ -3529,39 +3539,62 @@ async function deleteSavedIntake(intakeID){
                     String(intakeID)
             );
 
-        // If the deleted intake was the one
-        // currently loaded, clear the tracking ID.
         if(
-            typeof currentIntakeID !== "undefined" &&
             String(currentIntakeID) ===
             String(intakeID)
         ){
+            currentIntakeID = "";
+        }
 
-            currentIntakeID = null;
+        /*
+        ==========================================
+        REFRESH THE SAVED INTAKE LIST
+        INSIDE THE INTAKE WINDOW
+        ==========================================
+        */
+
+        if(currentIntakeWindow){
+
+            renderSavedIntakesForIntakeWindow(
+                currentIntakeWindow,
+                savedIntakes
+            );
+
+            currentIntakeWindow.defaultView.alert(
+                "✅ Saved intake deleted successfully."
+            );
+
+        }else{
+
+            alert(
+                "✅ Saved intake deleted successfully."
+            );
 
         }
 
-        // Refresh the popup
-        filterSavedIntakes();
-
-        alert(
-            "Saved intake deleted successfully."
-        );
-
-    }catch(err){
+    }catch(error){
 
         console.error(
             "DELETE INTAKE ERROR:",
-            err
+            error
         );
 
-        alert(
-            "Unable to delete this saved intake.\n\n" +
-            err.message
-        );
+        if(currentIntakeWindow){
 
+            currentIntakeWindow.defaultView.alert(
+                "Unable to delete this saved intake.\n\n" +
+                error.message
+            );
+
+        }else{
+
+            alert(
+                "Unable to delete this saved intake.\n\n" +
+                error.message
+            );
+
+        }
     }
-
 }
   
 //======================================
