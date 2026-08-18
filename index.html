@@ -3386,7 +3386,7 @@ async function openSavedIntake(intakeID){
     }
 
     if(!intakeID){
-        alert(
+        currentIntakeWindow.defaultView.alert(
             "Unable to open this intake because the saved intake ID is missing."
         );
         return;
@@ -3401,7 +3401,7 @@ async function openSavedIntake(intakeID){
             );
 
         if(!ok){
-            alert(
+            currentIntakeWindow.defaultView.alert(
                 "Unable to load this saved intake."
             );
             return;
@@ -3410,9 +3410,12 @@ async function openSavedIntake(intakeID){
         currentIntakeID = intakeID;
 
         /*
-         * IMPORTANT:
-         * Close the popup INSIDE the Intake window.
-         */
+        ==========================================
+        CLOSE SAVED INTAKES POPUP
+        INSIDE THE INTAKE WINDOW
+        ==========================================
+        */
+
         const modal =
             currentIntakeWindow.getElementById(
                 "savedIntakesModal"
@@ -3423,16 +3426,34 @@ async function openSavedIntake(intakeID){
         }
 
         /*
-         * Restore scrolling to the Intake window.
-         */
+        ==========================================
+        RESTORE INTAKE WINDOW SCROLLING
+        ==========================================
+        */
+
         currentIntakeWindow.body.style.overflow = "";
 
         /*
-         * Keep the Intake window active.
-         */
+        ==========================================
+        KEEP INTAKE WINDOW ACTIVE
+        ==========================================
+        */
+
         currentIntakeWindow.defaultView.focus();
 
-        alert("✅ Intake Loaded Successfully");
+        /*
+        ==========================================
+        IMPORTANT:
+        SHOW SUCCESS MESSAGE INSIDE
+        THE INTAKE WINDOW
+        ==========================================
+        */
+
+        currentIntakeWindow.defaultView.alert(
+            "✅ Intake Loaded Successfully"
+        );
+
+        return true;
 
     }catch(error){
 
@@ -3441,10 +3462,12 @@ async function openSavedIntake(intakeID){
             error
         );
 
-        alert(
+        currentIntakeWindow.defaultView.alert(
             "Unable to open this saved intake.\n\n" +
             error.message
         );
+
+        return false;
     }
 }
   
