@@ -1,12 +1,16 @@
 <!DOCTYPE html>
+
 <html>
 <head>
   <title>Prime Relief Solutions</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- FIREBASE -->
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
   <style>
@@ -100,8 +104,37 @@ z-index:999999;
 }
 
 .modal-content{
+    background:#ffffff;
+    color:#111111;
+    width:700px;
+    max-width:90%;
+    margin:40px auto;
+    padding:20px;
+    border-radius:12px;
+    max-height:85vh;
+    overflow:auto;
+}
 
-background:white;
+.modal-content h2,
+.modal-content h3,
+.modal-content div,
+.modal-content b,
+.modal-content strong,
+.modal-content span,
+.modal-content label{
+    color:#111111;
+}
+
+.savedCard{
+    color:#111111;
+    background:#ffffff;
+}
+
+.savedInfo{
+    color:#111111;
+    font-size:14px;
+    line-height:1.5;
+}
 
 width:700px;
 
@@ -169,6 +202,7 @@ cursor:pointer;
 
 }  
   </style>
+
 </head>
 
 <body>
@@ -195,12 +229,12 @@ cursor:pointer;
   <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
     <button onclick="window.open('https://jpwebsite.harriscountytx.gov/FindMyCase/search.jsp')">Case Search</button>
     <button onclick="window.open('https://jpwebsite.harriscountytx.gov/PublicExtracts/search.jsp')">Files Search</button>
-   
-    <button class="doc-btn btn-script" onclick="openDoc('script')">Call Script</button>
-    <button class="doc-btn btn-intake" onclick="openDoc('intake')">Intake</button>
-    <button class="doc-btn btn-appeal" onclick="openDoc('appeal')">Appeal</button>
-    <button class="doc-btn btn-checklist" onclick="openDoc('checklist')">Checklist</button>
-    <div style="width:100%;margin-top:8px;"></div>
+
+<button class="doc-btn btn-script" onclick="openDoc('script')">Call Script</button>
+<button class="doc-btn btn-intake" onclick="openDoc('intake')">Intake</button>
+<button class="doc-btn btn-appeal" onclick="openDoc('appeal')">Appeal</button>
+<button class="doc-btn btn-checklist" onclick="openDoc('checklist')">Checklist</button>
+<div style="width:100%;margin-top:8px;"></div>
 
 <button class="doc-btn btn-service" onclick="openDoc('serviceAgreement')">
 Service Agreement
@@ -217,22 +251,23 @@ Authorization
 <button class="doc-btn btn-checklist" onclick="openDoc('invoice')">
 Invoice
 </button>
-    
- <button class="doc-btn btn-service"
+
+<button class="doc-btn btn-service"
 onclick="openDoc('inability')">
 Statement of Inability
-</button>  
-    
-    <button class="doc-btn btn-workflow" onclick="openDoc('completion')">Completion Letter</button>
-    <button class="clear-btn" style="margin-left:auto;" onclick="clearView()">Clear View</button>
-    <button onclick="toggleDark()">🌙</button>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+</button>
+
+<button class="doc-btn btn-workflow" onclick="openDoc('completion')">Completion Letter</button>
+<button class="clear-btn" style="margin-left:auto;" onclick="clearView()">Clear View</button>
+<button onclick="toggleDark()">🌙</button>
+<button class="logout-btn" onclick="logout()">Logout</button>
+
   </div>
 </div>
 
 <div class="box">
   <input type="file" id="file" />
-  <button onclick="upload()">Upload</button>
+  <button type="button" onclick="uploadFile()">Upload</button>
 
   <input placeholder="Search Name" id="searchName" oninput="debounceFilter()">
   <input placeholder="ZIP" id="searchZip" oninput="debounceFilter()">
@@ -257,41 +292,67 @@ Statement of Inability
 </thead>
 <tbody id="tbody"></tbody>
 </table>
-  
+
 <!-- ============================= -->
+
 <!-- SAVED INTAKES POPUP -->
+
 <!-- ============================= -->
 
 <div id="savedIntakesModal" class="modal">
 
-    <div class="modal-content">
+<div class="modal-content" style="
+    background:#f4f0df;
+    color:#111;
+    border:3px solid #BFA13A;
+    border-radius:10px;
+    overflow:hidden;
+">
 
-        <h2>Saved Client Intakes</h2>
+    <div style="
+        text-align:center;
+        padding:15px 10px;
+        border-bottom:3px solid #BFA13A;
+    ">
 
-        <input
-            id="intakeSearch"
-            type="text"
-            placeholder="Search Name, Case, Address or Phone..."
-            onkeyup="filterSavedIntakes()"
+        <img
+            src="Prime Relief.PNG"
             style="
-                width:100%;
-                padding:10px;
-                margin-bottom:15px;
-                font-size:15px;
-            ">
-
-        <div id="savedIntakesList"></div>
-
-        <br>
-
-        <button onclick="closeSavedIntakes()">
-            Close
-        </button>
+                height:85px;
+                max-width:100%;
+                object-fit:contain;
+            "
+        >
 
     </div>
 
+
+    <h2>Saved Client Intakes</h2>
+
+    <input
+        id="intakeSearch"
+        type="text"
+        placeholder="Search Name, Case, Address or Phone..."
+        onkeyup="filterSavedIntakes()"
+        style="
+            width:100%;
+            padding:10px;
+            margin-bottom:15px;
+            font-size:15px;
+        ">
+
+    <div id="savedIntakesList"></div>
+
+    <br>
+
+    <button onclick="closeSavedIntakes()">
+        Close
+    </button>
+
 </div>
-  
+
+</div>
+
 <script>
 
 function toggleDark(){
@@ -608,19 +669,19 @@ I understand that Prime Relief Solutions is a Legal Document Preparation service
 <button type="button" onclick="intakeSaveButton()">💾 Save Intake</button>
 
 <button
-    type="button"
-    onclick="openSavedIntakes()"
-    style="
-        background:#BFA13A;
-        color:white;
-        border:none;
-        padding:10px 18px;
-        border-radius:5px;
-        cursor:pointer;
-        font-weight:bold;
-        margin-right:8px;
-    ">
-    📂 Open Saved Intake
+ type="button"
+ onclick="openSavedIntakes()"
+ style="
+     background:#BFA13A;
+     color:white;
+     border:none;
+     padding:10px 18px;
+     border-radius:5px;
+     cursor:pointer;
+     font-weight:bold;
+     margin-right:8px;
+ ">
+📂 Open Saved Intake
 </button>
 
 <button type="button" onclick="window.print()">🖨 Save / Print</button>
@@ -724,6 +785,7 @@ A: No. We are a Legal Document Preparation service. We prepare documents based o
 </div>`;}
 
 if(type==="checklist"){ content=`<div style="${style}">
+
 <ul>
 <li>Explain Your Service:
 
@@ -824,8 +886,9 @@ The timeline varies depending on the court and your specific case. We'll keep yo
 </li>
 </ul>
 </div>`;}
-  
+
 if(type==="serviceAgreement"){ content=`
+
 <div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
 
 <h2 style="text-align:center;color:#BFA13A;">PRIME RELIEF SOLUTIONS</h2>
@@ -892,25 +955,25 @@ We agree to prepare legal documents using only the information you provide.
     min-width:190px;
 ">
 
-    <b style="font-size:14px;">
-        SERVICE FEE
-    </b>
+<b style="font-size:14px;">
+    SERVICE FEE
+</b>
 
-    <span style="
-        font-size:18px;
-        font-weight:bold;
-        color:#BFA13A;
-        margin-left:12px;
-    ">
-        $190.00
-    </span>
+<span style="
+    font-size:18px;
+    font-weight:bold;
+    color:#BFA13A;
+    margin-left:12px;
+">
+    $190.00
+</span>
 
-    <div style="
-        margin-top:2px;
-        font-size:12px;
-    ">
-        Document Preparation Service Fee
-    </div>
+<div style="
+    margin-top:2px;
+    font-size:12px;
+">
+    Document Preparation Service Fee
+</div>
 
 </div>
 
@@ -954,8 +1017,9 @@ The client is responsible for reviewing, signing and filing all documents unless
 
 </div>
 `;}
-  
-  if(type==="limitedScope"){ content=`
+
+if(type==="limitedScope"){ content=`
+
 <div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
 
 <h2 style="text-align:center;color:#BFA13A;">
@@ -1010,8 +1074,9 @@ LIMITED SCOPE DISCLOSURE
 
 </div>
 `;}
-  
+
 if(type==="authorization"){ content=`
+
 <div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
 
 <h2 style="text-align:center;color:#BFA13A;">
@@ -1067,8 +1132,9 @@ I understand I am responsible for reviewing all documents before signing and fil
 
 </div>
 `;}
-  
+
 if(type==="invoice"){ content=`
+
 <div style="font-family:Arial;max-width:850px;margin:auto;font-size:15px;line-height:1.6;">
 
 <h2 style="text-align:center;color:#BFA13A;">
@@ -1137,8 +1203,9 @@ INVOICE / RECEIPT
 
 </div>
 `;}
-  
+
 if(type==="completion"){ content=`<div>
+
 <h2>Prime Relief Solutions</h2>
 <h3>LETTER OF SERVICE COMPLETION</h3>
 
@@ -1173,6 +1240,7 @@ let w = window.open("", "_blank");
 w.document.open();
 
 w.document.write(`
+
 <html>
 <head>
 <title>Prime Relief Solutions</title>
@@ -1186,24 +1254,24 @@ body{
 
 input,
 textarea{
-    border:1px solid #999;
-    padding:5px;
-    font-size:14px;
+border:1px solid #999;
+padding:5px;
+font-size:14px;
 }
 
 button{
-    padding:10px 20px;
-    margin:10px 5px;
-    cursor:pointer;
-    font-size:15px;
-    border:none;
-    border-radius:6px;
-    background:#BFA13A;
-    color:white;
+padding:10px 20px;
+margin:10px 5px;
+cursor;
+font-size:15px;
+border;
+border-radius:6px;
+background:#BFA13A;
+color;
 }
 
-button:hover{
-    opacity:.9;
+button{
+opacity:.9;
 }
 </style>
 
@@ -1449,6 +1517,13 @@ let existingCases=new Set();
 let debounceTimer;
 let rowOrder=[];
 let displayedCases = [];
+
+/*
+==========================================
+CURRENT ACTIVE CASE FILE
+==========================================
+*/
+let activeFileCases = [];
   
 function login(){ auth.signInWithEmailAndPassword(email.value,password.value).catch(e=>alert(e.message)); }
 function resetPassword(){ if(!email.value) return alert("Enter email"); auth.sendPasswordResetEmail(email.value).then(()=>alert("Reset email sent")); }
@@ -1460,233 +1535,966 @@ auth.onAuthStateChanged(user=>{
 });
 
 function load(){
-  db.collection("cases").onSnapshot(snap=>{
+
+  db.collection("cases").onSnapshot(function(snap){
+
     existingCases.clear();
-    allData=snap.docs.map(d=>{ let r=d.data(); existingCases.add(r.caseNumber); return r; });
-const savedUpload =
-    JSON.parse(localStorage.getItem("lastUpload") || "[]");
 
-if(savedUpload.length){
+    allData = snap.docs.map(function(d){
 
-    render(
-        allData.filter(c =>
-            savedUpload.includes(c.caseNumber)
-        )
-    );
+      const r = d.data();
 
-}else{
+      existingCases.add(
+        r.caseNumber
+      );
 
-   if(displayedCases.length){
+      return r;
 
-    const ids = displayedCases.map(c => c.caseNumber);
+    });
 
-    render(
-        allData.filter(c => ids.includes(c.caseNumber))
-    );
 
-}else{
+    /*
+    ==========================================
+    GET THE CURRENT ACTIVE FILE
+    ==========================================
+    */
 
-    render([]);
+    activeFileCases =
+      JSON.parse(
+        localStorage.getItem(
+          "lastUpload"
+        ) || "[]"
+      );
 
-}
 
-}
-    if(rowOrder.length){
-      allData.sort((a,b)=>{
-        let ai=rowOrder.indexOf(a.caseNumber);
-        let bi=rowOrder.indexOf(b.caseNumber);
+    /*
+    ==========================================
+    NO ACTIVE FILE
+    ==========================================
+    */
 
-        if(ai === -1) ai = 999999;
-        if(bi === -1) bi = 999999;
+    if(!activeFileCases.length){
 
-        return ai - bi;
-      });
+      displayedCases = [];
+
+      render([]);
+
+      return;
+
     }
 
-    render(allData);
+
+    /*
+    ==========================================
+    IMPORTANT:
+
+    DO NOT DIRECTLY RENDER THE FILE HERE.
+
+    Let applyFilters() decide what should
+    actually be displayed.
+    ==========================================
+    */
+
+    applyFilters();
+
   });
-}
 
+}
+  
 function debounceFilter(){
-  clearTimeout(debounceTimer);
-  debounceTimer=setTimeout(()=>requestAnimationFrame(applyFilters),250);
-}
 
-function applyFilters(){
-  let nameValue = searchName.value.toLowerCase();
-  let zipValue = searchZip.value;
-  let dateValue = searchDate.value.toLowerCase();
-  let minValue = Number(minAmt.value)||0;
-  let maxValue = Number(maxAmt.value)||999999;
-
-  let rows=allData.filter(r=>
-    r.name.toLowerCase().includes(nameValue) &&
-    (r.zip || "").includes(zipValue) &&
-    (r.hearing || "").toLowerCase().includes(dateValue) &&
-    r.amount>= minValue &&
-    r.amount<= maxValue
+  clearTimeout(
+    debounceTimer
   );
 
-  requestAnimationFrame(()=>render(rows));
-}
 
-function upload(){
-  const file=document.getElementById("file").files[0];
-  if(!file) return alert("Choose file");
+  debounceTimer =
+    setTimeout(function(){
 
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const lines=e.target.result.split("\n").filter(l=>l.trim());
-    const headers=lines[0].split("\t").map(h=>h.replace(/"/g,"").trim());
+      applyFilters();
 
-    let i=1, chunk=200, added=0, skipped=0, temp=[];
-
-    function processChunk(){
-      let end=Math.min(i+chunk, lines.length);
-
-      for(; i<end; i++){
-        let values=lines[i].split("\t");
-        let row={};
-        headers.forEach((h,idx)=> row[h]=values[idx]?.replace(/"/g,"").trim());
-
-        let caseNum=row["Case Number"];
-        if(!caseNum) continue;
-
-        let amount=Number(row["Claim Amount"]||0);
-        let zip=row["Defendant Addr Zip"]||"";
-
-        let addressParts=[
-          row["Defendant Addr Line 1"]||"",
-          row["Defendant Addr City"]||"",
-          zip
-        ].filter(Boolean);
-
-        let lead="Cold",cls="row-cold";
-        if(amount>1000){lead="Hot";cls="row-hot";}
-        else if(amount>500){lead="Warm";cls="row-warm";}
-
-        let record={
-          caseNumber:caseNum,
-          name:row["Defendant Name"]||"",
-          address:addressParts.join(", "),
-          amount,
-          hearing:row["Next Hearing Date"]||"",
-          zip,
-          lead,cls,
-          status:"Open",
-          updatedBy:currentUser
-        };
-
-        temp.push(record);
-
-      if(!existingCases.has(caseNum)){
-
-    existingCases.add(caseNum);
-
-    db.collection("cases")
-      .doc(caseNum)
-      .set(record,{merge:true});
-
-    allData.push(record);
-
-    added++;
-
-}else{
-
-    skipped++;
+    }, 150);
 
 }
-      }
+  
+function applyFilters(){
 
-      render(temp);
+  /*
+  ==========================================
+  GET CURRENT SEARCH VALUES
+  ==========================================
+  */
 
-      if(i<lines.length){ setTimeout(processChunk,0); }
-      else { load();
+  const nameValue =
+    (
+      document.getElementById("searchName")?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
 
-alert(`Upload Complete
-Added: ${added}
-Skipped: ${skipped}`); }
-    }
-localStorage.setItem(
-    "lastUpload",
-    JSON.stringify(temp.map(x=>x.caseNumber))
-);
-    processChunk();
+
+  const zipValue =
+    (
+      document.getElementById("searchZip")?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  const dateValue =
+    (
+      document.getElementById("searchDate")?.value ||
+      ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+  const minValue =
+    Number(
+      document.getElementById("minAmt")?.value
+    ) || 0;
+
+
+  const maxInput =
+    document.getElementById("maxAmt")?.value;
+
+
+  const maxValue =
+    maxInput === ""
+      ? Infinity
+      : Number(maxInput);
+
+
+  /*
+  ==========================================
+  ONLY SEARCH INSIDE THE CURRENT FILE
+  ==========================================
+  */
+
+  let rows =
+    allData.filter(function(r){
+
+      return activeFileCases.includes(
+        r.caseNumber
+      );
+
+    });
+
+
+  /*
+  ==========================================
+  NAME FILTER
+  ==========================================
+  */
+
+  if(nameValue){
+
+    rows =
+      rows.filter(function(r){
+
+        return String(
+          r.name || ""
+        )
+        .toLowerCase()
+        .includes(nameValue);
+
+      });
+
+  }
+
+
+  /*
+  ==========================================
+  ZIP FILTER
+  ==========================================
+  */
+
+  if(zipValue){
+
+    rows =
+      rows.filter(function(r){
+
+        return String(
+          r.zip || ""
+        )
+        .toLowerCase()
+        .includes(zipValue);
+
+      });
+
+  }
+
+
+  /*
+  ==========================================
+  DATE FILTER
+  ==========================================
+  */
+
+  if(dateValue){
+
+    rows =
+      rows.filter(function(r){
+
+        return String(
+          r.hearing || ""
+        )
+        .toLowerCase()
+        .includes(dateValue);
+
+      });
+
+  }
+
+
+  /*
+  ==========================================
+  MINIMUM AMOUNT
+  ==========================================
+  */
+
+  rows =
+    rows.filter(function(r){
+
+      return Number(r.amount || 0)
+        >= minValue;
+
+    });
+
+
+  /*
+  ==========================================
+  MAXIMUM AMOUNT
+  ==========================================
+  */
+
+  rows =
+    rows.filter(function(r){
+
+      return Number(r.amount || 0)
+        <= maxValue;
+
+    });
+
+
+  /*
+  ==========================================
+  PRESERVE THE FILE'S ORIGINAL ORDER
+  ==========================================
+  */
+
+  const orderedRows =
+    activeFileCases
+      .map(function(caseNumber){
+
+        return rows.find(function(r){
+
+          return r.caseNumber === caseNumber;
+
+        });
+
+      })
+      .filter(Boolean);
+
+
+  /*
+  ==========================================
+  DISPLAY FILTERED FILE
+  ==========================================
+  */
+
+  displayedCases =
+    orderedRows;
+
+
+  render(
+    orderedRows
+  );
+
+}
+
+function uploadFile(){
+
+  const fileInput =
+    document.getElementById("file");
+
+  if(!fileInput){
+
+    alert("File upload control was not found.");
+
+    return;
+
+  }
+
+  const file =
+    fileInput.files[0];
+
+  if(!file){
+
+    alert("Choose a file first.");
+
+    return;
+
+  }
+
+
+  /*
+  ==========================================
+  RESET CURRENT FILE VIEW
+  ==========================================
+  */
+
+  activeFileCases = [];
+
+  displayedCases = [];
+
+  rowOrder = [];
+
+  localStorage.removeItem("lastUpload");
+
+  document.getElementById("tbody").innerHTML = "";
+
+
+  /*
+  ==========================================
+  READ FILE
+  ==========================================
+  */
+
+  const reader =
+    new FileReader();
+
+
+  reader.onerror = function(){
+
+    alert(
+      "Unable to read this file."
+    );
+
   };
 
-  reader.readAsText(file);
-}
 
-function cycle(btn,id){
-  const states=["Open","Contacted","Processing","Closed"];
-  let next=(states.indexOf(btn.innerText)+1)%states.length;
-  let newState=states[next];
+  reader.onload = function(event){
 
-  btn.innerText=newState;
-  btn.className="status-"+newState.toLowerCase();
+    try{
 
-  allData.forEach(r=>{
-    if(r.caseNumber === id){
-      r.status = newState;
-      r.updatedBy = currentUser;
+      const text =
+        event.target.result;
+
+
+      const lines =
+        text
+          .split(/\r?\n/)
+          .filter(line =>
+            line.trim() !== ""
+          );
+
+
+      if(lines.length < 2){
+
+        alert(
+          "The file appears to be empty or does not contain case records."
+        );
+
+        return;
+
+      }
+
+
+      /*
+      ======================================
+      HEADER ROW
+      ======================================
+      */
+
+      const headers =
+        lines[0]
+          .split("\t")
+          .map(function(h){
+
+            return h
+              .replace(/"/g,"")
+              .trim();
+
+          });
+
+
+      let records = [];
+
+      let newCases = 0;
+
+      let updatedCases = 0;
+
+
+      /*
+      ======================================
+      PROCESS FILE
+      ======================================
+      */
+
+      for(let i = 1; i < lines.length; i++){
+
+        const values =
+          lines[i].split("\t");
+
+
+        const row = {};
+
+
+        headers.forEach(function(header,index){
+
+          row[header] =
+            values[index]
+              ? values[index]
+                  .replace(/"/g,"")
+                  .trim()
+              : "";
+
+        });
+
+
+        const caseNum =
+          row["Case Number"];
+
+
+        if(!caseNum){
+
+          continue;
+
+        }
+
+
+        /*
+        ====================================
+        REMEMBER EVERY CASE IN THIS FILE
+        ====================================
+        */
+
+        activeFileCases.push(
+          caseNum
+        );
+
+
+        /*
+        ====================================
+        CASE INFORMATION
+        ====================================
+        */
+
+        const amount =
+          Number(
+            row["Claim Amount"] || 0
+          );
+
+
+        const zip =
+          row["Defendant Addr Zip"] || "";
+
+
+        const addressParts = [
+
+          row["Defendant Addr Line 1"] || "",
+
+          row["Defendant Addr City"] || "",
+
+          zip
+
+        ].filter(Boolean);
+
+
+        let lead = "Cold";
+
+        let cls = "row-cold";
+
+
+        if(amount > 1000){
+
+          lead = "Hot";
+
+          cls = "row-hot";
+
+        }
+        else if(amount > 500){
+
+          lead = "Warm";
+
+          cls = "row-warm";
+
+        }
+
+
+        /*
+        ====================================
+        PRESERVE EXISTING STATUS
+        ====================================
+        */
+
+        const existing =
+          allData.find(function(r){
+
+            return r.caseNumber === caseNum;
+
+          });
+
+
+        const record = {
+
+          caseNumber: caseNum,
+
+          name:
+            row["Defendant Name"] || "",
+
+          address:
+            addressParts.join(", "),
+
+          amount: amount,
+
+          hearing:
+            row["Next Hearing Date"] || "",
+
+          zip: zip,
+
+          lead: lead,
+
+          cls: cls,
+
+          status:
+            existing &&
+            existing.status
+              ? existing.status
+              : "Open",
+
+          updatedBy:
+            currentUser
+
+        };
+
+
+        records.push(record);
+
+
+        /*
+        ====================================
+        NEW VS UPDATED
+        ====================================
+        */
+
+        if(
+          existingCases.has(caseNum)
+        ){
+
+          updatedCases++;
+
+        }
+        else{
+
+          newCases++;
+
+        }
+
+
+        /*
+        ====================================
+        UPDATE FIREBASE
+        ====================================
+        */
+
+        db.collection("cases")
+          .doc(caseNum)
+          .set(
+            record,
+            { merge:true }
+          )
+          .then(function(){
+
+            existingCases.add(
+              caseNum
+            );
+
+          })
+          .catch(function(error){
+
+            console.error(
+              "Firebase case save error:",
+              caseNum,
+              error
+            );
+
+          });
+
+
+        /*
+        ====================================
+        UPDATE LOCAL DATA
+        ====================================
+        */
+
+        const localIndex =
+          allData.findIndex(function(r){
+
+            return r.caseNumber === caseNum;
+
+          });
+
+
+        if(localIndex === -1){
+
+          allData.push(record);
+
+        }
+        else{
+
+          allData[localIndex] = {
+
+            ...allData[localIndex],
+
+            ...record
+
+          };
+
+        }
+
+      }
+
+
+      /*
+      ==========================================
+      REMOVE DUPLICATE CASE NUMBERS
+      ==========================================
+      */
+
+      activeFileCases =
+        [...new Set(activeFileCases)];
+
+
+      /*
+      ==========================================
+      SAVE CURRENT FILE CASE LIST
+      ==========================================
+      */
+
+      localStorage.setItem(
+
+        "lastUpload",
+
+        JSON.stringify(
+          activeFileCases
+        )
+
+      );
+
+
+      /*
+      ==========================================
+      DISPLAY THE FILE
+      ==========================================
+      */
+
+      displayedCases =
+        records;
+
+
+      render(
+        records
+      );
+
+
+      /*
+      ==========================================
+      DONE
+      ==========================================
+      */
+
+      alert(
+        "File Loaded Successfully\n\n" +
+        "New Cases: " +
+        newCases +
+        "\n" +
+        "Updated Cases: " +
+        updatedCases
+      );
+
+
     }
-  });
+    catch(error){
 
-  setTimeout(()=>{
-    db.collection("cases").doc(id).update({
-      status:newState,
-      updatedBy:currentUser
-    });
-  },0);
+      console.error(
+        "UPLOAD ERROR:",
+        error
+      );
+
+
+      alert(
+        "Upload Error:\n\n" +
+        error.message
+      );
+
+    }
+
+  };
+
+
+  reader.readAsText(file);
+
 }
+  
+async function cycle(btn, id){
 
+  const states = [
+    "Open",
+    "Contacted",
+    "Processing",
+    "Closed"
+  ];
+
+
+  /*
+  ==========================================
+  FIND THIS EXACT CASE
+  ==========================================
+  */
+
+  const record =
+    allData.find(function(r){
+
+      return r.caseNumber === id;
+
+    });
+
+
+  if(!record){
+
+    alert(
+      "Case could not be found."
+    );
+
+    return;
+
+  }
+
+
+  /*
+  ==========================================
+  FIND NEXT STATUS
+  ==========================================
+  */
+
+  const currentState =
+    record.status || "Open";
+
+
+  const currentIndex =
+    states.indexOf(currentState);
+
+
+  const nextIndex =
+    currentIndex === -1
+      ? 0
+      : (currentIndex + 1) % states.length;
+
+
+  const newState =
+    states[nextIndex];
+
+
+  /*
+  ==========================================
+  UPDATE LOCAL DATA IMMEDIATELY
+  ==========================================
+  */
+
+  record.status =
+    newState;
+
+  record.updatedBy =
+    currentUser;
+
+
+  /*
+  ==========================================
+  SAVE TO FIREBASE
+  ==========================================
+  */
+
+  try{
+
+    await db
+      .collection("cases")
+      .doc(id)
+      .update({
+
+        status: newState,
+
+        updatedBy: currentUser
+
+      });
+
+
+    /*
+    ==========================================
+    DO NOT MANUALLY REBUILD THE TABLE HERE.
+
+    Firebase onSnapshot() will fire.
+
+    load() will call applyFilters().
+
+    applyFilters() will preserve:
+      - current file
+      - current search
+      - current ZIP
+      - current date
+      - current amount filters
+      - original file order
+    ==========================================
+    */
+
+
+  }catch(error){
+
+    console.error(
+      "STATUS UPDATE ERROR:",
+      error
+    );
+
+
+    /*
+    Reload the current data if Firebase
+    rejected the update.
+    */
+
+    alert(
+      "Unable to update case status.\n\n" +
+      error.message
+    );
+
+  }
+
+}
+  
 function clearView(){
 
-    if(!confirm("Clear current file from view?")) return;
+  if(
+    !confirm(
+      "Clear current file from view?"
+    )
+  ){
 
-    searchName.value="";
-    searchZip.value="";
-    minAmt.value="";
-    maxAmt.value="";
-    searchDate.value="";
+    return;
 
-    document.getElementById("file").value="";
+  }
 
-    displayedCases=[];
+  searchName.value="";
+  searchZip.value="";
+  minAmt.value="";
+  maxAmt.value="";
+  searchDate.value="";
 
-    tbody.innerHTML="";
+  document.getElementById("file").value="";
+
+  hasActiveCaseFile=false;
+
+  displayedCases=[];
+
+  rowOrder=[];
+
+  tbody.innerHTML="";
 
 }
-
+  
 function render(rows){
-displayedCases = rows;  
-  let html="";
 
-  rowOrder = rows.map(r=>r.caseNumber);
+  /*
+  ==========================================
+  DO NOT CHANGE ROW ORDER HERE.
+  Firebase snapshots can arrive in a
+  different order after an update.
+  ==========================================
+  */
 
-  rows.forEach(r=>{
+  let html = "";
+
+
+  rows.forEach(r => {
+
     let displayAddress = r.address || "";
 
-    if(r.zip && displayAddress && !displayAddress.includes(r.zip)){
-      displayAddress = displayAddress + ", " + r.zip;
+
+    if(
+      r.zip &&
+      displayAddress &&
+      !displayAddress.includes(r.zip)
+    ){
+
+      displayAddress =
+        displayAddress + ", " + r.zip;
+
     }
 
-    html+=`
-    <tr class="${r.cls}">
-      <td>${r.caseNumber}</td>
-      <td>${r.name}</td>
-      <td>${displayAddress}</td>
-      <td>$${r.amount}</td>
-      <td>${r.hearing}</td>
-      <td>${r.lead}</td>
-      <td><button class="status-${r.status.toLowerCase()}" onclick="cycle(this,'${r.caseNumber}')">${r.status}</button></td>
-      <td>${r.updatedBy||""}</td>
-      <td><button class="map-btn" onclick="window.open('https://www.google.com/maps?q=${encodeURIComponent(displayAddress)}')">Map</button></td>
-    </tr>`;
+
+    html += `
+
+      <tr
+        data-case-number="${escapeHTML(r.caseNumber)}"
+        class="${r.cls || ""}"
+      >
+
+        <td>${escapeHTML(r.caseNumber || "")}</td>
+
+        <td>${escapeHTML(r.name || "")}</td>
+
+        <td>${escapeHTML(displayAddress)}</td>
+
+        <td>$${r.amount || 0}</td>
+
+        <td>${escapeHTML(r.hearing || "")}</td>
+
+        <td>${escapeHTML(r.lead || "")}</td>
+
+        <td>
+
+          <button
+            type="button"
+            class="status-${String(r.status || "Open").toLowerCase()}"
+            onclick="cycle(this, '${String(r.caseNumber).replace(/'/g, "\\'")}')"
+          >
+            ${escapeHTML(r.status || "Open")}
+          </button>
+
+        </td>
+
+        <td>
+          ${escapeHTML(r.updatedBy || "")}
+        </td>
+
+        <td>
+
+          <button
+            type="button"
+            class="map-btn"
+            onclick="window.open(
+              'https://www.google.com/maps?q=' +
+              encodeURIComponent('${String(displayAddress).replace(/'/g, "\\'")}')
+            )"
+          >
+            Map
+          </button>
+
+        </td>
+
+      </tr>
+
+    `;
+
   });
 
-  tbody.innerHTML=html;
+
+  document.getElementById("tbody").innerHTML = html;
+
 }
+  
 //======================================
 // SAVE ENTIRE INTAKE TO FIREBASE
 //======================================
@@ -1919,30 +2727,225 @@ async function showSavedIntakes(formDoc){
   
 async function showSavedIntakesForIntakeWindow(formDoc){
 
-    // Keep the Intake window as the document we will load data INTO
+    // This is the actual Intake popup window.
+    // Keep all Saved Intake UI inside that window.
     currentIntakeWindow = formDoc;
 
-    // The Saved Intake popup is located in the MAIN page
-    const modal = document.getElementById("savedIntakesModal");
-
-    if(!modal){
-
-        alert("Saved Intake window was not found.");
-
-        return;
-    }
-
-    modal.style.display = "block";
-    modal.style.zIndex = "999999";
-
-    const searchBox =
-        document.getElementById("intakeSearch");
-
-    if(searchBox){
-        searchBox.value = "";
-    }
-
     try{
+
+        // Look for the popup INSIDE the Intake window.
+        let modal =
+            formDoc.getElementById("savedIntakesModal");
+
+        // If it does not exist, create it inside the Intake window.
+        if(!modal){
+
+            modal = formDoc.createElement("div");
+
+            modal.id = "savedIntakesModal";
+
+            modal.style.cssText = `
+                display:block;
+                position:fixed;
+                inset:0;
+                width:100%;
+                height:100%;
+                z-index:999999;
+                background:rgba(0,0,0,0.55);
+                overflow:auto;
+                padding:30px;
+                box-sizing:border-box;
+            `;
+
+            modal.innerHTML = `
+
+                <div style="
+                    background:#f4f0df;
+                    color:#111;
+                    border:3px solid #BFA13A;
+                    border-radius:10px;
+                    width:700px;
+                    max-width:95%;
+                    max-height:90vh;
+                    margin:20px auto;
+                    overflow-y:auto;
+                    box-sizing:border-box;
+                    box-shadow:0 10px 35px rgba(0,0,0,.35);
+                ">
+
+                    <div style="
+                        text-align:center;
+                        padding:15px 10px;
+                        border-bottom:3px solid #BFA13A;
+                    ">
+
+                        <img
+                            src="Prime Relief.PNG"
+                            style="
+                                height:85px;
+                                max-width:100%;
+                                object-fit:contain;
+                            "
+                        >
+
+                    </div>
+
+                    <div style="padding:20px;">
+
+                        <h2 style="
+                            text-align:center;
+                            margin-top:0;
+                            color:#111;
+                        ">
+                            Saved Client Intakes
+                        </h2>
+
+                        <input
+                            id="intakeSearch"
+                            type="text"
+                            placeholder="Search Name, Case, Address or Phone..."
+                            style="
+                                width:100%;
+                                padding:10px;
+                                margin-bottom:15px;
+                                font-size:15px;
+                                box-sizing:border-box;
+                                border:1px solid #999;
+                                border-radius:5px;
+                            "
+                        >
+
+                        <div id="savedIntakesList"></div>
+
+                        <div style="
+                            text-align:center;
+                            margin-top:20px;
+                        ">
+
+                            <button
+                                type="button"
+                                id="closeSavedIntakesButton"
+                                style="
+                                    background:#6c757d;
+                                    color:white;
+                                    border:none;
+                                    padding:10px 20px;
+                                    border-radius:6px;
+                                    cursor:pointer;
+                                "
+                            >
+                                Close
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+            formDoc.body.appendChild(modal);
+
+            const closeButton =
+                modal.querySelector(
+                    "#closeSavedIntakesButton"
+                );
+
+           if(closeButton){
+
+    closeButton.onclick = function(){
+
+        modal.style.display = "none";
+
+        // Unlock the Intake form
+        formDoc.body.style.overflow = "auto";
+
+        // Restore the Intake document
+        formDoc.documentElement.style.overflow = "auto";
+
+        // Put focus back on the Intake window
+        if(formDoc.defaultView){
+
+            formDoc.defaultView.focus();
+
+        }
+
+    };
+
+}
+
+            const searchBox =
+                modal.querySelector(
+                    "#intakeSearch"
+                );
+
+            if(searchBox){
+
+                searchBox.oninput = function(){
+
+                    const search =
+                        searchBox.value
+                            .trim()
+                            .toLowerCase();
+
+                    const filtered =
+                        savedIntakes.filter(c => {
+
+                            return (
+
+                                String(
+                                    c.clientName || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                                ||
+
+                                String(
+                                    c.caseNumber || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                                ||
+
+                                String(
+                                    c.propertyAddress || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                                ||
+
+                                String(
+                                    c.phone || ""
+                                )
+                                .toLowerCase()
+                                .includes(search)
+
+                            );
+
+                        });
+
+                    renderSavedIntakesForIntakeWindow(
+                        formDoc,
+                        filtered
+                    );
+
+                };
+
+            }
+
+        }else{
+
+            modal.style.display = "block";
+
+        }
+
+        // IMPORTANT:
+        // Prevent the Intake window itself from scrolling
+        // when the popup is open.
+        formDoc.body.style.overflow = "hidden";
 
         const snap =
             await db
@@ -1954,22 +2957,30 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         snap.forEach(doc => {
 
             savedIntakes.push({
+
                 id: doc.id,
                 ...doc.data()
+
             });
 
         });
 
         savedIntakes.sort((a,b) => {
 
-            return String(a.clientName || "")
-                .localeCompare(
-                    String(b.clientName || "")
-                );
+            return String(
+                a.clientName || ""
+            ).localeCompare(
+                String(
+                    b.clientName || ""
+                )
+            );
 
         });
 
-        renderSavedIntakes(savedIntakes);
+        renderSavedIntakesForIntakeWindow(
+            formDoc,
+            savedIntakes
+        );
 
     }catch(err){
 
@@ -1984,16 +2995,20 @@ async function showSavedIntakesForIntakeWindow(formDoc){
         );
 
     }
+
 }
   
-function renderSavedIntakesForIntakeWindow(formDoc,list){
+function renderSavedIntakesForIntakeWindow(formDoc, list){
 
     const container =
         formDoc.getElementById("savedIntakesList");
 
-    if(!container) return;
+    if(!container){
+        alert("Saved intake list could not be found.");
+        return;
+    }
 
-    if(!list.length){
+    if(!list || !list.length){
 
         container.innerHTML = `
             <div style="
@@ -2017,20 +3032,43 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
         `;
 
         return;
-
     }
 
     let html = "";
 
     list.forEach(c => {
 
+        const id =
+            String(c.id || c.caseNumber || "");
+
+        const safeID =
+            id
+                .replace(/\\/g,"\\\\")
+                .replace(/'/g,"\\'");
+
         html += `
 
-            <div class="savedCard">
+            <div
+                class="savedCard"
+                style="
+                    background:#fff;
+                    border:1px solid #ccc;
+                    border-radius:8px;
+                    padding:14px;
+                    margin-bottom:12px;
+                    box-shadow:0 2px 5px rgba(0,0,0,.10);
+                "
+            >
 
-                <div class="savedInfo">
+                <div
+                    class="savedInfo"
+                    style="
+                        margin-bottom:12px;
+                        line-height:1.7;
+                    "
+                >
 
-                    <b>
+                    <b style="font-size:17px;">
                         ${escapeHTML(
                             c.clientName ||
                             "Unnamed Client"
@@ -2039,7 +3077,7 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
                     <br>
 
-                    Case:
+                    <b>Case:</b>
                     ${escapeHTML(
                         c.caseNumber ||
                         "No Case Number"
@@ -2061,14 +3099,248 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
                 </div>
 
-                <button
-                    type="button"
-                    class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
 
-                    Open
+                <div
+                    style="
+                        border-top:1px solid #ddd;
+                        padding-top:10px;
+                        display:flex;
+                        gap:8px;
+                        justify-content:center;
+                        flex-wrap:wrap;
+                    "
+                >
 
-                </button>
+                    <button
+                        type="button"
+                        style="
+                            background:#BFA13A;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:10px 20px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                       onclick="
+    if(
+        window.opener &&
+        !window.opener.closed &&
+        typeof window.opener.openSavedIntake === 'function'
+    ){
+        window.opener.openSavedIntake('${safeID}');
+    }else{
+        alert('The main Prime Relief Solutions window is not available.');
+    }
+"
+                    >
+                        📂 Open
+                    </button>
+
+
+                    <button
+                        type="button"
+                        style="
+                            background:#b91c1c;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:10px 20px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                       onclick="
+    if(
+        window.opener &&
+        !window.opener.closed &&
+        typeof window.opener.deleteSavedIntake === 'function'
+    ){
+        window.opener.deleteSavedIntake('${safeID}');
+    }else{
+        alert('The main Prime Relief Solutions window is not available.');
+    }
+"
+                    >
+                        🗑 Delete
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+//======================================
+// DISPLAY SAVED INTAKES
+//======================================
+
+function renderSavedIntakes(list){
+
+    const container =
+        currentIntakeWindow
+            ? currentIntakeWindow.getElementById("savedIntakesList")
+            : document.getElementById("savedIntakesList");
+
+    if(!container){
+        console.error("Saved intake list container not found.");
+        return;
+    }
+
+    let html = "";
+
+    if(!list || !list.length){
+
+        html = `
+            <div style="
+                text-align:center;
+                padding:35px;
+                color:#555;
+                font-weight:bold;
+            ">
+                No Saved Client Intakes Found
+            </div>
+        `;
+
+        container.innerHTML = html;
+        return;
+    }
+
+    list.forEach(c => {
+
+        const intakeID =
+            String(c.id || c.caseNumber || "")
+                .replace(/\\/g,"\\\\")
+                .replace(/'/g,"\\'");
+
+        html += `
+
+            <div
+                class="savedCard"
+                style="
+                    background:white;
+                    border:1px solid #ccc;
+                    border-radius:8px;
+                    margin-bottom:12px;
+                    padding:12px;
+                    box-shadow:0 2px 5px rgba(0,0,0,.08);
+                "
+            >
+
+                <div
+                    class="savedInfo"
+                    style="
+                        margin-bottom:10px;
+                        line-height:1.6;
+                    "
+                >
+
+                    <b style="font-size:16px;">
+                        ${escapeHTML(
+                            c.clientName ||
+                            "Unnamed Client"
+                        )}
+                    </b>
+
+                    <br>
+
+                    <b>Case:</b>
+                    ${escapeHTML(
+                        c.caseNumber ||
+                        c.id ||
+                        "No Case Number"
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.propertyAddress ||
+                        ""
+                    )}
+
+                    <br>
+
+                    ${escapeHTML(
+                        c.phone ||
+                        ""
+                    )}
+
+                </div>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:8px;
+                        align-items:center;
+                        justify-content:center;
+                        flex-wrap:wrap;
+                        border-top:1px solid #ddd;
+                        padding-top:10px;
+                    "
+                >
+
+                    <!-- OPEN BUTTON -->
+
+                    <button
+                        type="button"
+                        style="
+                            background:#BFA13A;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:9px 18px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        "
+                        onclick="
+                            if(
+                                window.opener &&
+                                !window.opener.closed &&
+                                typeof window.opener.openSavedIntake === 'function'
+                            ){
+                                window.opener.openSavedIntake('${intakeID}');
+                            }else{
+                                alert('The main Prime Relief Solutions window is not available.');
+                            }
+                        "
+                    >
+                        📂 Open
+                    </button>
+
+
+                    <!-- DELETE BUTTON -->
+
+                    <button
+                        type="button"
+                        style="
+                            background:#b91c1c;
+                            color:white;
+                            border:none;
+                            border-radius:5px;
+                            padding:9px 18px;
+                            font-weight:bold;
+                            cursor:pointer;
+                        "
+                        onclick="
+                            if(
+                                window.opener &&
+                                !window.opener.closed &&
+                                typeof window.opener.deleteSavedIntake === 'function'
+                            ){
+                                window.opener.deleteSavedIntake('${intakeID}');
+                            }else{
+                                alert('The main Prime Relief Solutions window is not available.');
+                            }
+                        "
+                    >
+                        🗑 Delete
+                    </button>
+
+                </div>
 
             </div>
 
@@ -2080,111 +3352,6 @@ function renderSavedIntakesForIntakeWindow(formDoc,list){
 
 }
   
-//======================================
-// DISPLAY SAVED INTAKES
-//======================================
-
-function renderSavedIntakes(list){
-
-    const container =
-        document.getElementById("savedIntakesList");
-
-    if(!container){
-        return;
-    }
-
-    if(!list.length){
-
-        container.innerHTML = `
-
-            <div style="
-                text-align:center;
-                padding:35px;
-                color:#777;
-            ">
-
-                <div style="font-size:35px;">
-                    📂
-                </div>
-
-                <strong>
-                    No Saved Intakes Found
-                </strong>
-
-                <div style="
-                    margin-top:6px;
-                    font-size:13px;
-                ">
-                    Save an intake to see it here.
-                </div>
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-    let html = "";
-
-    list.forEach(c => {
-
-        html += `
-
-            <div class="savedCard">
-
-                <div class="savedInfo">
-
-                    <b>
-                        ${escapeHTML(
-                            c.clientName ||
-                            "Unnamed Client"
-                        )}
-                    </b>
-
-                    <br>
-
-                    Case:
-                    ${escapeHTML(
-                        c.caseNumber ||
-                        "No Case Number"
-                    )}
-
-                    <br>
-
-                    ${escapeHTML(
-                        c.propertyAddress ||
-                        ""
-                    )}
-
-                    <br>
-
-                    ${escapeHTML(
-                        c.phone ||
-                        ""
-                    )}
-
-                </div>
-
-                <button
-                    type="button"
-                    class="savedOpen"
-                    onclick="openSavedIntake('${c.id}')">
-
-                    Open
-
-                </button>
-
-            </div>
-
-        `;
-
-    });
-
-    container.innerHTML = html;
-}
-
-
 //======================================
 // INSTANT SEARCH
 //======================================
@@ -2242,7 +3409,10 @@ function filterSavedIntakes(){
 
         });
 
-    renderSavedIntakes(filtered);
+   renderSavedIntakesForIntakeWindow(
+    currentIntakeWindow,
+    filtered
+);
 }
 
 
@@ -2253,48 +3423,250 @@ function filterSavedIntakes(){
 async function openSavedIntake(intakeID){
 
     if(!currentIntakeWindow){
-
         alert(
             "The Intake window is no longer available."
         );
+        return;
+    }
+
+    if(!intakeID){
+        currentIntakeWindow.defaultView.alert(
+            "Unable to open this intake because the saved intake ID is missing."
+        );
+        return;
+    }
+
+    try{
+
+        const ok =
+            await loadIntake(
+                currentIntakeWindow,
+                intakeID
+            );
+
+        if(!ok){
+            currentIntakeWindow.defaultView.alert(
+                "Unable to load this saved intake."
+            );
+            return;
+        }
+
+        currentIntakeID = intakeID;
+
+        /*
+        ==========================================
+        CLOSE SAVED INTAKES POPUP
+        INSIDE THE INTAKE WINDOW
+        ==========================================
+        */
+
+        const modal =
+            currentIntakeWindow.getElementById(
+                "savedIntakesModal"
+            );
+
+        if(modal){
+            modal.style.display = "none";
+        }
+
+        /*
+        ==========================================
+        RESTORE INTAKE WINDOW SCROLLING
+        ==========================================
+        */
+
+        currentIntakeWindow.body.style.overflow = "";
+
+        /*
+        ==========================================
+        KEEP INTAKE WINDOW ACTIVE
+        ==========================================
+        */
+
+        currentIntakeWindow.defaultView.focus();
+
+        /*
+        ==========================================
+        IMPORTANT:
+        SHOW SUCCESS MESSAGE INSIDE
+        THE INTAKE WINDOW
+        ==========================================
+        */
+
+        currentIntakeWindow.defaultView.alert(
+            "✅ Intake Loaded Successfully"
+        );
+
+        return true;
+
+    }catch(error){
+
+        console.error(
+            "OPEN SAVED INTAKE ERROR:",
+            error
+        );
+
+        currentIntakeWindow.defaultView.alert(
+            "Unable to open this saved intake.\n\n" +
+            error.message
+        );
+
+        return false;
+    }
+}
+  
+//======================================
+// DELETE SAVED INTAKE
+//======================================
+
+async function deleteSavedIntake(intakeID){
+
+    if(!intakeID){
+
+        currentIntakeWindow?.defaultView.alert(
+            "Unable to delete this intake because the saved intake ID is missing."
+        );
 
         return;
-
     }
 
-    const ok =
-        await loadIntake(
-            currentIntakeWindow,
-            intakeID
+    const client =
+        savedIntakes.find(
+            c =>
+                String(c.id) ===
+                String(intakeID)
         );
 
-    if(ok){
+    const clientName =
+        client
+            ? (
+                client.clientName ||
+                client.caseNumber ||
+                intakeID
+            )
+            : intakeID;
 
-        closeSavedIntakes();
+    const confirmed =
+        currentIntakeWindow
+            ? currentIntakeWindow.defaultView.confirm(
+                "DELETE SAVED INTAKE?\n\n" +
+                "Client: " +
+                clientName +
+                "\n\n" +
+                "This will permanently delete this saved intake.\n\n" +
+                "Click OK to permanently delete it."
+            )
+            : confirm(
+                "DELETE SAVED INTAKE?\n\n" +
+                "Client: " +
+                clientName +
+                "\n\n" +
+                "This will permanently delete this saved intake.\n\n" +
+                "Click OK to permanently delete it."
+            );
 
-    }else{
-
-        alert(
-            "Unable to load this saved intake."
-        );
-
+    if(!confirmed){
+        return;
     }
 
+    try{
+
+        await db
+            .collection("intakes")
+            .doc(String(intakeID))
+            .delete();
+
+        savedIntakes =
+            savedIntakes.filter(
+                c =>
+                    String(c.id) !==
+                    String(intakeID)
+            );
+
+        if(
+            String(currentIntakeID) ===
+            String(intakeID)
+        ){
+            currentIntakeID = "";
+        }
+
+        /*
+        ==========================================
+        REFRESH THE SAVED INTAKE LIST
+        INSIDE THE INTAKE WINDOW
+        ==========================================
+        */
+
+        if(currentIntakeWindow){
+
+            renderSavedIntakesForIntakeWindow(
+                currentIntakeWindow,
+                savedIntakes
+            );
+
+            currentIntakeWindow.defaultView.alert(
+                "✅ Saved intake deleted successfully."
+            );
+
+        }else{
+
+            alert(
+                "✅ Saved intake deleted successfully."
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "DELETE INTAKE ERROR:",
+            error
+        );
+
+        if(currentIntakeWindow){
+
+            currentIntakeWindow.defaultView.alert(
+                "Unable to delete this saved intake.\n\n" +
+                error.message
+            );
+
+        }else{
+
+            alert(
+                "Unable to delete this saved intake.\n\n" +
+                error.message
+            );
+
+        }
+    }
 }
-
-
+  
 //======================================
 // CLOSE SAVED INTAKES
 //======================================
 
 function closeSavedIntakes(){
 
+    // Prefer the active Intake window.
+    const targetDoc =
+        currentIntakeWindow || document;
+
     const modal =
-        document.getElementById("savedIntakesModal");
+        targetDoc.getElementById(
+            "savedIntakesModal"
+        );
 
     if(modal){
 
         modal.style.display = "none";
+
+    }
+
+    // Restore scrolling to whichever window
+    // contains the Saved Intake popup.
+    if(targetDoc.body){
+
+        targetDoc.body.style.overflow = "";
 
     }
 
@@ -2316,5 +3688,6 @@ function escapeHTML(value){
 }
   
 </script>
+
 </body>
 </html>
